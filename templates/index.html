@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#060814">
+  <title>FinCalc Pro — Your Financial Dashboard</title>
+  <meta name="description" content="Access 25+ financial calculators on your personalized FinCalc Pro dashboard.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: 'Inter', 'Roboto', -apple-system, sans-serif; }
+
+    /* ── Hamburger / mobile sidebar ── */
+    .sidebar-toggle {
+      display: none;
+      width: 40px; height: 40px;
+      background: var(--surface-glass);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 1rem;
+      cursor: pointer;
+      place-items: center;
+      transition: background var(--transition), color var(--transition), transform var(--transition-spring);
+    }
+    .sidebar-toggle:hover {
+      background: rgba(108,140,255,0.15);
+      color: var(--accent-primary);
+      transform: scale(1.05);
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 90;
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    @media(max-width:1024px) {
+      .sidebar-toggle { display: grid; }
+      .sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        z-index: 200;
+        transform: translateX(-110%);
+        transition: transform 0.35s cubic-bezier(0.22,0.61,0.36,1);
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        max-height: 100vh;
+        width: 280px;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+    }
+
+    /* ── Logout modal ── */
+    .logout-modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      z-index: var(--z-modal);
+      display: none;
+      place-items: center;
+    }
+    .logout-modal-backdrop.open { display: grid; }
+    .logout-modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-glass-strong);
+      border-radius: var(--radius-xl);
+      padding: 2.2rem 2rem;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: var(--shadow-heavy), 0 0 40px rgba(108,140,255,0.15);
+      animation: fadeUp 0.3s ease;
+      text-align: center;
+    }
+    .logout-modal-icon {
+      width: 60px; height: 60px;
+      margin: 0 auto 1.2rem;
+      display: grid; place-items: center;
+      border-radius: 18px;
+      background: rgba(255,92,122,0.12);
+      border: 1px solid rgba(255,92,122,0.25);
+      color: var(--accent-danger);
+      font-size: 1.4rem;
+    }
+    .logout-modal h3 { margin-bottom: 0.5rem; font-size: 1.3rem; }
+    .logout-modal p  { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.6rem; }
+    .logout-modal-actions { display: flex; gap: 0.8rem; justify-content: center; }
+    .btn-cancel {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-pill);
+      background: var(--surface-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .btn-cancel:hover { background: var(--surface-glass-hover); color: var(--text-primary); }
+    .btn-logout-confirm {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-pill);
+      background: var(--accent-danger);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition-spring), box-shadow var(--transition);
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .btn-logout-confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,92,122,0.4); }
+
+    /* ── History panel ── */
+    .history-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .history-table th {
+      text-align: left;
+      padding: 0.7rem 1rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-glass);
+      white-space: nowrap;
+    }
+    .history-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-soft);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:hover td { background: rgba(108,140,255,0.04); }
+    .history-calc-badge {
+      display: inline-block;
+      padding: 0.22rem 0.55rem;
+      border-radius: var(--radius-pill);
+      background: rgba(108,140,255,0.15);
+      border: 1px solid rgba(108,140,255,0.25);
+      color: var(--accent-primary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .history-time {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+    .history-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+    .history-empty i { font-size: 2rem; margin-bottom: 0.7rem; display: block; opacity: 0.4; }
+
+    /* ── Copy button in results ── */
+    .result-copy-btn {
+      margin-top: 0.8rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: var(--radius-pill);
+      background: var(--surface-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background var(--transition), color var(--transition), transform var(--transition-spring);
+      display: inline-flex; align-items: center; gap: 0.45rem;
+    }
+    .result-copy-btn:hover {
+      background: rgba(108,140,255,0.12);
+      color: var(--accent-primary);
+      border-color: rgba(108,140,255,0.3);
+      transform: translateY(-2px);
+    }
+    .result-copy-btn.copied { color: var(--accent-success); border-color: rgba(46,229,157,0.3); }
+
+    /* ── Welcome typing cursor ── */
+    .typing-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background: var(--accent-primary);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+    /* ── Sidebar history mini-preview ── */
+    .history-mini-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.8rem; font-size: 0.75rem;
+      color: var(--text-muted); border-radius: var(--radius-sm);
+    }
+    .history-mini-item i { font-size: 0.7rem; color: var(--accent-primary); opacity: 0.7; }
+    .history-mini-time { margin-left: auto; font-size: 0.7rem; color: var(--text-muted); opacity: 0.7; }
+  </style>
+</head>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div id="toast" class="toast-msg {{ category }}" role="alert" aria-live="assertive">
+        <i class="fas {% if category == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}" style="margin-right:6px;" aria-hidden="true"></i>
+        {{ message }}
+      </div>
+      <script>
+        setTimeout(() => {
+          const t = document.getElementById('toast');
+          if (t) { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }
+        }, 3500);
+      </script>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<body>
+  <!-- Background orbs -->
+  <div class="bg-orb bg-orb--purple" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--blue"   aria-hidden="true"></div>
+
+  <!-- Logout modal -->
+  <div class="logout-modal-backdrop" id="logout-modal" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+    <div class="logout-modal">
+      <div class="logout-modal-icon"><i class="fas fa-right-from-bracket" aria-hidden="true"></i></div>
+      <h3 id="logout-title">Logout?</h3>
+      <p>Are you sure you want to sign out of your account?</p>
+      <div class="logout-modal-actions">
+        <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+        <a href="{{ url_for('logout') }}" class="btn-logout-confirm">Yes, Logout</a>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══ HEADER ═══ -->
+  <header role="banner">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">
+          <i class="fas fa-chart-simple"></i>
+        </div>
+        <div class="logo-text-wrapper">
+          <div class="logo-text">Fin<span>Calc</span>Pro</div>
+          <div class="logo-subtext">Dashboard</div>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+        <i class="fas fa-bars" id="sidebar-toggle-icon" aria-hidden="true"></i>
+      </button>
+      <div class="header-badge" aria-label="All calculators available">ALL CALCULATORS</div>
+    </div>
+  </header>
+
+  <!-- ═══ LAYOUT ═══ -->
+  <div class="layout">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <nav class="sidebar" id="sidebar" aria-label="Calculator navigation">
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Investments</div>
+        <div class="nav-item" onclick="show('SIP')" aria-label="SIP Calculator"><span class="icon" aria-hidden="true">📈</span> SIP</div>
+        <div class="nav-item" onclick="show('LUMPSUM')" aria-label="Lumpsum Calculator"><span class="icon" aria-hidden="true">💰</span> Lumpsum</div>
+        <div class="nav-item" onclick="show('STEP_UP_SIP')" aria-label="Step-Up SIP Calculator"><span class="icon" aria-hidden="true">🚀</span> Step-Up SIP</div>
+        <div class="nav-item" onclick="show('SWP')" aria-label="SWP Calculator"><span class="icon" aria-hidden="true">💸</span> SWP</div>
+        <div class="nav-item" onclick="show('PPF')" aria-label="PPF Calculator"><span class="icon" aria-hidden="true">🏛️</span> PPF</div>
+        <div class="nav-item" onclick="show('EPF')" aria-label="EPF Calculator"><span class="icon" aria-hidden="true">🏢</span> EPF</div>
+        <div class="nav-item" onclick="show('NPS')" aria-label="NPS Calculator"><span class="icon" aria-hidden="true">🎯</span> NPS</div>
+        <div class="nav-item" onclick="show('NSC')" aria-label="NSC Calculator"><span class="icon" aria-hidden="true">📜</span> NSC</div>
+        <div class="nav-item" onclick="show('FD_SIMPLE')" aria-label="Fixed Deposit Calculator"><span class="icon" aria-hidden="true">🏦</span> Fixed Deposit</div>
+        <div class="nav-item" onclick="show('RD')" aria-label="Recurring Deposit Calculator"><span class="icon" aria-hidden="true">📅</span> Recurring Deposit</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Planning</div>
+        <div class="nav-item" onclick="show('RETIREMENT_CALCULATOR')" aria-label="Retirement Calculator"><span class="icon" aria-hidden="true">🌅</span> Retirement</div>
+        <div class="nav-item" onclick="show('INFLATION')" aria-label="Inflation Calculator"><span class="icon" aria-hidden="true">📊</span> Inflation</div>
+        <div class="nav-item" onclick="show('CAGR')" aria-label="CAGR Calculator"><span class="icon" aria-hidden="true">📉</span> CAGR</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Loans &amp; EMI</div>
+        <div class="nav-item" onclick="show('EMI')" aria-label="EMI Calculator"><span class="icon" aria-hidden="true">🧮</span> EMI</div>
+        <div class="nav-item" onclick="show('HOME_LOAN_EMI')" aria-label="Home Loan EMI Calculator"><span class="icon" aria-hidden="true">🏠</span> Home Loan</div>
+        <div class="nav-item" onclick="show('CAR_LOAN_EMI')" aria-label="Car Loan EMI Calculator"><span class="icon" aria-hidden="true">🚗</span> Car Loan</div>
+        <div class="nav-item" onclick="show('GOLD_LOAN_EMI')" aria-label="Gold Loan EMI Calculator"><span class="icon" aria-hidden="true">🪙</span> Gold Loan</div>
+        <div class="nav-item" onclick="show('EDUCATION_LOAN_EMI')" aria-label="Education Loan EMI Calculator"><span class="icon" aria-hidden="true">🎓</span> Education Loan</div>
+        <div class="nav-item" onclick="show('FLAT_VS_REDUCING')" aria-label="Flat vs Reducing Calculator"><span class="icon" aria-hidden="true">⚖️</span> Flat vs Reducing</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">General</div>
+        <div class="nav-item" onclick="show('SIMPLE_INTEREST')" aria-label="Simple Interest Calculator"><span class="icon" aria-hidden="true">➕</span> Simple Interest</div>
+        <div class="nav-item" onclick="show('COMPOUND_INTEREST')" aria-label="Compound Interest Calculator"><span class="icon" aria-hidden="true">✖️</span> Compound Interest</div>
+        <div class="nav-item" onclick="show('GST')" aria-label="GST Calculator"><span class="icon" aria-hidden="true">🧾</span> GST</div>
+        <div class="nav-item" onclick="show('GRATUITY')" aria-label="Gratuity Calculator"><span class="icon" aria-hidden="true">🎁</span> Gratuity</div>
+        <div class="nav-item" onclick="show('SALARY_CALCULATOR')" aria-label="Salary Calculator"><span class="icon" aria-hidden="true">👔</span> Salary</div>
+        <div class="nav-item" onclick="show('BROKERAGE_CALCULATOR')" aria-label="Brokerage Calculator"><span class="icon" aria-hidden="true">📋</span> Brokerage</div>
+      </div>
+
+      <!-- History mini (recent 3) -->
+      <div class="sidebar-section">
+        <div class="sidebar-label" style="display:flex;align-items:center;justify-content:space-between;">
+          Recent Activity
+          {% if history %}
+          <span onclick="show('HISTORY')" style="cursor:pointer;color:var(--accent-primary);font-size:0.7rem;font-weight:600;letter-spacing:0.04em;" aria-label="View full history">View all →</span>
+          {% endif %}
+        </div>
+        {% for entry in history[:3] %}
+        <div class="history-mini-item">
+          <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+          <span>{{ entry.calc_type }}</span>
+          <span class="history-mini-time">{{ entry.timestamp.strftime('%H:%M') }}</span>
+        </div>
+        {% else %}
+        <div class="history-mini-item" style="font-style:italic;">No history yet</div>
+        {% endfor %}
+      </div>
+
+      <!-- Account -->
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <button class="nav-item logout-item"
+                onclick="openLogoutModal()"
+                style="width:100%;text-align:left;background:none;border:none;cursor:pointer;font-family:inherit;"
+                aria-label="Logout">
+          <span class="icon" aria-hidden="true"><i class="fas fa-right-from-bracket"></i></span>
+          Logout
+        </button>
+      </div>
+
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <main class="main" id="main-content">
+
+      <!-- WELCOME -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon" aria-hidden="true">
+          <i class="fas fa-chart-simple"></i>
+        </div>
+        <h2>Your Financial Command Centre</h2>
+        <p>Select a calculator from the sidebar. All computations run locally — fast, private, and accurate.</p>
+        <div class="quick-chips" role="list" aria-label="Quick calculator shortcuts">
+          <div class="chip" role="listitem" onclick="show('SIP')"><i class="fas fa-chart-line" style="margin-right:5px;font-size:0.8rem;" aria-hidden="true"></i>SIP Calculator</div>
+          <div class="chip" role="listitem" onclick="show('EMI')"><i class="fas fa-house" style="margin-right:5px;font-size:0.8rem;" aria-hidden="true"></i>EMI Calculator</div>
+          <div class="chip" role="listitem" onclick="show('RETIREMENT_CALCULATOR')"><i class="fas fa-umbrella-beach" style="margin-right:5px;font-size:0.8rem;" aria-hidden="true"></i>Retirement</div>
+          <div class="chip" role="listitem" onclick="show('BROKERAGE_CALCULATOR')"><i class="fas fa-chart-column" style="margin-right:5px;font-size:0.8rem;" aria-hidden="true"></i>Brokerage</div>
+          <div class="chip" role="listitem" onclick="show('CAGR')"><i class="fas fa-percent" style="margin-right:5px;font-size:0.8rem;" aria-hidden="true"></i>CAGR</div>
+          <div class="chip" role="listitem" onclick="show('GST')"><i class="fas fa-receipt" style="margin-right:5px;font-size:0.8rem;" aria-hidden="true"></i>GST</div>
+        </div>
+      </div>
+
+      <!-- PAGE HEADER (injected per panel) -->
+      <div class="page-header" id="page-header" style="display:none" aria-live="polite">
+        <div class="page-title" id="page-title"></div>
+        <div class="page-subtitle" id="page-subtitle"></div>
+      </div>
+
+      <!-- ═══════ CALCULATOR PANELS ═══════ -->
+
+      <!-- SIP -->
+      <div class="calc-panel" id="panel-SIP">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">SIP</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="SIP-monthly_investment">Monthly Investment (₹)</label><input type="number" id="SIP-monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="SIP-Expected_return">Expected Return (%)</label><input type="number" id="SIP-Expected_return" placeholder="12" step="0.1"></div>
+            <div class="field"><label for="SIP-years">Time Period (Years)</label><input type="number" id="SIP-years" placeholder="10"></div>
+            <div class="field">
+              <label for="SIP-mode">Mode</label>
+              <select id="SIP-mode">
+                <option value="end">End of Month</option>
+                <option value="begin">Beginning of Month</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-calc" onclick="calculate('SIP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="SIP-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="SIP-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="SIP-result">
+          <div class="card">
+            <div class="card-title">Results</div>
+            <div class="result-grid" id="SIP-result-grid"></div>
+            <button class="result-copy-btn" onclick="copyResult('SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LUMPSUM -->
+      <div class="calc-panel" id="panel-LUMPSUM">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">LUMPSUM</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="LUMPSUM-Total_investment">Total Investment (₹)</label><input type="number" id="LUMPSUM-Total_investment" placeholder="100000"></div>
+            <div class="field"><label for="LUMPSUM-Expected_return">Expected Return (%)</label><input type="number" id="LUMPSUM-Expected_return" placeholder="12" step="0.1"></div>
+            <div class="field"><label for="LUMPSUM-years">Time Period (Years)</label><input type="number" id="LUMPSUM-years" placeholder="10"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('LUMPSUM')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="LUMPSUM-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="LUMPSUM-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="LUMPSUM-result">
+          <div class="card"><div class="card-title">Results</div><div class="result-grid" id="LUMPSUM-result-grid"></div><button class="result-copy-btn" onclick="copyResult('LUMPSUM')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div>
+        </div>
+      </div>
+
+      <!-- STEP_UP_SIP -->
+      <div class="calc-panel" id="panel-STEP_UP_SIP">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">STEP-UP SIP</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="STEP_UP_SIP-monthly_investment">Monthly Investment (₹)</label><input type="number" id="STEP_UP_SIP-monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="STEP_UP_SIP-step_up_rate">Annual Step-Up (%)</label><input type="number" id="STEP_UP_SIP-step_up_rate" placeholder="10" step="0.1"></div>
+            <div class="field"><label for="STEP_UP_SIP-Expected_return">Expected Return (%)</label><input type="number" id="STEP_UP_SIP-Expected_return" placeholder="12" step="0.1"></div>
+            <div class="field"><label for="STEP_UP_SIP-years">Time Period (Years)</label><input type="number" id="STEP_UP_SIP-years" placeholder="10"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('STEP_UP_SIP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="STEP_UP_SIP-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="STEP_UP_SIP-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="STEP_UP_SIP-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="STEP_UP_SIP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('STEP_UP_SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- SWP -->
+      <div class="calc-panel" id="panel-SWP">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">SWP</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="SWP-total_investment">Total Investment (₹)</label><input type="number" id="SWP-total_investment" placeholder="1000000"></div>
+            <div class="field"><label for="SWP-withdrawal_amount">Monthly Withdrawal (₹)</label><input type="number" id="SWP-withdrawal_amount" placeholder="10000"></div>
+            <div class="field"><label for="SWP-Expected_rate">Expected Return (%)</label><input type="number" id="SWP-Expected_rate" placeholder="8" step="0.1"></div>
+            <div class="field"><label for="SWP-years">Time Period (Years)</label><input type="number" id="SWP-years" placeholder="10"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('SWP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="SWP-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="SWP-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="SWP-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SWP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SWP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- PPF -->
+      <div class="calc-panel" id="panel-PPF">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">PPF</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="PPF-yearly_investment">Yearly Investment (₹)</label><input type="number" id="PPF-yearly_investment" placeholder="150000"></div>
+            <div class="field"><label for="PPF-annual_interest_rate">Annual Interest Rate (%)</label><input type="number" id="PPF-annual_interest_rate" placeholder="7.1" step="0.01"></div>
+            <div class="field"><label for="PPF-years">Time Period (Years)</label><input type="number" id="PPF-years" placeholder="15"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('PPF')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="PPF-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="PPF-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="PPF-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="PPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('PPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- EPF -->
+      <div class="calc-panel" id="panel-EPF">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">EPF</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="EPF-basic_salary">Basic Salary (₹/month)</label><input type="number" id="EPF-basic_salary" placeholder="30000"></div>
+            <div class="field"><label for="EPF-DA">Dearness Allowance (₹)</label><input type="number" id="EPF-DA" placeholder="0"></div>
+            <div class="field"><label for="EPF-years_of_service">Years of Service</label><input type="number" id="EPF-years_of_service" placeholder="30"></div>
+            <div class="field"><label for="EPF-annual_salary_growth">Annual Salary Growth (%)</label><input type="number" id="EPF-annual_salary_growth" placeholder="5" step="0.1"></div>
+            <div class="field"><label for="EPF-epf_interest_rate">EPF Interest Rate (%)</label><input type="number" id="EPF-epf_interest_rate" placeholder="8.15" step="0.01"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('EPF')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="EPF-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="EPF-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="EPF-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- NPS -->
+      <div class="calc-panel" id="panel-NPS">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">NPS</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="NPS-monthly_investment">Monthly Investment (₹)</label><input type="number" id="NPS-monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="NPS-annual_return">Annual Return (%)</label><input type="number" id="NPS-annual_return" placeholder="10" step="0.1"></div>
+            <div class="field"><label for="NPS-current_age">Current Age</label><input type="number" id="NPS-current_age" placeholder="30"></div>
+            <div class="field"><label for="NPS-retirement_age">Retirement Age</label><input type="number" id="NPS-retirement_age" placeholder="60"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('NPS')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="NPS-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="NPS-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="NPS-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="NPS-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NPS')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- NSC -->
+      <div class="calc-panel" id="panel-NSC">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">NSC</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="NSC-amount_invested">Amount Invested (₹)</label><input type="number" id="NSC-amount_invested" placeholder="10000"></div>
+            <div class="field"><label for="NSC-interest_rate">Interest Rate (%)</label><input type="number" id="NSC-interest_rate" placeholder="7.7" step="0.01"></div>
+            <div class="field"><label for="NSC-years">Years</label><input type="number" id="NSC-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('NSC')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="NSC-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="NSC-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="NSC-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="NSC-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NSC')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- FD_SIMPLE -->
+      <div class="calc-panel" id="panel-FD_SIMPLE">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">FIXED DEPOSIT</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="FD_SIMPLE-principal">Principal (₹)</label><input type="number" id="FD_SIMPLE-principal" placeholder="100000"></div>
+            <div class="field"><label for="FD_SIMPLE-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="FD_SIMPLE-interest_rate" placeholder="7" step="0.01"></div>
+            <div class="field"><label for="FD_SIMPLE-years">Time Period (Years)</label><input type="number" id="FD_SIMPLE-years" placeholder="3"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('FD_SIMPLE')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="FD_SIMPLE-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="FD_SIMPLE-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="FD_SIMPLE-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="FD_SIMPLE-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FD_SIMPLE')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- RD -->
+      <div class="calc-panel" id="panel-RD">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">RECURRING DEPOSIT</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="RD-monthly_investment">Monthly Investment (₹)</label><input type="number" id="RD-monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="RD-Expected_rate">Interest Rate (%)</label><input type="number" id="RD-Expected_rate" placeholder="6.5" step="0.01"></div>
+            <div class="field"><label for="RD-years">Time Period (Years)</label><input type="number" id="RD-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('RD')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="RD-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="RD-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="RD-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="RD-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RD')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- RETIREMENT_CALCULATOR -->
+      <div class="calc-panel" id="panel-RETIREMENT_CALCULATOR">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">RETIREMENT</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="RETIREMENT_CALCULATOR-age">Current Age</label><input type="number" id="RETIREMENT_CALCULATOR-age" placeholder="30"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-monthly_expense">Monthly Expense (₹)</label><input type="number" id="RETIREMENT_CALCULATOR-monthly_expense" placeholder="50000"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-retirement_age">Retirement Age</label><input type="number" id="RETIREMENT_CALCULATOR-retirement_age" value="60"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-life_expectancy">Life Expectancy</label><input type="number" id="RETIREMENT_CALCULATOR-life_expectancy" value="85"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-inflation">Inflation Rate</label><input type="number" id="RETIREMENT_CALCULATOR-inflation" value="0.06" step="0.01"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-annual_return">Annual Return</label><input type="number" id="RETIREMENT_CALCULATOR-annual_return" value="0.07" step="0.01"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('RETIREMENT_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="RETIREMENT_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="RETIREMENT_CALCULATOR-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="RETIREMENT_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="RETIREMENT_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RETIREMENT_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- INFLATION -->
+      <div class="calc-panel" id="panel-INFLATION">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">INFLATION</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="INFLATION-current_price">Current Price (₹)</label><input type="number" id="INFLATION-current_price" placeholder="1000"></div>
+            <div class="field"><label for="INFLATION-rate">Inflation Rate (%)</label><input type="number" id="INFLATION-rate" placeholder="6" step="0.1"></div>
+            <div class="field"><label for="INFLATION-years">Years</label><input type="number" id="INFLATION-years" placeholder="10"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('INFLATION')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="INFLATION-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="INFLATION-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="INFLATION-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="INFLATION-result-grid"></div><button class="result-copy-btn" onclick="copyResult('INFLATION')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- CAGR -->
+      <div class="calc-panel" id="panel-CAGR">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">CAGR</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="CAGR-initial_value">Initial Value (₹)</label><input type="number" id="CAGR-initial_value" placeholder="100000"></div>
+            <div class="field"><label for="CAGR-final_value">Final Value (₹)</label><input type="number" id="CAGR-final_value" placeholder="200000"></div>
+            <div class="field"><label for="CAGR-years">Years</label><input type="number" id="CAGR-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('CAGR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="CAGR-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="CAGR-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="CAGR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="CAGR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAGR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- EMI -->
+      <div class="calc-panel" id="panel-EMI">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">EMI</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="EMI-loan_amount" placeholder="500000"></div>
+            <div class="field"><label for="EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="EMI-interest_rate" placeholder="10" step="0.01"></div>
+            <div class="field"><label for="EMI-years">Tenure (Years)</label><input type="number" id="EMI-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="EMI-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="EMI-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- HOME_LOAN_EMI -->
+      <div class="calc-panel" id="panel-HOME_LOAN_EMI">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">HOME LOAN</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="HOME_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="HOME_LOAN_EMI-loan_amount" placeholder="5000000"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="HOME_LOAN_EMI-interest_rate" placeholder="8.5" step="0.01"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="HOME_LOAN_EMI-years" placeholder="20"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('HOME_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="HOME_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="HOME_LOAN_EMI-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="HOME_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="HOME_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('HOME_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- CAR_LOAN_EMI -->
+      <div class="calc-panel" id="panel-CAR_LOAN_EMI">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">CAR LOAN</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="CAR_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="CAR_LOAN_EMI-loan_amount" placeholder="800000"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="CAR_LOAN_EMI-interest_rate" placeholder="9" step="0.01"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="CAR_LOAN_EMI-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('CAR_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="CAR_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="CAR_LOAN_EMI-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="CAR_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="CAR_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAR_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- GOLD_LOAN_EMI -->
+      <div class="calc-panel" id="panel-GOLD_LOAN_EMI">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">GOLD LOAN</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="GOLD_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="GOLD_LOAN_EMI-loan_amount" placeholder="200000"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="GOLD_LOAN_EMI-interest_rate" placeholder="7.5" step="0.01"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="GOLD_LOAN_EMI-years" placeholder="2"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('GOLD_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="GOLD_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="GOLD_LOAN_EMI-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="GOLD_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GOLD_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GOLD_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- EDUCATION_LOAN_EMI -->
+      <div class="calc-panel" id="panel-EDUCATION_LOAN_EMI">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">EDUCATION LOAN</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="EDUCATION_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="EDUCATION_LOAN_EMI-loan_amount" placeholder="1000000"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="EDUCATION_LOAN_EMI-interest_rate" placeholder="10" step="0.01"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="EDUCATION_LOAN_EMI-years" placeholder="10"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('EDUCATION_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="EDUCATION_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="EDUCATION_LOAN_EMI-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="EDUCATION_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EDUCATION_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EDUCATION_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- FLAT_VS_REDUCING -->
+      <div class="calc-panel" id="panel-FLAT_VS_REDUCING">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">FLAT vs REDUCING</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="FLAT_VS_REDUCING-principal">Principal (₹)</label><input type="number" id="FLAT_VS_REDUCING-principal" placeholder="500000"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-annual_rate">Annual Rate (%)</label><input type="number" id="FLAT_VS_REDUCING-annual_rate" placeholder="10" step="0.01"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-years">Tenure (Years)</label><input type="number" id="FLAT_VS_REDUCING-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('FLAT_VS_REDUCING')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="FLAT_VS_REDUCING-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="FLAT_VS_REDUCING-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="FLAT_VS_REDUCING-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="FLAT_VS_REDUCING-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FLAT_VS_REDUCING')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- SIMPLE_INTEREST -->
+      <div class="calc-panel" id="panel-SIMPLE_INTEREST">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">SIMPLE INTEREST</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="SIMPLE_INTEREST-principal_amount">Principal (₹)</label><input type="number" id="SIMPLE_INTEREST-principal_amount" placeholder="100000"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-rate_of_interest">Rate of Interest (%)</label><input type="number" id="SIMPLE_INTEREST-rate_of_interest" placeholder="8" step="0.1"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-years">Years</label><input type="number" id="SIMPLE_INTEREST-years" placeholder="5"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('SIMPLE_INTEREST')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="SIMPLE_INTEREST-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="SIMPLE_INTEREST-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="SIMPLE_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SIMPLE_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SIMPLE_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- COMPOUND_INTEREST -->
+      <div class="calc-panel" id="panel-COMPOUND_INTEREST">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">COMPOUND INTEREST</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="COMPOUND_INTEREST-principal_amount">Principal (₹)</label><input type="number" id="COMPOUND_INTEREST-principal_amount" placeholder="100000"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-interest_rate">Interest Rate (%)</label><input type="number" id="COMPOUND_INTEREST-interest_rate" placeholder="8" step="0.1"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-years">Years</label><input type="number" id="COMPOUND_INTEREST-years" placeholder="5"></div>
+            <div class="field">
+              <label for="COMPOUND_INTEREST-compounding_per_year">Compounding Frequency</label>
+              <select id="COMPOUND_INTEREST-compounding_per_year">
+                <option value="1">Annually</option>
+                <option value="2">Semi-Annually</option>
+                <option value="4" selected>Quarterly</option>
+                <option value="12">Monthly</option>
+                <option value="365">Daily</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-calc" onclick="calculate('COMPOUND_INTEREST')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="COMPOUND_INTEREST-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="COMPOUND_INTEREST-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="COMPOUND_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="COMPOUND_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('COMPOUND_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- GST -->
+      <div class="calc-panel" id="panel-GST">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">GST</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="GST-original_price">Original Price (₹)</label><input type="number" id="GST-original_price" placeholder="1000"></div>
+            <div class="field">
+              <label for="GST-gst_rate">GST Rate (%)</label>
+              <select id="GST-gst_rate">
+                <option value="0">0%</option>
+                <option value="5">5%</option>
+                <option value="12">12%</option>
+                <option value="18" selected>18%</option>
+                <option value="28">28%</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-calc" onclick="calculate('GST')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="GST-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="GST-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="GST-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- GRATUITY -->
+      <div class="calc-panel" id="panel-GRATUITY">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">GRATUITY</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="GRATUITY-basic_salary">Basic Salary (₹/month)</label><input type="number" id="GRATUITY-basic_salary" placeholder="50000"></div>
+            <div class="field"><label for="GRATUITY-DA">Dearness Allowance (₹)</label><input type="number" id="GRATUITY-DA" placeholder="0"></div>
+            <div class="field"><label for="GRATUITY-years_of_service">Years of Service</label><input type="number" id="GRATUITY-years_of_service" placeholder="10"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('GRATUITY')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="GRATUITY-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="GRATUITY-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="GRATUITY-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GRATUITY-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GRATUITY')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- SALARY_CALCULATOR -->
+      <div class="calc-panel" id="panel-SALARY_CALCULATOR">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">SALARY</span></div>
+          <div class="form-grid">
+            <div class="field"><label for="SALARY_CALCULATOR-ctc">CTC (Annual ₹)</label><input type="number" id="SALARY_CALCULATOR-ctc" placeholder="1200000"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-bonus">Bonus (Monthly ₹)</label><input type="number" id="SALARY_CALCULATOR-bonus" placeholder="0"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-proffesional_tax">Professional Tax (₹)</label><input type="number" id="SALARY_CALCULATOR-proffesional_tax" placeholder="200"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-employer_pf">Employer PF (₹)</label><input type="number" id="SALARY_CALCULATOR-employer_pf" placeholder="1800"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-employee_pf">Employee PF (₹)</label><input type="number" id="SALARY_CALCULATOR-employee_pf" placeholder="1800"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-other_deductions">Other Deductions (₹)</label><input type="number" id="SALARY_CALCULATOR-other_deductions" placeholder="0"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('SALARY_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="SALARY_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="SALARY_CALCULATOR-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="SALARY_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SALARY_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SALARY_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- BROKERAGE_CALCULATOR -->
+      <div class="calc-panel" id="panel-BROKERAGE_CALCULATOR">
+        <div class="card">
+          <div class="card-title">Parameters <span class="badge">BROKERAGE</span></div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="BROKERAGE_CALCULATOR-segment">Segment</label>
+              <select id="BROKERAGE_CALCULATOR-segment">
+                <option value="delivery">Delivery</option>
+                <option value="intraday">Intraday</option>
+                <option value="futures">Futures</option>
+                <option value="options">Options</option>
+              </select>
+            </div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Quantity">Quantity</label><input type="number" id="BROKERAGE_CALCULATOR-Quantity" placeholder="100"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-buy_price">Buy Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-buy_price" placeholder="500" step="0.01"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-sell_price">Sell Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-sell_price" placeholder="550" step="0.01"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-brokerage">Brokerage (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-brokerage" placeholder="20" step="0.01"></div>
+          </div>
+          <button class="btn-calc" onclick="calculate('BROKERAGE_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
+          <div class="loading" id="BROKERAGE_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
+          <div class="error-box" id="BROKERAGE_CALCULATOR-error" role="alert"></div>
+        </div>
+        <div class="result-box" id="BROKERAGE_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="BROKERAGE_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('BROKERAGE_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+      </div>
+
+      <!-- HISTORY PANEL -->
+      <div class="calc-panel" id="panel-HISTORY">
+        <div class="card">
+          <div class="card-title">
+            <i class="fas fa-clock-rotate-left" style="color:var(--accent-primary);" aria-hidden="true"></i>
+            Calculation History
+            <span class="badge">LAST 10</span>
+          </div>
+          {% if history %}
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Calculator</th>
+                  <th>Inputs</th>
+                  <th>Result</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in history %}
+                <tr>
+                  <td><span class="history-calc-badge">{{ entry.calc_type }}</span></td>
+                  <td class="history-params">
+                      {% for param in entry.params.split(',') %}
+                          <div class="history-param">
+                              {{ param.strip() }}
+                          </div>
+                      {% endfor %}
+                  </td>
+                  <td class="history-result">
+                      {% for result in entry.result.split(', ') %}
+                          <div class="history-result-line">
+                              {{ result.strip() }}
+                          </div>
+                      {% endfor %}
+                  </td>                  
+                  <td class="history-time">
+                    {{ entry.timestamp.strftime('%d %b') }}<br>{{ entry.timestamp.strftime('%H:%M') }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="history-empty">
+            <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+            <p>No calculations yet.</p>
+            <p style="font-size:0.85rem;">Start calculating to build your history.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+  // ── Panel metadata ──
+  const META = {
+    SIP: { title: 'SIP Calculator', sub: 'Systematic Investment Plan — wealth via monthly investments' },
+    LUMPSUM: { title: 'Lumpsum Calculator', sub: 'One-time investment growth calculator' },
+    STEP_UP_SIP: { title: 'Step-Up SIP', sub: 'Increase your SIP amount yearly to grow wealth faster' },
+    SWP: { title: 'SWP Calculator', sub: 'Systematic Withdrawal Plan — plan your regular withdrawals' },
+    PPF: { title: 'PPF Calculator', sub: 'Public Provident Fund — tax-free long term savings' },
+    EPF: { title: 'EPF Calculator', sub: 'Employee Provident Fund — retirement corpus estimator' },
+    NPS: { title: 'NPS Calculator', sub: 'National Pension Scheme — plan your pension corpus' },
+    NSC: { title: 'NSC Calculator', sub: 'National Savings Certificate — post office savings' },
+    FD_SIMPLE: { title: 'Fixed Deposit', sub: 'Simple interest fixed deposit maturity calculator' },
+    RD: { title: 'Recurring Deposit', sub: 'Monthly RD maturity with quarterly compounding' },
+    RETIREMENT_CALCULATOR: { title: 'Retirement Calculator', sub: 'Find out how much corpus you need to retire comfortably' },
+    INFLATION: { title: 'Inflation Calculator', sub: 'See how purchasing power erodes over time' },
+    CAGR: { title: 'CAGR Calculator', sub: 'Compound Annual Growth Rate — measure investment performance' },
+    EMI: { title: 'EMI Calculator', sub: 'Calculate monthly loan repayments easily' },
+    HOME_LOAN_EMI: { title: 'Home Loan EMI', sub: 'Calculate your home loan monthly installment' },
+    CAR_LOAN_EMI: { title: 'Car Loan EMI', sub: 'Calculate your car loan monthly installment' },
+    GOLD_LOAN_EMI: { title: 'Gold Loan EMI', sub: 'Calculate your gold loan monthly installment' },
+    EDUCATION_LOAN_EMI: { title: 'Education Loan EMI', sub: 'Calculate your education loan monthly installment' },
+    FLAT_VS_REDUCING: { title: 'Flat vs Reducing Rate', sub: 'Compare flat rate vs reducing balance interest methods' },
+    SIMPLE_INTEREST: { title: 'Simple Interest', sub: 'Calculate interest on a principal amount simply' },
+    COMPOUND_INTEREST: { title: 'Compound Interest', sub: 'The power of compounding — calculate growth over time' },
+    GST: { title: 'GST Calculator', sub: 'Goods & Services Tax — add GST to any amount' },
+    GRATUITY: { title: 'Gratuity Calculator', sub: 'Calculate your retirement gratuity entitlement' },
+    SALARY_CALCULATOR: { title: 'Salary Calculator', sub: 'Break down your CTC into take-home salary' },
+    BROKERAGE_CALCULATOR: { title: 'Brokerage Calculator', sub: 'Full breakdown of trading charges and net P&L' },
+    HISTORY: { title: 'Calculation History', sub: 'Your last 10 calculations at a glance' },
+  };
+
+  const HIGHLIGHT_KEYS = ['Future Value','Maturity Value','Maturity Amount','Total Corpus','Net P&L','Retirement Corpus Required','60% Lump Sum'];
+  const GOLD_KEYS = ['Wealth Gained','Interest Earned','CAGR %'];
+
+  let activePanel = null;
+
+  function show(type) {
+    document.getElementById('welcome').style.display = 'none';
+    document.getElementById('page-header').style.display = 'block';
+
+    const meta = META[type] || { title: type, sub: '' };
+    document.getElementById('page-title').innerHTML = `<span>${meta.title}</span>`;
+    document.getElementById('page-subtitle').textContent = meta.sub;
+
+    document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    const panel = document.getElementById('panel-' + type);
+    if (panel) panel.classList.add('active');
+
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') === `show('${type}')`) n.classList.add('active');
+    });
+
+    activePanel = type;
+    closeSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function calculate(type) {
+    const panel = document.getElementById('panel-' + type);
+    const params = {};
+    panel.querySelectorAll('input, select').forEach(el => {
+      const key = el.id.replace(type + '-', '');
+      params[key] = el.value;
+    });
+
+    const loading  = document.getElementById(type + '-loading');
+    const errorBox = document.getElementById(type + '-error');
+    const resultBox= document.getElementById(type + '-result');
+
+    loading.classList.add('show');
+    errorBox.classList.remove('show');
+    resultBox.classList.remove('show');
+
+    try {
+      const res  = await fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, params })
+      });
+      const data = await res.json();
+      loading.classList.remove('show');
+
+      if (data.success) {
+        renderResult(type, data.result);
+      } else {
+        errorBox.textContent = '⚠ ' + data.error;
+        errorBox.classList.add('show');
+      }
+    } catch (e) {
+      loading.classList.remove('show');
+      errorBox.textContent = '⚠ Network error: ' + e.message;
+      errorBox.classList.add('show');
+    }
+  }
+
+  function renderResult(type, result) {
+    const grid = document.getElementById(type + '-result-grid');
+    grid.innerHTML = '';
+
+    Object.entries(result).forEach(([key, value]) => {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+
+      let valClass = 'result-value';
+      if (HIGHLIGHT_KEYS.includes(key)) valClass += ' highlight';
+      else if (GOLD_KEYS.includes(key)) valClass += ' gold-val';
+
+      item.innerHTML = `
+        <div class="result-key">${key}</div>
+        <div class="${valClass}">${value}</div>
+      `;
+      grid.appendChild(item);
+    });
+
+    document.getElementById(type + '-result').classList.add('show');
+  }
+
+  // ── Copy results ──
+  function copyResult(type) {
+    const grid = document.getElementById(type + '-result-grid');
+    if (!grid) return;
+    const lines = [];
+    grid.querySelectorAll('.result-item').forEach(item => {
+      const key = item.querySelector('.result-key')?.textContent?.trim() || '';
+      const val = item.querySelector('[class*="result-value"]')?.textContent?.trim() || '';
+      if (key) lines.push(`${key}: ${val}`);
+    });
+    const btn = grid.closest('.card').querySelector('.result-copy-btn');
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      if (btn) {
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<i class="fas fa-copy" aria-hidden="true"></i> Copy Results';
+        }, 2000);
+      }
+    });
+  }
+
+  // ── Sidebar toggle ──
+  const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const sidebarIcon = document.getElementById('sidebar-toggle-icon');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    sidebarOverlay.classList.add('open');
+    sidebarToggleBtn.setAttribute('aria-expanded', 'true');
+    sidebarIcon.className = 'fas fa-xmark';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+    sidebarToggleBtn.setAttribute('aria-expanded', 'false');
+    sidebarIcon.className = 'fas fa-bars';
+  }
+  sidebarToggleBtn.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+
+  // ── Logout modal ──
+  function openLogoutModal() { document.getElementById('logout-modal').classList.add('open'); }
+  function closeLogoutModal() { document.getElementById('logout-modal').classList.remove('open'); }
+  document.getElementById('logout-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLogoutModal();
+  });
+
+  // ── Enter key support ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && activePanel && activePanel !== 'HISTORY') calculate(activePanel);
+    if (e.key === 'Escape') { closeLogoutModal(); closeSidebar(); }
+  });
+  </script>
+</body>
+</html>
