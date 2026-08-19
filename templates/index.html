@@ -269,6 +269,23 @@
       <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
         <i class="fas fa-bars" id="sidebar-toggle-icon" aria-hidden="true"></i>
       </button>
+      <div class="theme-selector" role="group" aria-label="Choose color theme">
+        <button class="theme-btn active" data-theme="indigo" aria-label="Midnight Indigo (default)" title="Midnight Indigo">
+          <span class="theme-dot" style="background: #6c8cff;"></span>
+        </button>
+        <button class="theme-btn" data-theme="green" aria-label="Forest Green" title="Forest Green">
+          <span class="theme-dot" style="background: #2ee59d;"></span>
+        </button>
+        <button class="theme-btn" data-theme="orange" aria-label="Sunset Orange" title="Sunset Orange">
+          <span class="theme-dot" style="background: #ffb454;"></span>
+        </button>
+        <button class="theme-btn" data-theme="purple" aria-label="Royal Purple" title="Royal Purple">
+          <span class="theme-dot" style="background: #b388ff;"></span>
+        </button>
+        <button class="theme-btn" data-theme="teal" aria-label="Ocean Teal" title="Ocean Teal">
+          <span class="theme-dot" style="background: #4dd0e1;"></span>
+        </button>
+      </div>
       <div class="header-badge" aria-label="All calculators available">ALL CALCULATORS</div>
     </div>
   </header>
@@ -279,45 +296,70 @@
     <!-- ═══ SIDEBAR ═══ -->
     <nav class="sidebar" id="sidebar" aria-label="Calculator navigation">
 
+      <div class="sidebar-search" role="search" aria-label="Calculator search">
+        <i class="fas fa-search search-icon" aria-hidden="true"></i>
+        <input 
+          type="search" 
+          id="calculator-search" 
+          class="search-input"
+          placeholder="Search calculators..." 
+          aria-label="Search calculators"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button 
+          type="button" 
+          id="search-clear" 
+          class="search-clear" 
+          aria-label="Clear search"
+          style="display: none;"
+        >
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div id="search-no-results" class="search-no-results" style="display: none;" aria-live="polite">
+        No calculators match "<span id="search-query-display"></span>"
+      </div>
+
       <div class="sidebar-section">
         <div class="sidebar-label">Investments</div>
-        <div class="nav-item" onclick="show('SIP')" aria-label="SIP Calculator"><span class="icon" aria-hidden="true">📈</span> SIP</div>
-        <div class="nav-item" onclick="show('LUMPSUM')" aria-label="Lumpsum Calculator"><span class="icon" aria-hidden="true">💰</span> Lumpsum</div>
-        <div class="nav-item" onclick="show('STEP_UP_SIP')" aria-label="Step-Up SIP Calculator"><span class="icon" aria-hidden="true">🚀</span> Step-Up SIP</div>
-        <div class="nav-item" onclick="show('SWP')" aria-label="SWP Calculator"><span class="icon" aria-hidden="true">💸</span> SWP</div>
-        <div class="nav-item" onclick="show('PPF')" aria-label="PPF Calculator"><span class="icon" aria-hidden="true">🏛️</span> PPF</div>
-        <div class="nav-item" onclick="show('EPF')" aria-label="EPF Calculator"><span class="icon" aria-hidden="true">🏢</span> EPF</div>
-        <div class="nav-item" onclick="show('NPS')" aria-label="NPS Calculator"><span class="icon" aria-hidden="true">🎯</span> NPS</div>
-        <div class="nav-item" onclick="show('NSC')" aria-label="NSC Calculator"><span class="icon" aria-hidden="true">📜</span> NSC</div>
-        <div class="nav-item" onclick="show('FD_SIMPLE')" aria-label="Fixed Deposit Calculator"><span class="icon" aria-hidden="true">🏦</span> Fixed Deposit</div>
-        <div class="nav-item" onclick="show('RD')" aria-label="Recurring Deposit Calculator"><span class="icon" aria-hidden="true">📅</span> Recurring Deposit</div>
+        <div class="nav-item" onclick="show('SIP')" data-search-tags="sip systematic investment plan monthly invest wealth mutual fund" aria-label="SIP Calculator"><span class="icon" aria-hidden="true">📈</span> SIP</div>
+        <div class="nav-item" onclick="show('LUMPSUM')" data-search-tags="lumpsum one-time investment growth corpus" aria-label="Lumpsum Calculator"><span class="icon" aria-hidden="true">💰</span> Lumpsum</div>
+        <div class="nav-item" onclick="show('STEP_UP_SIP')" data-search-tags="step-up step up sip increase yearly topup" aria-label="Step-Up SIP Calculator"><span class="icon" aria-hidden="true">🚀</span> Step-Up SIP</div>
+        <div class="nav-item" onclick="show('SWP')" data-search-tags="swp systematic withdrawal plan withdraw income retirement" aria-label="SWP Calculator"><span class="icon" aria-hidden="true">💸</span> SWP</div>
+        <div class="nav-item" onclick="show('PPF')" data-search-tags="ppf public provident fund tax free savings 15 year" aria-label="PPF Calculator"><span class="icon" aria-hidden="true">🏛️</span> PPF</div>
+        <div class="nav-item" onclick="show('EPF')" data-search-tags="epf employee provident fund retirement corpus salary" aria-label="EPF Calculator"><span class="icon" aria-hidden="true">🏢</span> EPF</div>
+        <div class="nav-item" onclick="show('NPS')" data-search-tags="nps national pension scheme pension retirement annuity" aria-label="NPS Calculator"><span class="icon" aria-hidden="true">🎯</span> NPS</div>
+        <div class="nav-item" onclick="show('NSC')" data-search-tags="nsc national savings certificate post office 5 year" aria-label="NSC Calculator"><span class="icon" aria-hidden="true">📜</span> NSC</div>
+        <div class="nav-item" onclick="show('FD_SIMPLE')" data-search-tags="fd fixed deposit simple interest maturity bank" aria-label="Fixed Deposit Calculator"><span class="icon" aria-hidden="true">🏦</span> Fixed Deposit</div>
+        <div class="nav-item" onclick="show('RD')" data-search-tags="rd recurring deposit monthly quarterly compounding" aria-label="Recurring Deposit Calculator"><span class="icon" aria-hidden="true">📅</span> Recurring Deposit</div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-label">Planning</div>
-        <div class="nav-item" onclick="show('RETIREMENT_CALCULATOR')" aria-label="Retirement Calculator"><span class="icon" aria-hidden="true">🌅</span> Retirement</div>
-        <div class="nav-item" onclick="show('INFLATION')" aria-label="Inflation Calculator"><span class="icon" aria-hidden="true">📊</span> Inflation</div>
-        <div class="nav-item" onclick="show('CAGR')" aria-label="CAGR Calculator"><span class="icon" aria-hidden="true">📉</span> CAGR</div>
+        <div class="nav-item" onclick="show('RETIREMENT_CALCULATOR')" data-search-tags="retirement corpus planner pension future expense inflation" aria-label="Retirement Calculator"><span class="icon" aria-hidden="true">🌅</span> Retirement</div>
+        <div class="nav-item" onclick="show('INFLATION')" data-search-tags="inflation purchasing power future cost price rise" aria-label="Inflation Calculator"><span class="icon" aria-hidden="true">📊</span> Inflation</div>
+        <div class="nav-item" onclick="show('CAGR')" data-search-tags="cagr compound annual growth rate return performance" aria-label="CAGR Calculator"><span class="icon" aria-hidden="true">📉</span> CAGR</div>
       </div>
 
-      <div class="sidebar-section">
-        <div class="sidebar-label">Loans &amp; EMI</div>
-        <div class="nav-item" onclick="show('EMI')" aria-label="EMI Calculator"><span class="icon" aria-hidden="true">🧮</span> EMI</div>
-        <div class="nav-item" onclick="show('HOME_LOAN_EMI')" aria-label="Home Loan EMI Calculator"><span class="icon" aria-hidden="true">🏠</span> Home Loan</div>
-        <div class="nav-item" onclick="show('CAR_LOAN_EMI')" aria-label="Car Loan EMI Calculator"><span class="icon" aria-hidden="true">🚗</span> Car Loan</div>
-        <div class="nav-item" onclick="show('GOLD_LOAN_EMI')" aria-label="Gold Loan EMI Calculator"><span class="icon" aria-hidden="true">🪙</span> Gold Loan</div>
-        <div class="nav-item" onclick="show('EDUCATION_LOAN_EMI')" aria-label="Education Loan EMI Calculator"><span class="icon" aria-hidden="true">🎓</span> Education Loan</div>
-        <div class="nav-item" onclick="show('FLAT_VS_REDUCING')" aria-label="Flat vs Reducing Calculator"><span class="icon" aria-hidden="true">⚖️</span> Flat vs Reducing</div>
+<div class="sidebar-section">
+        <div class="sidebar-label">Loans & EMI</div>
+        <div class="nav-item" onclick="show('EMI')" data-search-tags="emi loan repayment monthly installment principal interest" aria-label="EMI Calculator"><span class="icon" aria-hidden="true">🧮</span> EMI</div>
+        <div class="nav-item" onclick="show('HOME_LOAN_EMI')" data-search-tags="home loan housing mortgage property emi" aria-label="Home Loan EMI Calculator"><span class="icon" aria-hidden="true">🏠</span> Home Loan</div>
+        <div class="nav-item" onclick="show('CAR_LOAN_EMI')" data-search-tags="car loan vehicle auto emi" aria-label="Car Loan EMI Calculator"><span class="icon" aria-hidden="true">🚗</span> Car Loan</div>
+        <div class="nav-item" onclick="show('GOLD_LOAN_EMI')" data-search-tags="gold loan ornament jewellery emi" aria-label="Gold Loan EMI Calculator"><span class="icon" aria-hidden="true">🪙</span> Gold Loan</div>
+        <div class="nav-item" onclick="show('EDUCATION_LOAN_EMI')" data-search-tags="education loan student study emi moratorium" aria-label="Education Loan EMI Calculator"><span class="icon" aria-hidden="true">🎓</span> Education Loan</div>
+        <div class="nav-item" onclick="show('FLAT_VS_REDUCING')" data-search-tags="flat reducing balance interest compare method" aria-label="Flat vs Reducing Calculator"><span class="icon" aria-hidden="true">⚖️</span> Flat vs Reducing</div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-label">General</div>
-        <div class="nav-item" onclick="show('SIMPLE_INTEREST')" aria-label="Simple Interest Calculator"><span class="icon" aria-hidden="true">➕</span> Simple Interest</div>
-        <div class="nav-item" onclick="show('COMPOUND_INTEREST')" aria-label="Compound Interest Calculator"><span class="icon" aria-hidden="true">✖️</span> Compound Interest</div>
-        <div class="nav-item" onclick="show('GST')" aria-label="GST Calculator"><span class="icon" aria-hidden="true">🧾</span> GST</div>
-        <div class="nav-item" onclick="show('GRATUITY')" aria-label="Gratuity Calculator"><span class="icon" aria-hidden="true">🎁</span> Gratuity</div>
-        <div class="nav-item" onclick="show('SALARY_CALCULATOR')" aria-label="Salary Calculator"><span class="icon" aria-hidden="true">👔</span> Salary</div>
-        <div class="nav-item" onclick="show('BROKERAGE_CALCULATOR')" aria-label="Brokerage Calculator"><span class="icon" aria-hidden="true">📋</span> Brokerage</div>
+        <div class="nav-item" onclick="show('SIMPLE_INTEREST')" data-search-tags="simple interest basic principal rate time" aria-label="Simple Interest Calculator"><span class="icon" aria-hidden="true">➕</span> Simple Interest</div>
+        <div class="nav-item" onclick="show('COMPOUND_INTEREST')" data-search-tags="compound interest compounding frequency quarterly monthly" aria-label="Compound Interest Calculator"><span class="icon" aria-hidden="true">✖️</span> Compound Interest</div>
+        <div class="nav-item" onclick="show('GST')" data-search-tags="gst goods services tax rate slab 5 12 18 28" aria-label="GST Calculator"><span class="icon" aria-hidden="true">🧾</span> GST</div>
+        <div class="nav-item" onclick="show('GRATUITY')" data-search-tags="gratuity end service benefit 15/26 formula" aria-label="Gratuity Calculator"><span class="icon" aria-hidden="true">🎁</span> Gratuity</div>
+        <div class="nav-item" onclick="show('SALARY_CALCULATOR')" data-search-tags="salary ctc breakdown take home in-hand deduction" aria-label="Salary Calculator"><span class="icon" aria-hidden="true">👔</span> Salary</div>
+        <div class="nav-item" onclick="show('BROKERAGE_CALCULATOR')" data-search-tags="brokerage trading charges stt turnover pnl profit loss" aria-label="Brokerage Calculator"><span class="icon" aria-hidden="true">📋</span> Brokerage</div>
       </div>
 
       <!-- History mini (recent 3) -->
@@ -325,7 +367,7 @@
         <div class="sidebar-label" style="display:flex;align-items:center;justify-content:space-between;">
           Recent Activity
           {% if history %}
-          <span onclick="show('HISTORY')" style="cursor:pointer;color:var(--accent-primary);font-size:0.7rem;font-weight:600;letter-spacing:0.04em;" aria-label="View full history">View all →</span>
+          <span onclick="show('HISTORY')" data-search-tags="history recent calculations past activity log" style="cursor:pointer;color:var(--accent-primary);font-size:0.7rem;font-weight:600;letter-spacing:0.04em;" aria-label="View full history">View all →</span>
           {% endif %}
         </div>
         {% for entry in history[:3] %}
@@ -924,6 +966,128 @@
     HISTORY: { title: 'Calculation History', sub: 'Your last 10 calculations at a glance' },
   };
 
+  // ── Search Module ──
+  const SEARCH_TAGS = {
+    SIP: 'sip systematic investment plan monthly invest wealth mutual fund',
+    LUMPSUM: 'lumpsum one-time investment growth corpus',
+    STEP_UP_SIP: 'step-up step up sip increase yearly topup',
+    SWP: 'swp systematic withdrawal plan withdraw income retirement',
+    PPF: 'ppf public provident fund tax free savings 15 year',
+    EPF: 'epf employee provident fund retirement corpus salary',
+    NPS: 'nps national pension scheme pension retirement annuity',
+    NSC: 'nsc national savings certificate post office 5 year',
+    FD_SIMPLE: 'fd fixed deposit simple interest maturity bank',
+    RD: 'rd recurring deposit monthly quarterly compounding',
+    RETIREMENT_CALCULATOR: 'retirement corpus planner pension future expense inflation',
+    INFLATION: 'inflation purchasing power future cost price rise',
+    CAGR: 'cagr compound annual growth rate return performance',
+    EMI: 'emi loan repayment monthly installment principal interest',
+    HOME_LOAN_EMI: 'home loan housing mortgage property emi',
+    CAR_LOAN_EMI: 'car loan vehicle auto emi',
+    GOLD_LOAN_EMI: 'gold loan ornament jewellery emi',
+    EDUCATION_LOAN_EMI: 'education loan student study emi moratorium',
+    FLAT_VS_REDUCING: 'flat reducing balance interest compare method',
+    SIMPLE_INTEREST: 'simple interest basic principal rate time',
+    COMPOUND_INTEREST: 'compound interest compounding frequency quarterly monthly',
+    GST: 'gst goods services tax rate slab 5 12 18 28',
+    GRATUITY: 'gratuity end service benefit 15/26 formula',
+    SALARY_CALCULATOR: 'salary ctc breakdown take home in-hand deduction',
+    BROKERAGE_CALCULATOR: 'brokerage trading charges stt turnover pnl profit loss',
+    HISTORY: 'history recent calculations past activity log',
+  };
+
+  let searchDebounceTimer = null;
+
+  function initSearch() {
+    const input = document.getElementById('calculator-search');
+    const clearBtn = document.getElementById('search-clear');
+    const noResults = document.getElementById('search-no-results');
+    const queryDisplay = document.getElementById('search-query-display');
+
+    if (!input) return;
+
+    input.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      clearBtn.style.display = query ? 'flex' : 'none';
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => performSearch(query), 150);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      clearBtn.style.display = 'none';
+      performSearch('');
+      input.focus();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+      }
+      if (e.key === 'Escape' && document.activeElement === input) {
+        input.value = '';
+        clearBtn.style.display = 'none';
+        performSearch('');
+        input.blur();
+      }
+    });
+
+    function performSearch(query) {
+      const navItems = document.querySelectorAll('.nav-item[data-search-tags]');
+      const sections = document.querySelectorAll('.sidebar-section');
+      let visibleCount = 0;
+
+      navItems.forEach(item => {
+        const typeMatch = item.getAttribute('onclick').match(/show\('(.+?)'\)/);
+        const type = typeMatch ? typeMatch[1] : null;
+        if (!type) return;
+
+        const tags = (SEARCH_TAGS[type] || '').toLowerCase();
+        const meta = META[type] || {};
+        const title = (meta.title || '').toLowerCase();
+        const sub = (meta.sub || '').toLowerCase();
+        const searchText = `${tags} ${title} ${sub}`;
+
+        const matches = !query || searchText.includes(query);
+        item.classList.toggle('hidden', !matches);
+        if (matches) visibleCount++;
+      });
+
+      sections.forEach(section => {
+        const visibleItems = section.querySelectorAll('.nav-item:not(.hidden)').length;
+        section.classList.toggle('hidden', visibleItems === 0);
+      });
+
+      noResults.style.display = (query && visibleCount === 0) ? 'block' : 'none';
+      if (queryDisplay) queryDisplay.textContent = query;
+    }
+  }
+
+  // ── Theme Manager ──
+  const THEMES = ['indigo', 'green', 'orange', 'purple', 'teal'];
+  const THEME_LABELS = {
+    indigo: 'Midnight Indigo',
+    green: 'Forest Green',
+    orange: 'Sunset Orange',
+    purple: 'Royal Purple',
+    teal: 'Ocean Teal'
+  };
+
+  function initTheme() {
+    const saved = localStorage.getItem('fincalc-theme') || 'indigo';
+    setTheme(saved);
+  }
+
+  function setTheme(name) {
+    if (!THEMES.includes(name)) name = 'indigo';
+    document.documentElement.dataset.theme = name;
+    localStorage.setItem('fincalc-theme', name);
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === name);
+    });
+  }
+
   const HIGHLIGHT_KEYS = ['Future Value','Maturity Value','Maturity Amount','Total Corpus','Net P&L','Retirement Corpus Required','60% Lump Sum'];
   const GOLD_KEYS = ['Wealth Gained','Interest Earned','CAGR %'];
 
@@ -1068,6 +1232,17 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && activePanel && activePanel !== 'HISTORY') calculate(activePanel);
     if (e.key === 'Escape') { closeLogoutModal(); closeSidebar(); }
+  });
+
+  // Initialize search and theme on load
+  document.addEventListener('DOMContentLoaded', () => {
+    initSearch();
+    initTheme();
+
+    // Theme button delegation
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+    });
   });
   </script>
 </body>
