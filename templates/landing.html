@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#060814">
+  <title>FinCalc Pro — Smart Financial Calculators for India</title>
+  <meta name="description" content="Plan, invest, save and grow your wealth with 25+ free financial calculators — SIP, EMI, PPF, retirement, CAGR, GST and more. Accurate, instant, and 100% secure.">
+  <meta property="og:title" content="FinCalc Pro — Smart Financial Calculators">
+  <meta property="og:description" content="25+ powerful calculators: SIP, EMI, Retirement, CAGR, GST and more. Free, fast, and accurate.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FinCalc Pro — Smart Financial Calculators">
+  <meta name="twitter:description" content="Plan, invest, save and grow with 25+ free calculators.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: 'Inter', 'Roboto', -apple-system, sans-serif; }
+
+    /* ── Scroll reveal ── */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.22,0.61,0.36,1),
+                  transform 0.7s cubic-bezier(0.22,0.61,0.36,1);
+    }
+    .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+    .scroll-reveal.delay-1 { transition-delay: 0.12s; }
+    .scroll-reveal.delay-2 { transition-delay: 0.24s; }
+    .scroll-reveal.delay-3 { transition-delay: 0.36s; }
+    .scroll-reveal.delay-4 { transition-delay: 0.48s; }
+
+    /* ── Stats strip ── */
+    .stats-section {
+      max-width: var(--max-width);
+      margin: 0 auto 2rem;
+      padding: 0 clamp(1rem,4vw,2rem);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 1px;
+      background: var(--border-glass);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-soft);
+    }
+    .stat-item {
+      background: rgba(6,8,20,0.65);
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+      position: relative;
+      transition: background var(--transition);
+    }
+    .stat-item:hover { background: rgba(108,140,255,0.08); }
+    .stat-number {
+      font-size: clamp(1.8rem,3vw,2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.4rem;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .stat-icon {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent-primary);
+      opacity: 0.8;
+    }
+    @media(max-width:768px){ .stats-grid{ grid-template-columns: 1fr 1fr; } }
+    @media(max-width:480px){ .stats-grid{ grid-template-columns: 1fr 1fr; } }
+
+    /* ── Trust bar ── */
+    .trust-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      padding: 1rem clamp(1rem,4vw,2rem);
+      max-width: var(--max-width);
+      margin: 0 auto 1rem;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .trust-item i { color: var(--accent-primary); font-size: 0.9rem; }
+
+    /* ── Footer ── */
+    .site-footer {
+      margin-top: 5rem;
+      border-top: 1px solid var(--border-glass);
+      background: rgba(6,8,20,0.7);
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+    }
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 3rem clamp(1rem,4vw,2rem) 2rem;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+    .footer-brand .logo { margin-bottom: 1rem; }
+    .footer-brand p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      max-width: 280px;
+      line-height: 1.6;
+    }
+    .footer-social {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1.2rem;
+    }
+    .footer-social a {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--surface-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition-spring);
+    }
+    .footer-social a:hover {
+      color: var(--accent-primary);
+      border-color: rgba(108,140,255,0.4);
+      background: rgba(108,140,255,0.1);
+      transform: translateY(-3px) scale(1.1);
+    }
+    .footer-col h5 {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .footer-col ul li {
+      margin-bottom: 0.55rem;
+    }
+    .footer-col ul li a {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition), transform var(--transition);
+      display: inline-block;
+    }
+    .footer-col ul li a:hover {
+      color: var(--text-primary);
+      transform: translateX(3px);
+    }
+    .footer-bottom {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 1.2rem clamp(1rem,4vw,2rem);
+      border-top: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .footer-bottom-links {
+      display: flex;
+      gap: 1.2rem;
+    }
+    .footer-bottom-links a {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .footer-bottom-links a:hover { color: var(--text-primary); }
+    @media(max-width:900px){
+      .footer-inner{ grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:600px){
+      .footer-inner{ grid-template-columns: 1fr; }
+      .footer-bottom{ flex-direction: column; text-align: center; }
+    }
+
+    /* ── Animated gradient text on hero ── */
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .hero-highlight {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-pink), var(--accent-tertiary), var(--accent-primary));
+      background-size: 300% 300%;
+      animation: gradientShift 5s ease infinite;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  </style>
+</head>
+<body class="landing-page">
+
+  <!-- Background orbs -->
+  <div class="bg-orb bg-orb--purple" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--blue"   aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--teal"   aria-hidden="true"></div>
+
+  <!-- Page transition overlay (referenced by JS) -->
+  <div id="page-transition" role="status" aria-live="polite">
+    <span id="transition-text">Loading...</span>
+  </div>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="landing-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="logo" aria-label="FinCalc Pro home">
+        <div class="logo-icon" aria-hidden="true">
+          <i class="fas fa-chart-simple"></i>
+        </div>
+        <div class="logo-text-wrapper">
+          <div class="logo-text">FinCalc Pro</div>
+          <div class="logo-subtext">Smart Financial Calculators</div>
+        </div>
+      </a>
+
+      <nav class="landing-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="#calculators">Calculators</a>
+        <a href="#features">Features</a>
+      </nav>
+
+      <div class="landing-auth">
+        <a href="/login"    class="btn-outline transition-link" data-transition="login"    id="nav-login-btn">Login</a>
+        <a href="/register" class="btn-primary transition-link" data-transition="register" id="nav-register-btn">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ HERO ═══ -->
+  <main>
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-content">
+      <h1 class="hero-title" id="hero-heading">
+        Plan Today.<br>
+        <span class="hero-highlight">Prosper Tomorrow.</span>
+      </h1>
+      <p class="hero-description">
+        FinCalc Pro is your all-in-one financial companion with 25+ powerful calculators to help you plan, invest, save, and grow your wealth with confidence.
+      </p>
+
+      <div class="hero-cta">
+        <a href="/register" class="btn-primary btn-large transition-link" data-transition="register" id="hero-cta-primary">
+          Get Started Free <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+        </a>
+        <a href="#calculators" class="btn-secondary btn-large" id="hero-cta-explore">Explore Calculators</a>
+      </div>
+
+      <div class="hero-badges" role="list">
+        <span role="listitem"><i class="fas fa-shield-alt text-primary" aria-hidden="true"></i> 100% Secure</span>
+        <span role="listitem"><i class="fas fa-bolt text-warning" aria-hidden="true"></i> Instant Results</span>
+        <span role="listitem"><i class="fas fa-infinity text-primary" aria-hidden="true"></i> Always Free</span>
+      </div>
+    </div>
+
+    <div class="hero-graphics" aria-hidden="true">
+      <!-- Phone mockup -->
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="phone-balance">
+            <p>Total Wealth <span class="positive">+12.5%</span></p>
+            <h2>₹ 12,45,678</h2>
+          </div>
+          <div class="phone-chart">
+            <div class="bar bar-1"></div>
+            <div class="bar bar-2"></div>
+            <div class="bar bar-3"></div>
+            <div class="bar bar-4"></div>
+            <div class="bar bar-5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating cards -->
+      <div class="floating-card invest-card-top">
+        <div class="icon-wrap"><i class="fas fa-chart-column"></i></div>
+        <div class="card-text">
+          <h4>SIP Calculator</h4>
+          <p>Plan your SIP and<br>grow your wealth.</p>
+        </div>
+      </div>
+      <div class="floating-card emi-card">
+        <div class="icon-wrap"><i class="fas fa-house"></i></div>
+        <div class="card-text">
+          <h4>EMI Calculator</h4>
+          <p>Calculate EMIs<br>for loans easily.</p>
+        </div>
+      </div>
+      <div class="floating-card retirement-card">
+        <div class="icon-wrap"><i class="fas fa-clock"></i></div>
+        <div class="card-text">
+          <h4>Retirement Planner</h4>
+          <p>Plan retirement<br>with confidence.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STATS STRIP ═══ -->
+  <section class="stats-section scroll-reveal" aria-label="Platform statistics">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fas fa-calculator" aria-hidden="true"></i></div>
+        <div class="stat-number" data-count="25" data-suffix="+">0</div>
+        <div class="stat-label">Calculators</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fas fa-shield-alt podium-icon" aria-hidden="true"></i></div>
+        <div class="stat-number" data-count="100" data-suffix="%">0</div>
+        <div class="stat-label">Secure Platform</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fas fa-bullseye" aria-hidden="true"></i></div>
+        <div class="stat-number" data-count="100" data-suffix="%">0</div>
+        <div class="stat-label">Accurate Results</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
+        <div class="stat-number" data-count="0" data-suffix="₹ Cost">Free</div>
+        <div class="stat-label">Always Free</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CALCULATORS SECTION ═══ -->
+  <section id="calculators" class="calculators-section" aria-labelledby="calculators-heading">
+    <div class="section-header scroll-reveal">
+      <h2 id="calculators-heading">
+        <i class="fas fa-sparkles text-primary" aria-hidden="true"></i>
+        25+ Powerful Financial Calculators
+        <i class="fas fa-sparkles text-primary" aria-hidden="true"></i>
+      </h2>
+      <p>Everything you need for your complete financial journey</p>
+    </div>
+
+    <div class="calc-cards-grid">
+      <!-- Investment -->
+      <div class="calc-card theme-purple scroll-reveal delay-1">
+        <div class="card-icon-3d">
+          <div class="icon-base">
+            <i class="fas fa-chart-column"></i>
+            <div class="icon-accent float-coin"><i class="fas fa-indian-rupee-sign"></i></div>
+          </div>
+        </div>
+        <h3>Investment<br>Calculators</h3>
+        <ul class="calc-list" aria-label="Investment calculators list">
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> SIP Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Lumpsum Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> SWP Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Step-Up SIP</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> PPF Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> EPF Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> NSC Calculator</li>
+          <li class="more"><i class="fas fa-caret-right" aria-hidden="true"></i> And more...</li>
+        </ul>
+      </div>
+
+      <!-- Loan & EMI -->
+      <div class="calc-card theme-blue scroll-reveal delay-2">
+        <div class="card-icon-3d">
+          <div class="icon-base">
+            <i class="fas fa-house-chimney"></i>
+            <div class="icon-accent float-car"><i class="fas fa-car"></i></div>
+          </div>
+        </div>
+        <h3>Loan &amp; EMI<br>Calculators</h3>
+        <ul class="calc-list" aria-label="Loan and EMI calculators list">
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> EMI Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Home Loan EMI</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Car Loan EMI</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Gold Loan EMI</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Education Loan EMI</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Flat vs Reducing</li>
+          <li class="more"><i class="fas fa-caret-right" aria-hidden="true"></i> And more...</li>
+        </ul>
+      </div>
+
+      <!-- Interest -->
+      <div class="calc-card theme-teal scroll-reveal delay-3">
+        <div class="card-icon-3d">
+          <div class="icon-base">
+            <div class="percent-circle">%</div>
+            <div class="icon-accent float-percent"><i class="fas fa-percent"></i></div>
+          </div>
+        </div>
+        <h3>Interest<br>Calculators</h3>
+        <ul class="calc-list" aria-label="Interest calculators list">
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Simple Interest</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Compound Interest</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> CAGR Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Inflation Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> FD Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> RD Calculator</li>
+          <li class="more"><i class="fas fa-caret-right" aria-hidden="true"></i> And more...</li>
+        </ul>
+      </div>
+
+      <!-- Tax & Other -->
+      <div class="calc-card theme-dark scroll-reveal delay-4">
+        <div class="card-icon-3d">
+          <div class="icon-base clipboard-icon">
+            <div class="clip-top">TAX</div>
+            <i class="fas fa-list-ul"></i>
+            <div class="icon-accent float-percent"><i class="fas fa-percent"></i></div>
+          </div>
+        </div>
+        <h3>Tax &amp; Other<br>Calculators</h3>
+        <ul class="calc-list" aria-label="Tax and other calculators list">
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> GST Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Brokerage Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Salary Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Gratuity Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> NPS Calculator</li>
+          <li><i class="fas fa-caret-right" aria-hidden="true"></i> Retirement Calculator</li>
+          <li class="more"><i class="fas fa-caret-right" aria-hidden="true"></i> And more...</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section id="features" class="features-section" aria-labelledby="features-heading">
+    <div class="section-header scroll-reveal">
+      <h2 id="features-heading">
+        <i class="fas fa-sparkles text-primary" aria-hidden="true"></i>
+        Why Choose FinCalc Pro?
+        <i class="fas fa-sparkles text-primary" aria-hidden="true"></i>
+      </h2>
+      <p>Built for India's financial journey — powerful, private, and precise</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-item scroll-reveal delay-1">
+        <div class="feature-icon-podium">
+          <div class="podium-base"></div>
+          <i class="fas fa-shield-alt podium-icon" style="color:#038cf5;" aria-hidden="true"></i>
+        </div>
+        <h4>100% Secure</h4>
+        <p>Your data never leaves your device. Enterprise-grade security with no ads, no tracking.</p>
+      </div>
+      <div class="feature-item scroll-reveal delay-2">
+        <div class="feature-icon-podium">
+          <div class="podium-base"></div>
+          <i class="fas fa-bullseye podium-icon" aria-hidden="true"></i>
+        </div>
+        <h4>Accurate Results</h4>
+        <p>Advanced algorithms used by certified financial planners ensure precise, reliable calculations.</p>
+      </div>
+      <div class="feature-item scroll-reveal delay-3">
+        <div class="feature-icon-podium">
+          <div class="podium-base"></div>
+          <i class="fas fa-bolt text-warning podium-icon" aria-hidden="true"></i>
+        </div>
+        <h4>Fast &amp; Easy</h4>
+        <p>Get results in under a second. No complex forms, no waiting — just instant answers.</p>
+      </div>
+      <div class="feature-item scroll-reveal delay-4">
+        <div class="feature-icon-podium">
+          <div class="podium-base"></div>
+          <div class="devices-icon podium-icon" aria-hidden="true">
+            <i class="fas fa-desktop"></i>
+            <i class="fas fa-mobile-screen"></i>
+          </div>
+        </div>
+        <h4>Access Anywhere</h4>
+        <p>Fully responsive — works beautifully on any device, from desktop to mobile.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA STRIP ═══ -->
+  <section class="scroll-reveal" style="max-width:var(--max-width);margin:0 auto 3rem;padding:0 clamp(1rem,4vw,2rem);">
+    <div style="background:linear-gradient(135deg,rgba(108,140,255,0.18) 0%,rgba(179,136,255,0.12) 100%);border:1px solid rgba(108,140,255,0.25);border-radius:var(--radius-xl);padding:3rem 2rem;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(108,140,255,0.25) 0%,transparent 65%);pointer-events:none;"></div>
+      <h2 style="font-size:clamp(1.7rem,3vw,2.4rem);margin-bottom:0.8rem;position:relative;">Start Your Financial Journey Today</h2>
+      <p style="color:var(--text-muted);margin-bottom:1.8rem;font-size:1rem;position:relative;">Join thousands of Indians who plan smarter with FinCalc Pro.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;position:relative;">
+        <a href="/register" class="btn-primary btn-large transition-link" data-transition="register" id="cta-strip-register">
+          Create Free Account <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+        </a>
+        <a href="/login" class="btn-outline btn-large transition-link" data-transition="login" id="cta-strip-login">
+          Already a member? Login
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TRUST BAR ═══ -->
+  <div class="trust-bar scroll-reveal" role="list" aria-label="Trust indicators">
+    <div class="trust-item" role="listitem"><i class="fas fa-lock"></i> No Data Stored</div>
+    <div class="trust-item" role="listitem"><i class="fas fa-code"></i> Built in India</div>
+    <div class="trust-item" role="listitem"><i class="fas fa-infinity"></i> Free Forever</div>
+    <div class="trust-item" role="listitem"><i class="fas fa-user-shield"></i> No Ads / No Tracking</div>
+    <div class="trust-item" role="listitem"><i class="fas fa-mobile-screen"></i> Mobile Ready</div>
+  </div>
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-icon"><i class="fas fa-chart-simple" aria-hidden="true"></i></div>
+          <div class="logo-text-wrapper">
+            <div class="logo-text">FinCalc Pro</div>
+            <div class="logo-subtext">Smart Financial Calculators</div>
+          </div>
+        </div>
+        <p>India's most comprehensive free financial calculator suite. Plan smarter, invest better, retire richer. FinCalc Pro is a dedicated digital toolkit engineered to simplify personal finance for millions of Indian investors.</p>
+      </div>
+
+      <div class="footer-col">
+        <h5>Calculators</h5>
+        <ul>
+          <li><a href="/register">SIP Calculator</a></li>
+          <li><a href="/register">EMI Calculator</a></li>
+          <li><a href="/register">Retirement Planner</a></li>
+          <li><a href="/register">CAGR Calculator</a></li>
+          <li><a href="/register">GST Calculator</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Planning</h5>
+        <ul>
+          <li><a href="/register">PPF Calculator</a></li>
+          <li><a href="/register">EPF Calculator</a></li>
+          <li><a href="/register">NPS Calculator</a></li>
+          <li><a href="/register">Salary Calculator</a></li>
+          <li><a href="/register">Gratuity Calculator</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Account</h5>
+        <ul>
+          <li><a href="/register">Create Account</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 FinCalc Pro. All rights reserved. Built with <i class="fas fa-heart" style="color:var(--accent-danger);font-size:0.7rem;"></i> in India.</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Page transition ──
+    function startPageTransition(href, transitionType) {
+      const map = { login: 'Opening login...', register: 'Opening register...' };
+      const overlay = document.getElementById('page-transition');
+      if (overlay) {
+        overlay.querySelector('#transition-text').textContent = map[transitionType] || 'Loading...';
+        overlay.classList.add('visible');
+      }
+      setTimeout(() => { window.location.href = href; }, 650);
+    }
+    
+    window.addEventListener('pageshow', (event) => {
+    const overlay = document.getElementById('page-transition');
+
+    if (!overlay) return;
+
+    if (event.persisted) {
+        overlay.classList.remove('visible');
+    }
+    });
+
+    document.body.addEventListener('click', e => {
+      const link = e.target.closest('a.transition-link');
+      if (!link) return;
+      e.preventDefault();
+      startPageTransition(link.getAttribute('href'), link.dataset.transition);
+    });
+
+    // ── Scroll reveal (IntersectionObserver) ──
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
+
+    // ── Animated stat counters ──
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const els = entry.target.querySelectorAll('[data-count]');
+        els.forEach(el => {
+          const target = parseInt(el.dataset.count, 10);
+          const suffix = el.dataset.suffix || '';
+          if (isNaN(target)) return;
+          let start = 0;
+          const duration = 1400;
+          const step = timestamp => {
+            if (!step.startTime) step.startTime = timestamp;
+            const progress = Math.min((timestamp - step.startTime) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * target) + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        });
+        countObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.3 });
+
+    const statsSection = document.querySelector('.stats-section');
+    if (statsSection) countObserver.observe(statsSection);
+  </script>
+</body>
+</html>
