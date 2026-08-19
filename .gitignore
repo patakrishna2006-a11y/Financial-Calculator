@@ -7,6 +7,9 @@ __pycache__/
 # Instance folder - contains database with real user data
 instance/
 
+# .env file
+.env
+
 # OS files
 desktop.ini
 Thumbs.db
