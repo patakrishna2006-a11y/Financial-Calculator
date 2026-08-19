@@ -3,9 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-venv/
-.env
-.env.*
 
 # Instance folder - contains database with real user data
 instance/
