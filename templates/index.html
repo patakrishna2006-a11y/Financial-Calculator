@@ -321,6 +321,15 @@
         No calculators match "<span id="search-query-display"></span>"
       </div>
 
+      <div class="color-scheme-toggle" role="group" aria-label="Color scheme">
+        <button class="scheme-btn active" data-scheme="dark" aria-label="Dark mode" title="Dark">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button class="scheme-btn" data-scheme="light" aria-label="Light mode" title="Light">
+          <i class="fas fa-sun"></i>
+        </button>
+      </div>
+
       <div class="sidebar-section">
         <div class="sidebar-label">Investments</div>
         <div class="nav-item" onclick="show('SIP')" data-search-tags="sip systematic investment plan monthly invest wealth mutual fund" aria-label="SIP Calculator"><span class="icon" aria-hidden="true">📈</span> SIP</div>
@@ -1074,6 +1083,21 @@
     teal: 'Ocean Teal'
   };
 
+  const THEME_COLORS_DARK = {
+    indigo: '#060814',
+    green: '#051a0f',
+    orange: '#1a0f05',
+    purple: '#10051a',
+    teal: '#051a1f'
+  };
+  const THEME_COLORS_LIGHT = {
+    indigo: '#f8fafc',
+    green: '#f0fdf4',
+    orange: '#fff7ed',
+    purple: '#faf5ff',
+    teal: '#f0fdfa'
+  };
+
   function initTheme() {
     const saved = localStorage.getItem('fincalc-theme') || 'indigo';
     setTheme(saved);
@@ -1085,6 +1109,35 @@
     localStorage.setItem('fincalc-theme', name);
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.theme === name);
+    });
+    const scheme = document.documentElement.dataset.colorScheme || 'dark';
+    const colors = scheme === 'light' ? THEME_COLORS_LIGHT : THEME_COLORS_DARK;
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) metaThemeColor.setAttribute('content', colors[name]);
+  }
+
+  // ── Color Scheme Manager (Light/Dark) ──
+  const COLOR_SCHEMES = ['dark', 'light'];
+
+  function initColorScheme() {
+    const saved = localStorage.getItem('fincalc-color-scheme') || 'dark';
+    setColorScheme(saved);
+  }
+
+  function setColorScheme(scheme) {
+    if (!COLOR_SCHEMES.includes(scheme)) scheme = 'dark';
+    document.documentElement.classList.add('color-scheme-switching');
+    document.documentElement.dataset.colorScheme = scheme;
+    localStorage.setItem('fincalc-color-scheme', scheme);
+    document.querySelectorAll('.scheme-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.scheme === scheme);
+    });
+    const theme = document.documentElement.dataset.theme || 'indigo';
+    const colors = scheme === 'light' ? THEME_COLORS_LIGHT : THEME_COLORS_DARK;
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) metaThemeColor.setAttribute('content', colors[theme]);
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('color-scheme-switching');
     });
   }
 
@@ -1234,14 +1287,20 @@
     if (e.key === 'Escape') { closeLogoutModal(); closeSidebar(); }
   });
 
-  // Initialize search and theme on load
+  // Initialize search, theme, and color scheme on load
   document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     initTheme();
+    initColorScheme();
 
     // Theme button delegation
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+    });
+
+    // Color scheme button delegation
+    document.querySelectorAll('.scheme-btn').forEach(btn => {
+      btn.addEventListener('click', () => setColorScheme(btn.dataset.scheme));
     });
   });
   </script>
