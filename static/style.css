@@ -3191,15 +3191,17 @@ body {
    COLOR SCHEME TOGGLE (Light/Dark)
    ============================================================ */
 .color-scheme-toggle {
-  display: flex;
-  gap: 0.4rem;
-  padding: 0.25rem;
-  background: var(--surface-glass);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-pill);
-  margin: 0.5rem 0.5rem 0;
+    display: flex;
+    gap: 0.25rem;
+    width: 80px;
+    height: 45px;
+    padding: 0.2rem;
+    background: var(--surface-glass);
+    border: 3px solid var(--border-glass);
+    border-radius: var(--radius-pill);
+    margin: 0.5rem 0.5rem 0;
+    box-sizing: border-box;
 }
-
 .scheme-btn {
   position: relative;
   width: 32px; height: 32px;
