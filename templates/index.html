@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     body { font-family: 'Inter', 'Roboto', -apple-system, sans-serif; }
 
@@ -455,6 +456,7 @@
         <div class="result-box" id="SIP-result">
           <div class="card">
             <div class="card-title">Results</div>
+            <div class="chart-wrapper" id="SIP-chart-wrapper" style="display:none;"><canvas id="SIP-chart"></canvas></div>
             <div class="result-grid" id="SIP-result-grid"></div>
             <button class="result-copy-btn" onclick="copyResult('SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
           </div>
@@ -475,7 +477,7 @@
           <div class="error-box" id="LUMPSUM-error" role="alert"></div>
         </div>
         <div class="result-box" id="LUMPSUM-result">
-          <div class="card"><div class="card-title">Results</div><div class="result-grid" id="LUMPSUM-result-grid"></div><button class="result-copy-btn" onclick="copyResult('LUMPSUM')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div>
+          <div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="LUMPSUM-chart-wrapper" style="display:none;"><canvas id="LUMPSUM-chart"></canvas></div><div class="result-grid" id="LUMPSUM-result-grid"></div><button class="result-copy-btn" onclick="copyResult('LUMPSUM')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div>
         </div>
       </div>
 
@@ -493,7 +495,7 @@
           <div class="loading" id="STEP_UP_SIP-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="STEP_UP_SIP-error" role="alert"></div>
         </div>
-        <div class="result-box" id="STEP_UP_SIP-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="STEP_UP_SIP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('STEP_UP_SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="STEP_UP_SIP-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="STEP_UP_SIP-chart-wrapper" style="display:none;"><canvas id="STEP_UP_SIP-chart"></canvas></div><div class="result-grid" id="STEP_UP_SIP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('STEP_UP_SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- SWP -->
@@ -526,7 +528,7 @@
           <div class="loading" id="PPF-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="PPF-error" role="alert"></div>
         </div>
-        <div class="result-box" id="PPF-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="PPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('PPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="PPF-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="PPF-chart-wrapper" style="display:none;"><canvas id="PPF-chart"></canvas></div><div class="result-grid" id="PPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('PPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- EPF -->
@@ -577,7 +579,7 @@
           <div class="loading" id="NSC-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="NSC-error" role="alert"></div>
         </div>
-        <div class="result-box" id="NSC-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="NSC-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NSC')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="NSC-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="NSC-chart-wrapper" style="display:none;"><canvas id="NSC-chart"></canvas></div><div class="result-grid" id="NSC-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NSC')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- FD_SIMPLE -->
@@ -593,7 +595,7 @@
           <div class="loading" id="FD_SIMPLE-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="FD_SIMPLE-error" role="alert"></div>
         </div>
-        <div class="result-box" id="FD_SIMPLE-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="FD_SIMPLE-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FD_SIMPLE')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="FD_SIMPLE-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="FD_SIMPLE-chart-wrapper" style="display:none;"><canvas id="FD_SIMPLE-chart"></canvas></div><div class="result-grid" id="FD_SIMPLE-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FD_SIMPLE')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- RD -->
@@ -609,7 +611,7 @@
           <div class="loading" id="RD-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="RD-error" role="alert"></div>
         </div>
-        <div class="result-box" id="RD-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="RD-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RD')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="RD-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="RD-chart-wrapper" style="display:none;"><canvas id="RD-chart"></canvas></div><div class="result-grid" id="RD-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RD')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- RETIREMENT_CALCULATOR -->
@@ -644,7 +646,7 @@
           <div class="loading" id="INFLATION-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="INFLATION-error" role="alert"></div>
         </div>
-        <div class="result-box" id="INFLATION-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="INFLATION-result-grid"></div><button class="result-copy-btn" onclick="copyResult('INFLATION')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="INFLATION-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="INFLATION-chart-wrapper" style="display:none;"><canvas id="INFLATION-chart"></canvas></div><div class="result-grid" id="INFLATION-result-grid"></div><button class="result-copy-btn" onclick="copyResult('INFLATION')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- CAGR -->
@@ -676,7 +678,7 @@
           <div class="loading" id="EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="EMI-chart-wrapper" style="display:none;"><canvas id="EMI-chart"></canvas></div><div class="result-grid" id="EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- HOME_LOAN_EMI -->
@@ -692,7 +694,7 @@
           <div class="loading" id="HOME_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="HOME_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="HOME_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="HOME_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('HOME_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="HOME_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="HOME_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="HOME_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="HOME_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('HOME_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- CAR_LOAN_EMI -->
@@ -708,7 +710,7 @@
           <div class="loading" id="CAR_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="CAR_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="CAR_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="CAR_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAR_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="CAR_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="CAR_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="CAR_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="CAR_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAR_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- GOLD_LOAN_EMI -->
@@ -724,7 +726,7 @@
           <div class="loading" id="GOLD_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="GOLD_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="GOLD_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GOLD_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GOLD_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="GOLD_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="GOLD_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="GOLD_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="GOLD_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GOLD_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- EDUCATION_LOAN_EMI -->
@@ -740,7 +742,7 @@
           <div class="loading" id="EDUCATION_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="EDUCATION_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="EDUCATION_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EDUCATION_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EDUCATION_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="EDUCATION_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="EDUCATION_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="EDUCATION_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="EDUCATION_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EDUCATION_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- FLAT_VS_REDUCING -->
@@ -756,7 +758,7 @@
           <div class="loading" id="FLAT_VS_REDUCING-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="FLAT_VS_REDUCING-error" role="alert"></div>
         </div>
-        <div class="result-box" id="FLAT_VS_REDUCING-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="FLAT_VS_REDUCING-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FLAT_VS_REDUCING')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="FLAT_VS_REDUCING-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="FLAT_VS_REDUCING-chart-wrapper" style="display:none;"><canvas id="FLAT_VS_REDUCING-chart"></canvas></div><div class="result-grid" id="FLAT_VS_REDUCING-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FLAT_VS_REDUCING')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- SIMPLE_INTEREST -->
@@ -772,7 +774,7 @@
           <div class="loading" id="SIMPLE_INTEREST-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="SIMPLE_INTEREST-error" role="alert"></div>
         </div>
-        <div class="result-box" id="SIMPLE_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SIMPLE_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SIMPLE_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="SIMPLE_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="SIMPLE_INTEREST-chart-wrapper" style="display:none;"><canvas id="SIMPLE_INTEREST-chart"></canvas></div><div class="result-grid" id="SIMPLE_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SIMPLE_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- COMPOUND_INTEREST -->
@@ -798,7 +800,7 @@
           <div class="loading" id="COMPOUND_INTEREST-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="COMPOUND_INTEREST-error" role="alert"></div>
         </div>
-        <div class="result-box" id="COMPOUND_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="COMPOUND_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('COMPOUND_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="COMPOUND_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="COMPOUND_INTEREST-chart-wrapper" style="display:none;"><canvas id="COMPOUND_INTEREST-chart"></canvas></div><div class="result-grid" id="COMPOUND_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('COMPOUND_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- GST -->
@@ -822,7 +824,7 @@
           <div class="loading" id="GST-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="GST-error" role="alert"></div>
         </div>
-        <div class="result-box" id="GST-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="GST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="GST-chart-wrapper" style="display:none;"><canvas id="GST-chart"></canvas></div><div class="result-grid" id="GST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
       </div>
 
       <!-- GRATUITY -->
@@ -1196,6 +1198,9 @@
 
       if (data.success) {
         renderResult(type, data.result);
+        console.log('Calling renderChart for', type, 'with params:', params);
+        LAST_CALCULATION.set(type, { result: data.result, params });
+        renderChart(type, data.result, params);
       } else {
         errorBox.textContent = '⚠ ' + data.error;
         errorBox.classList.add('show');
@@ -1286,6 +1291,509 @@
     if (e.key === 'Enter' && activePanel && activePanel !== 'HISTORY') calculate(activePanel);
     if (e.key === 'Escape') { closeLogoutModal(); closeSidebar(); }
   });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // CHART.JS RENDERING MODULE
+  // ═══════════════════════════════════════════════════════════════════
+
+  const CHART_INSTANCES = new Map();
+const LAST_CALCULATION = new Map(); // type -> { result, params }
+
+  function getThemeColors() {
+    const cs = getComputedStyle(document.documentElement);
+    const isLight = cs.getPropertyValue('--bg-primary').includes('248') || cs.getPropertyValue('--bg-primary').includes('f0') || cs.getPropertyValue('--bg-primary').includes('fff');
+    const rgb = (varName) => cs.getPropertyValue(varName).trim() || '108,140,255';
+    const textColor = isLight ? '#1a1a2e' : cs.getPropertyValue('--text-secondary').trim();
+    const textPrimaryColor = isLight ? '#0a0a1a' : cs.getPropertyValue('--text-primary').trim();
+    const gridColor = isLight ? 'rgba(26,26,46,0.1)' : `rgba(${cs.getPropertyValue('--text-muted').trim()}, 0.2)`;
+    const bgColor = isLight ? 'rgba(255,255,255,0.95)' : cs.getPropertyValue('--bg-tertiary').trim();
+    const borderColor = isLight ? 'rgba(26,26,46,0.15)' : cs.getPropertyValue('--border-glass-strong').trim();
+    return {
+      invested: `rgba(${rgb('--accent-primary-rgb')}, 0.95)`,
+      investedLight: `rgba(${rgb('--accent-primary-rgb')}, 0.25)`,
+      investedLightStart: `rgba(${rgb('--accent-primary-rgb')}, 0.4)`,
+      returns: `rgba(${rgb('--accent-secondary-rgb')}, 0.95)`,
+      returnsLight: `rgba(${rgb('--accent-secondary-rgb')}, 0.25)`,
+      wealth: `rgba(${rgb('--accent-gold-rgb')}, 1)`,
+      wealthLight: `rgba(${rgb('--accent-gold-rgb')}, 0.3)`,
+      wealthLightStart: `rgba(${rgb('--accent-gold-rgb')}, 0.45)`,
+      principal: `rgba(${rgb('--accent-primary-rgb')}, 0.95)`,
+      interest: `rgba(${rgb('--accent-danger-rgb')}, 0.95)`,
+      withdrawal: `rgba(${rgb('--accent-warning-rgb')}, 0.95)`,
+      withdrawalLight: `rgba(${rgb('--accent-warning-rgb')}, 0.25)`,
+      withdrawalLightStart: `rgba(${rgb('--accent-warning-rgb')}, 0.4)`,
+      success: `rgba(${rgb('--accent-success-rgb')}, 0.95)`,
+      grid: gridColor,
+      text: textColor,
+      textPrimary: textPrimaryColor,
+      background: bgColor,
+      borderGlass: borderColor,
+      isLight,
+    };
+  }
+
+  function createGradient(ctx, colorStart, colorEnd) {
+    // Chart.js v4: ctx is ScriptableContext, actual canvas context is ctx.chart.ctx
+    const chartCtx = ctx?.chart?.ctx;
+    const chart = ctx?.chart;
+    const canvas = chart?.canvas;
+    const height = canvas?.height || (chartCtx?.canvas?.height) || 280;
+    if (!chartCtx) return colorStart; // Fallback if context not ready
+    const gradient = chartCtx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, colorStart);
+    gradient.addColorStop(1, colorEnd);
+    return gradient;
+  }
+
+  function parseValue(result, keyFragment) {
+    const entry = Object.entries(result).find(([k]) => k.toLowerCase().includes(keyFragment.toLowerCase()));
+    return entry ? parseFloat(entry[1].replace(/[₹,]/g, '')) : 0;
+  }
+
+  function parseAllValues(result) {
+    const vals = {};
+    Object.entries(result).forEach(([k, v]) => {
+      const num = parseFloat(v.replace(/[₹,]/g, ''));
+      if (!isNaN(num)) vals[k] = num;
+    });
+    return vals;
+  }
+
+  // ═══ DATA COMPUTATION FUNCTIONS ═══════════════════════════════════════
+
+  function computeSIP(monthly, rate, years) {
+    const r = rate / 12 / 100;
+    const totalMonths = years * 12;
+    const labels = [];
+    const invested = [];
+    const future = [];
+    let inv = 0, fv = 0;
+    for (let m = 1; m <= totalMonths; m++) {
+      inv += monthly;
+      fv = monthly * (((1 + r) ** m - 1) / r) * (1 + r);
+      if (m % 12 === 0 || m === totalMonths) {
+        labels.push(`Y${Math.ceil(m/12)}`);
+        invested.push(inv);
+        future.push(fv);
+      }
+    }
+    return { labels, datasets: [
+      { label: 'Total Invested', data: invested },
+      { label: 'Future Value', data: future }
+    ]};
+  }
+
+  function computeLumpsum(principal, rate, years) {
+    const r = rate / 100;
+    const labels = [];
+    const principalArr = [];
+    const maturity = [];
+    for (let y = 1; y <= years; y++) {
+      labels.push(`Year ${y}`);
+      principalArr.push(principal);
+      maturity.push(principal * (1 + r) ** y);
+    }
+    return { labels, datasets: [
+      { label: 'Principal', data: principalArr },
+      { label: 'Maturity Value', data: maturity }
+    ]};
+  }
+
+  function computeStepUpSIP(monthly, stepUp, rate, years) {
+    const r = rate / 12 / 100;
+    const step = stepUp / 100;
+    const totalMonths = years * 12;
+    const labels = [];
+    const invested = [];
+    const future = [];
+    let inv = 0, fv = 0, sip = monthly;
+    for (let m = 1; m <= totalMonths; m++) {
+      fv = fv * (1 + r) + sip;
+      inv += sip;
+      if (m % 12 === 0) sip *= (1 + step);
+      if (m % 12 === 0 || m === totalMonths) {
+        labels.push(`Y${Math.ceil(m/12)}`);
+        invested.push(inv);
+        future.push(fv);
+      }
+    }
+    return { labels, datasets: [
+      { label: 'Total Invested', data: invested },
+      { label: 'Future Value', data: future }
+    ]};
+  }
+
+  function computeSWP(investment, withdrawal, rate, years) {
+    const r = rate / 12 / 100;
+    const totalMonths = years * 12;
+    const labels = [];
+    const corpus = [];
+    const withdrawals = [];
+    let c = investment, w = 0;
+    for (let m = 1; m <= totalMonths; m++) {
+      c = c * (1 + r) - withdrawal;
+      w += withdrawal;
+      if (m % 12 === 0 || m === totalMonths) {
+        labels.push(`Y${Math.ceil(m/12)}`);
+        corpus.push(Math.max(0, c));
+        withdrawals.push(w);
+      }
+    }
+    return { labels, datasets: [
+      { label: 'Remaining Corpus', data: corpus },
+      { label: 'Cumulative Withdrawals', data: withdrawals }
+    ]};
+  }
+
+  function computePPF(yearly, rate, years) {
+    const r = rate / 100;
+    const labels = [];
+    const invested = [];
+    const maturity = [];
+    let inv = 0;
+    for (let y = 1; y <= years; y++) {
+      inv += yearly;
+      const mat = yearly * (((1 + r) ** y - 1) / r) * (1 + r);
+      labels.push(`Year ${y}`);
+      invested.push(inv);
+      maturity.push(mat);
+    }
+    return { labels, datasets: [
+      { label: 'Total Invested', data: invested },
+      { label: 'Maturity Value', data: maturity }
+    ]};
+  }
+
+  function computeNSC(amount, rate, years) {
+    const r = rate / 100;
+    const labels = [];
+    const invested = [];
+    const maturity = [];
+    for (let y = 1; y <= years; y++) {
+      labels.push(`Year ${y}`);
+      invested.push(amount);
+      maturity.push(amount * (1 + r) ** y);
+    }
+    return { labels, datasets: [
+      { label: 'Invested Amount', data: invested },
+      { label: 'Maturity Value', data: maturity }
+    ]};
+  }
+
+  function computeFD(principal, rate, years) {
+    const r = rate / 100;
+    const labels = [];
+    const principalArr = [];
+    const maturity = [];
+    for (let y = 1; y <= years; y++) {
+      labels.push(`Year ${y}`);
+      principalArr.push(principal);
+      maturity.push(principal + principal * r * y);
+    }
+    return { labels, datasets: [
+      { label: 'Principal', data: principalArr },
+      { label: 'Maturity Value', data: maturity }
+    ]};
+  }
+
+  function computeRD(monthly, rate, years) {
+    const totalMonths = years * 12;
+    const quarterlyRate = rate / 100 / 4;
+    const labels = [];
+    const deposits = [];
+    const maturity = [];
+    let dep = 0, mat = 0;
+    for (let m = 1; m <= totalMonths; m++) {
+      dep += monthly;
+      const remainingMonths = totalMonths - m + 1;
+      const quarters = remainingMonths / 3;
+      mat = 0;
+      for (let i = 1; i <= m; i++) {
+        const rem = totalMonths - i + 1;
+        const q = rem / 3;
+        mat += monthly * (1 + quarterlyRate) ** q;
+      }
+      if (m % 12 === 0 || m === totalMonths) {
+        labels.push(`Y${Math.ceil(m/12)}`);
+        deposits.push(dep);
+        maturity.push(mat);
+      }
+    }
+    return { labels, datasets: [
+      { label: 'Total Deposits', data: deposits },
+      { label: 'Maturity Value', data: maturity }
+    ]};
+  }
+
+  function computeInflation(current, rate, years) {
+    const r = rate / 100;
+    const labels = [];
+    const prices = [];
+    for (let y = 0; y <= years; y++) {
+      labels.push(y === 0 ? 'Now' : `Year ${y}`);
+      prices.push(current * (1 + r) ** y);
+    }
+    return { labels, datasets: [{ label: 'Future Price', data: prices }] };
+  }
+
+  function computeFlatVsReducing(principal, rate, years) {
+    const n = years * 12;
+    const r = (rate / 100) / 12;
+    const labels = [];
+    const flatEMI = [];
+    const reducingEMI = [];
+    const flatTotal = principal + principal * (rate / 100) * years;
+    const flatMonthly = flatTotal / n;
+    const reducingMonthly = principal * r * (1 + r) ** n / ((1 + r) ** n - 1);
+    for (let y = 1; y <= years; y++) {
+      labels.push(`Year ${y}`);
+      flatEMI.push(flatMonthly);
+      reducingEMI.push(reducingMonthly);
+    }
+    return { labels, flat: flatEMI, reducing: reducingEMI };
+  }
+
+  // ═══ CHART SPECIFICATIONS ══════════════════════════════════════════════
+
+  const CHART_SPECS = {
+    SIP: { kind: 'doughnut', fromResult: true },
+    LUMPSUM: { kind: 'doughnut', fromResult: true },
+    STEP_UP_SIP: { kind: 'doughnut', fromResult: true },
+    PPF: { kind: 'doughnut', fromResult: true },
+    NSC: { kind: 'doughnut', fromResult: true },
+    FD_SIMPLE: { kind: 'doughnut', fromResult: true },
+    RD: { kind: 'doughnut', fromResult: true },
+    SIMPLE_INTEREST: { kind: 'doughnut', fromResult: true },
+    INFLATION: { kind: 'doughnut', fromResult: true },
+    EMI: { kind: 'doughnut', fromResult: true },
+    HOME_LOAN_EMI: { kind: 'doughnut', fromResult: true },
+    CAR_LOAN_EMI: { kind: 'doughnut', fromResult: true },
+    GOLD_LOAN_EMI: { kind: 'doughnut', fromResult: true },
+    EDUCATION_LOAN_EMI: { kind: 'doughnut', fromResult: true },
+    COMPOUND_INTEREST: { kind: 'doughnut', fromResult: true },
+    GST: { kind: 'doughnut', fromResult: true },
+    FLAT_VS_REDUCING: { kind: 'groupedBar', compute: (p) => computeFlatVsReducing(parseFloat(p.principal), parseFloat(p.annual_rate), parseFloat(p.years)) },
+  };
+
+  // ═══ CHART BUILDER ════════════════════════════════════════════════════
+
+  function buildChartConfig(spec, type, result, params, colors) {
+    const baseOptions = {
+      animation: { duration: 600, easing: 'easeOutQuart' },
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: spec.kind !== 'doughnut', position: 'bottom', labels: { color: colors.text, font: { size: 12, family: 'Inter', weight: '500' }, usePointStyle: true, pointStyle: 'circle', padding: 20, boxWidth: 8, boxHeight: 8 } },
+        tooltip: {
+          backgroundColor: colors.background,
+          borderColor: colors.borderGlass,
+          borderWidth: 1,
+          titleColor: colors.textPrimary,
+          bodyColor: colors.text,
+          padding: 14,
+          cornerRadius: 10,
+          displayColors: true,
+          titleFont: { size: 13, weight: '600' },
+          bodyFont: { size: 12 },
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ₹${Number(ctx.raw).toLocaleString('en-IN', {minimumFractionDigits: 0})}`
+          }
+        }
+      },
+      scales: {}
+    };
+
+    if (['area', 'dualArea', 'line', 'bar', 'groupedBar'].includes(spec.kind)) {
+      baseOptions.scales = {
+        x: { 
+          grid: { color: colors.grid, drawBorder: false, drawTicks: false }, 
+          ticks: { color: colors.text, font: { size: 11, family: 'Inter' }, padding: 8 },
+          border: { display: false }
+        },
+        y: { 
+          grid: { color: colors.grid, drawBorder: false, drawTicks: false }, 
+          ticks: { color: colors.text, font: { size: 11, family: 'Inter' }, padding: 8, callback: (v) => '₹' + v.toLocaleString('en-IN') },
+          border: { display: false }
+        }
+      };
+    }
+
+    switch (spec.kind) {
+      case 'area':
+      case 'dualArea': {
+        const data = spec.compute(params);
+        return {
+          type: 'line',
+          data: { labels: data.labels, datasets: data.datasets.map((ds, i) => ({
+            label: ds.label,
+            data: ds.data,
+            borderColor: i === 0 ? colors.invested : (ds.label.includes('Withdrawal') ? colors.withdrawal : colors.wealth),
+            backgroundColor: (ctx) => createGradient(ctx,
+              i === 0 ? colors.investedLightStart : (ds.label.includes('Withdrawal') ? colors.withdrawalLightStart : colors.wealthLightStart),
+              i === 0 ? colors.invested : (ds.label.includes('Withdrawal') ? colors.withdrawal : colors.wealth)
+            ),
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            pointBackgroundColor: i === 0 ? colors.invested : (ds.label.includes('Withdrawal') ? colors.withdrawal : colors.wealth),
+            pointBorderColor: colors.background,
+            pointBorderWidth: 2.5,
+            borderWidth: 3,
+            pointStyle: 'circle'
+          }))},
+          options: { ...baseOptions, plugins: { ...baseOptions.plugins, tooltip: { ...baseOptions.plugins.tooltip, intersect: false } } }
+        };
+      }
+      case 'line': {
+        const data = spec.compute(params);
+        return {
+          type: 'line',
+          data: { labels: data.labels, datasets: data.datasets.map(ds => ({
+            label: ds.label,
+            data: ds.data,
+            borderColor: colors.wealth,
+            backgroundColor: colors.wealthLight,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointBackgroundColor: colors.wealth,
+            pointBorderColor: colors.background,
+            pointBorderWidth: 2.5,
+            borderWidth: 3,
+            pointStyle: 'circle'
+          }))},
+          options: { ...baseOptions, plugins: { ...baseOptions.plugins, tooltip: { ...baseOptions.plugins.tooltip, intersect: false } } }
+        };
+      }
+case 'doughnut': {
+        const vals = parseAllValues(result);
+        let invested = 0, finalValue = 0;
+        
+        if (type === 'GST') { 
+          invested = vals['Original Price'] || 0; 
+          finalValue = vals['Total Amount'] || 0;
+        } else if (type.includes('EMI')) { 
+          invested = vals['Principal'] || 0; 
+          finalValue = vals['Total Amount'] || 0;
+        } else if (type === 'SIMPLE_INTEREST') {
+          invested = vals['Principal Amount'] || vals['Principal'] || 0;
+          finalValue = vals['Total Amount'] || 0;
+        } else {
+          // Investment calculators: Total Invested vs Final Value
+          invested = vals['Total Investment'] || vals['Invested Amount'] || vals['Principal'] || vals['Principal Amount'] || vals['Investment'] || 0;
+          finalValue = vals['Future Value'] || vals['Maturity Value'] || vals['Maturity Amount'] || vals['Total Amount'] || vals['Final Value'] || 0;
+        }
+        
+        const total = invested + finalValue;
+        const investedPct = total > 0 ? Math.round((invested / total) * 100) : 0;
+        const finalPct = total > 0 ? Math.round((finalValue / total) * 100) : 0;
+        
+        return {
+          type: 'doughnut',
+          data: {
+            labels: [`Total Invested (${investedPct}%)`, `Final Value (${finalPct}%)`],
+            datasets: [{
+              data: [invested, finalValue],
+              backgroundColor: [colors.invested, colors.wealth],
+              borderWidth: 0,
+              cutout: '60%',
+              circumference: 360,
+              rotation: -90,
+              spacing: 2,
+              borderRadius: 8,
+            }]
+          },
+          options: { 
+            ...baseOptions, 
+            plugins: { 
+              ...baseOptions.plugins, 
+              legend: { display: true },
+              tooltip: { 
+                ...baseOptions.plugins.tooltip, 
+                callbacks: { 
+                  label: (ctx) => `${ctx.label}: ₹${Number(ctx.raw).toLocaleString('en-IN')}` 
+                } 
+              } 
+            } 
+          }
+        };
+      }
+            }
+          }
+  // ═══ MAIN RENDER FUNCTION ══════════════════════════════════════════════
+
+  function renderChart(calcType, result, params) {
+    const wrapper = document.getElementById(`${calcType}-chart-wrapper`);
+    const canvas = document.getElementById(`${calcType}-chart`);
+    if (!wrapper || !canvas) {
+      console.warn('Chart elements not found for', calcType);
+      return;
+    }
+
+    if (typeof Chart === 'undefined') {
+      console.error('Chart.js not loaded!');
+      return;
+    }
+
+    // Ensure canvas has dimensions (fix for Chart.js v4 gradient callback)
+    if (canvas.height === 0 || canvas.width === 0) {
+      wrapper.style.display = 'block'; // Show wrapper so it gets layout
+      // Force reflow and wait for next frame
+      requestAnimationFrame(() => {
+        renderChart(calcType, result, params);
+      });
+      return;
+    }
+
+    CHART_INSTANCES.get(calcType)?.destroy();
+
+    const spec = CHART_SPECS[calcType];
+    if (!spec) { wrapper.style.display = 'none'; return; }
+
+    const colors = getThemeColors();
+    const config = buildChartConfig(spec, calcType, result, params, colors);
+
+    try {
+      const chart = new Chart(canvas, config);
+      CHART_INSTANCES.set(calcType, chart);
+      wrapper.style.display = 'block';
+      console.log('Chart rendered for', calcType);
+    } catch (e) {
+      console.error('Chart render error:', calcType, e);
+      wrapper.style.display = 'none';
+    }
+  }
+
+  // ═══ THEME CHANGE INTEGRATION ═══════════════════════════════════════════
+
+  const originalSetTheme = setTheme;
+  setTheme = (name) => {
+    originalSetTheme(name);
+    const activePanel = document.querySelector('.calc-panel.active');
+    if (activePanel) {
+      const type = activePanel.id.replace('panel-', '');
+      if (CHART_INSTANCES.has(type) && LAST_CALCULATION.has(type)) {
+        const stored = LAST_CALCULATION.get(type);
+        renderChart(type, stored.result, stored.params);
+      }
+    }
+  };
+
+  const originalSetColorScheme = setColorScheme;
+  setColorScheme = (scheme) => {
+    originalSetColorScheme(scheme);
+    const activePanel = document.querySelector('.calc-panel.active');
+    if (activePanel) {
+      const type = activePanel.id.replace('panel-', '');
+      if (CHART_INSTANCES.has(type) && LAST_CALCULATION.has(type)) {
+        const stored = LAST_CALCULATION.get(type);
+        renderChart(type, stored.result, stored.params);
+      }
+    }
+  };
 
   // Initialize search, theme, and color scheme on load
   document.addEventListener('DOMContentLoaded', () => {

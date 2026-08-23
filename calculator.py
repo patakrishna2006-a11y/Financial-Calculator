@@ -43,7 +43,7 @@ def SWP(total_investment, withdrawal_amount, Expected_rate, years):
 def STEP_UP_SIP(monthly_investment, step_up_rate, Expected_return, years):
     monthly_rate = Expected_return / 12 / 100
     step_up = step_up_rate / 100
-    total_months = years * 12
+    total_months = int(years * 12)
 
     fund_value = 0
     total_investment = 0
@@ -133,7 +133,7 @@ def FD_SIMPLE(principal, interest_rate, years):
 
 # RECURRING DEPOSIT
 def RD(monthly_investment, Expected_rate, years):
-    months = years * 12
+    months = int(years * 12)
     quarterly_rate = Expected_rate / 100 / 4
     maturity = 0
     values = []
