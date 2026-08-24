@@ -14,6 +14,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     body { font-family: 'Inter', 'Roboto', -apple-system, sans-serif; }
 
@@ -438,14 +440,14 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SIP</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SIP-monthly_investment">Monthly Investment (₹)</label><input type="number" id="SIP-monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="SIP-Monthly_investment">Monthly Investment (₹)</label><input type="number" id="SIP-Monthly_investment" placeholder="5000"></div>
             <div class="field"><label for="SIP-Expected_return">Expected Return (%)</label><input type="number" id="SIP-Expected_return" placeholder="12" step="0.1"></div>
-            <div class="field"><label for="SIP-years">Time Period (Years)</label><input type="number" id="SIP-years" placeholder="10"></div>
+            <div class="field"><label for="SIP-Years">Time Period (Years)</label><input type="number" id="SIP-Years" placeholder="10"></div>
             <div class="field">
-              <label for="SIP-mode">Mode</label>
-              <select id="SIP-mode">
-                <option value="end">End of Month</option>
-                <option value="begin">Beginning of Month</option>
+              <label for="SIP-Mode">Mode</label>
+              <select id="SIP-Mode">
+                <option value="End of Month">End of Month</option>
+                <option value="Beginning of Month">Beginning of Month</option>
               </select>
             </div>
           </div>
@@ -459,6 +461,7 @@
             <div class="chart-wrapper" id="SIP-chart-wrapper" style="display:none;"><canvas id="SIP-chart"></canvas></div>
             <div class="result-grid" id="SIP-result-grid"></div>
             <button class="result-copy-btn" onclick="copyResult('SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('SIP')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button>
           </div>
         </div>
       </div>
@@ -470,14 +473,15 @@
           <div class="form-grid">
             <div class="field"><label for="LUMPSUM-Total_investment">Total Investment (₹)</label><input type="number" id="LUMPSUM-Total_investment" placeholder="100000"></div>
             <div class="field"><label for="LUMPSUM-Expected_return">Expected Return (%)</label><input type="number" id="LUMPSUM-Expected_return" placeholder="12" step="0.1"></div>
-            <div class="field"><label for="LUMPSUM-years">Time Period (Years)</label><input type="number" id="LUMPSUM-years" placeholder="10"></div>
+            <div class="field"><label for="LUMPSUM-Years">Time Period (Years)</label><input type="number" id="LUMPSUM-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('LUMPSUM')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="LUMPSUM-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="LUMPSUM-error" role="alert"></div>
         </div>
         <div class="result-box" id="LUMPSUM-result">
-          <div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="LUMPSUM-chart-wrapper" style="display:none;"><canvas id="LUMPSUM-chart"></canvas></div><div class="result-grid" id="LUMPSUM-result-grid"></div><button class="result-copy-btn" onclick="copyResult('LUMPSUM')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div>
+          <div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="LUMPSUM-chart-wrapper" style="display:none;"><canvas id="LUMPSUM-chart"></canvas></div><div class="result-grid" id="LUMPSUM-result-grid"></div><button class="result-copy-btn" onclick="copyResult('LUMPSUM')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('LUMPSUM')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div>
         </div>
       </div>
 
@@ -489,13 +493,14 @@
             <div class="field"><label for="STEP_UP_SIP-monthly_investment">Monthly Investment (₹)</label><input type="number" id="STEP_UP_SIP-monthly_investment" placeholder="5000"></div>
             <div class="field"><label for="STEP_UP_SIP-step_up_rate">Annual Step-Up (%)</label><input type="number" id="STEP_UP_SIP-step_up_rate" placeholder="10" step="0.1"></div>
             <div class="field"><label for="STEP_UP_SIP-Expected_return">Expected Return (%)</label><input type="number" id="STEP_UP_SIP-Expected_return" placeholder="12" step="0.1"></div>
-            <div class="field"><label for="STEP_UP_SIP-years">Time Period (Years)</label><input type="number" id="STEP_UP_SIP-years" placeholder="10"></div>
+            <div class="field"><label for="STEP_UP_SIP-Years">Time Period (Years)</label><input type="number" id="STEP_UP_SIP-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('STEP_UP_SIP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="STEP_UP_SIP-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="STEP_UP_SIP-error" role="alert"></div>
         </div>
-        <div class="result-box" id="STEP_UP_SIP-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="STEP_UP_SIP-chart-wrapper" style="display:none;"><canvas id="STEP_UP_SIP-chart"></canvas></div><div class="result-grid" id="STEP_UP_SIP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('STEP_UP_SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="STEP_UP_SIP-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="STEP_UP_SIP-chart-wrapper" style="display:none;"><canvas id="STEP_UP_SIP-chart"></canvas></div><div class="result-grid" id="STEP_UP_SIP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('STEP_UP_SIP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('STEP_UP_SIP')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- SWP -->
@@ -506,13 +511,14 @@
             <div class="field"><label for="SWP-total_investment">Total Investment (₹)</label><input type="number" id="SWP-total_investment" placeholder="1000000"></div>
             <div class="field"><label for="SWP-withdrawal_amount">Monthly Withdrawal (₹)</label><input type="number" id="SWP-withdrawal_amount" placeholder="10000"></div>
             <div class="field"><label for="SWP-Expected_rate">Expected Return (%)</label><input type="number" id="SWP-Expected_rate" placeholder="8" step="0.1"></div>
-            <div class="field"><label for="SWP-years">Time Period (Years)</label><input type="number" id="SWP-years" placeholder="10"></div>
+            <div class="field"><label for="SWP-Years">Time Period (Years)</label><input type="number" id="SWP-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('SWP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="SWP-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="SWP-error" role="alert"></div>
         </div>
-        <div class="result-box" id="SWP-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SWP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SWP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="SWP-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SWP-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SWP')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('SWP')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- PPF -->
@@ -522,13 +528,14 @@
           <div class="form-grid">
             <div class="field"><label for="PPF-yearly_investment">Yearly Investment (₹)</label><input type="number" id="PPF-yearly_investment" placeholder="150000"></div>
             <div class="field"><label for="PPF-annual_interest_rate">Annual Interest Rate (%)</label><input type="number" id="PPF-annual_interest_rate" placeholder="7.1" step="0.01"></div>
-            <div class="field"><label for="PPF-years">Time Period (Years)</label><input type="number" id="PPF-years" placeholder="15"></div>
+            <div class="field"><label for="PPF-Years">Time Period (Years)</label><input type="number" id="PPF-Years" placeholder="15"></div>
           </div>
           <button class="btn-calc" onclick="calculate('PPF')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="PPF-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="PPF-error" role="alert"></div>
         </div>
-        <div class="result-box" id="PPF-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="PPF-chart-wrapper" style="display:none;"><canvas id="PPF-chart"></canvas></div><div class="result-grid" id="PPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('PPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="PPF-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="PPF-chart-wrapper" style="display:none;"><canvas id="PPF-chart"></canvas></div><div class="result-grid" id="PPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('PPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('PPF')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- EPF -->
@@ -536,17 +543,18 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">EPF</span></div>
           <div class="form-grid">
-            <div class="field"><label for="EPF-basic_salary">Basic Salary (₹/month)</label><input type="number" id="EPF-basic_salary" placeholder="30000"></div>
+            <div class="field"><label for="EPF-Basic_salary">Basic Salary (₹/month)</label><input type="number" id="EPF-Basic_salary" placeholder="30000"></div>
             <div class="field"><label for="EPF-DA">Dearness Allowance (₹)</label><input type="number" id="EPF-DA" placeholder="0"></div>
-            <div class="field"><label for="EPF-years_of_service">Years of Service</label><input type="number" id="EPF-years_of_service" placeholder="30"></div>
-            <div class="field"><label for="EPF-annual_salary_growth">Annual Salary Growth (%)</label><input type="number" id="EPF-annual_salary_growth" placeholder="5" step="0.1"></div>
-            <div class="field"><label for="EPF-epf_interest_rate">EPF Interest Rate (%)</label><input type="number" id="EPF-epf_interest_rate" placeholder="8.15" step="0.01"></div>
+            <div class="field"><label for="EPF-Years_of_service">Years of Service</label><input type="number" id="EPF-Years_of_service" placeholder="30"></div>
+            <div class="field"><label for="EPF-Annual_salary_growth">Annual Salary Growth (%)</label><input type="number" id="EPF-Annual_salary_growth" placeholder="5" step="0.1"></div>
+            <div class="field"><label for="EPF-Epf_interest_rate">EPF Interest Rate (%)</label><input type="number" id="EPF-Epf_interest_rate" placeholder="8.15" step="0.01"></div>
           </div>
           <button class="btn-calc" onclick="calculate('EPF')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="EPF-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="EPF-error" role="alert"></div>
         </div>
-        <div class="result-box" id="EPF-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="EPF-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="EPF-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EPF')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('EPF')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- NPS -->
@@ -554,16 +562,17 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">NPS</span></div>
           <div class="form-grid">
-            <div class="field"><label for="NPS-monthly_investment">Monthly Investment (₹)</label><input type="number" id="NPS-monthly_investment" placeholder="5000"></div>
-            <div class="field"><label for="NPS-annual_return">Annual Return (%)</label><input type="number" id="NPS-annual_return" placeholder="10" step="0.1"></div>
-            <div class="field"><label for="NPS-current_age">Current Age</label><input type="number" id="NPS-current_age" placeholder="30"></div>
-            <div class="field"><label for="NPS-retirement_age">Retirement Age</label><input type="number" id="NPS-retirement_age" placeholder="60"></div>
+            <div class="field"><label for="NPS-Monthly_investment">Monthly Investment (₹)</label><input type="number" id="NPS-Monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="NPS-Annual_return">Annual Return (%)</label><input type="number" id="NPS-Annual_return" placeholder="10" step="0.1"></div>
+            <div class="field"><label for="NPS-Current_age">Current Age</label><input type="number" id="NPS-Current_age" placeholder="30"></div>
+            <div class="field"><label for="NPS-Retirement_age">Retirement Age</label><input type="number" id="NPS-Retirement_age" placeholder="60"></div>
           </div>
           <button class="btn-calc" onclick="calculate('NPS')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="NPS-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="NPS-error" role="alert"></div>
         </div>
-        <div class="result-box" id="NPS-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="NPS-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NPS')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="NPS-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="NPS-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NPS')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('NPS')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- NSC -->
@@ -571,15 +580,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">NSC</span></div>
           <div class="form-grid">
-            <div class="field"><label for="NSC-amount_invested">Amount Invested (₹)</label><input type="number" id="NSC-amount_invested" placeholder="10000"></div>
-            <div class="field"><label for="NSC-interest_rate">Interest Rate (%)</label><input type="number" id="NSC-interest_rate" placeholder="7.7" step="0.01"></div>
-            <div class="field"><label for="NSC-years">Years</label><input type="number" id="NSC-years" placeholder="5"></div>
+            <div class="field"><label for="NSC-Amount_invested">Amount Invested (₹)</label><input type="number" id="NSC-Amount_invested" placeholder="10000"></div>
+            <div class="field"><label for="NSC-Interest_rate">Interest Rate (%)</label><input type="number" id="NSC-Interest_rate" placeholder="7.7" step="0.01"></div>
+            <div class="field"><label for="NSC-Years">Years</label><input type="number" id="NSC-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('NSC')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="NSC-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="NSC-error" role="alert"></div>
         </div>
-        <div class="result-box" id="NSC-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="NSC-chart-wrapper" style="display:none;"><canvas id="NSC-chart"></canvas></div><div class="result-grid" id="NSC-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NSC')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="NSC-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="NSC-chart-wrapper" style="display:none;"><canvas id="NSC-chart"></canvas></div><div class="result-grid" id="NSC-result-grid"></div><button class="result-copy-btn" onclick="copyResult('NSC')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('NSC')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- FD_SIMPLE -->
@@ -587,15 +597,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">FIXED DEPOSIT</span></div>
           <div class="form-grid">
-            <div class="field"><label for="FD_SIMPLE-principal">Principal (₹)</label><input type="number" id="FD_SIMPLE-principal" placeholder="100000"></div>
-            <div class="field"><label for="FD_SIMPLE-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="FD_SIMPLE-interest_rate" placeholder="7" step="0.01"></div>
-            <div class="field"><label for="FD_SIMPLE-years">Time Period (Years)</label><input type="number" id="FD_SIMPLE-years" placeholder="3"></div>
+            <div class="field"><label for="FD_SIMPLE-Principal">Principal (₹)</label><input type="number" id="FD_SIMPLE-Principal" placeholder="100000"></div>
+            <div class="field"><label for="FD_SIMPLE-Interest_rate">Interest Rate (% p.a.)</label><input type="number" id="FD_SIMPLE-Interest_rate" placeholder="7" step="0.01"></div>
+            <div class="field"><label for="FD_SIMPLE-Years">Time Period (Years)</label><input type="number" id="FD_SIMPLE-Years" placeholder="3"></div>
           </div>
           <button class="btn-calc" onclick="calculate('FD_SIMPLE')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="FD_SIMPLE-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="FD_SIMPLE-error" role="alert"></div>
         </div>
-        <div class="result-box" id="FD_SIMPLE-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="FD_SIMPLE-chart-wrapper" style="display:none;"><canvas id="FD_SIMPLE-chart"></canvas></div><div class="result-grid" id="FD_SIMPLE-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FD_SIMPLE')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="FD_SIMPLE-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="FD_SIMPLE-chart-wrapper" style="display:none;"><canvas id="FD_SIMPLE-chart"></canvas></div><div class="result-grid" id="FD_SIMPLE-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FD_SIMPLE')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('FD_SIMPLE')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- RD -->
@@ -603,15 +614,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">RECURRING DEPOSIT</span></div>
           <div class="form-grid">
-            <div class="field"><label for="RD-monthly_investment">Monthly Investment (₹)</label><input type="number" id="RD-monthly_investment" placeholder="5000"></div>
+            <div class="field"><label for="RD-Monthly_investment">Monthly Investment (₹)</label><input type="number" id="RD-Monthly_investment" placeholder="5000"></div>
             <div class="field"><label for="RD-Expected_rate">Interest Rate (%)</label><input type="number" id="RD-Expected_rate" placeholder="6.5" step="0.01"></div>
-            <div class="field"><label for="RD-years">Time Period (Years)</label><input type="number" id="RD-years" placeholder="5"></div>
+            <div class="field"><label for="RD-Years">Time Period (Years)</label><input type="number" id="RD-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('RD')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="RD-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="RD-error" role="alert"></div>
         </div>
-        <div class="result-box" id="RD-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="RD-chart-wrapper" style="display:none;"><canvas id="RD-chart"></canvas></div><div class="result-grid" id="RD-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RD')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="RD-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="RD-chart-wrapper" style="display:none;"><canvas id="RD-chart"></canvas></div><div class="result-grid" id="RD-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RD')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('RD')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- RETIREMENT_CALCULATOR -->
@@ -619,18 +631,19 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">RETIREMENT</span></div>
           <div class="form-grid">
-            <div class="field"><label for="RETIREMENT_CALCULATOR-age">Current Age</label><input type="number" id="RETIREMENT_CALCULATOR-age" placeholder="30"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-monthly_expense">Monthly Expense (₹)</label><input type="number" id="RETIREMENT_CALCULATOR-monthly_expense" placeholder="50000"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-retirement_age">Retirement Age</label><input type="number" id="RETIREMENT_CALCULATOR-retirement_age" value="60"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-life_expectancy">Life Expectancy</label><input type="number" id="RETIREMENT_CALCULATOR-life_expectancy" value="85"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-inflation">Inflation Rate</label><input type="number" id="RETIREMENT_CALCULATOR-inflation" value="0.06" step="0.01"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-annual_return">Annual Return</label><input type="number" id="RETIREMENT_CALCULATOR-annual_return" value="0.07" step="0.01"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Age">Current Age</label><input type="number" id="RETIREMENT_CALCULATOR-Age" placeholder="30"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Monthly_expense">Monthly Expense (₹)</label><input type="number" id="RETIREMENT_CALCULATOR-Monthly_expense" placeholder="50000"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Retirement_age">Retirement Age</label><input type="number" id="RETIREMENT_CALCULATOR-Retirement_age" value="60"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Life_expectancy">Life Expectancy</label><input type="number" id="RETIREMENT_CALCULATOR-Life_expectancy" value="85"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Inflation">Inflation Rate</label><input type="number" id="RETIREMENT_CALCULATOR-Inflation" value="0.06" step="0.01"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Annual_return">Annual Return</label><input type="number" id="RETIREMENT_CALCULATOR-Annual_return" value="0.07" step="0.01"></div>
           </div>
           <button class="btn-calc" onclick="calculate('RETIREMENT_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="RETIREMENT_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="RETIREMENT_CALCULATOR-error" role="alert"></div>
         </div>
-        <div class="result-box" id="RETIREMENT_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="RETIREMENT_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RETIREMENT_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="RETIREMENT_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="RETIREMENT_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('RETIREMENT_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('RETIREMENT_CALCULATOR')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- INFLATION -->
@@ -638,15 +651,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">INFLATION</span></div>
           <div class="form-grid">
-            <div class="field"><label for="INFLATION-current_price">Current Price (₹)</label><input type="number" id="INFLATION-current_price" placeholder="1000"></div>
-            <div class="field"><label for="INFLATION-rate">Inflation Rate (%)</label><input type="number" id="INFLATION-rate" placeholder="6" step="0.1"></div>
-            <div class="field"><label for="INFLATION-years">Years</label><input type="number" id="INFLATION-years" placeholder="10"></div>
+            <div class="field"><label for="INFLATION-Current_price">Current Price (₹)</label><input type="number" id="INFLATION-Current_price" placeholder="1000"></div>
+            <div class="field"><label for="INFLATION-Rate">Inflation Rate (%)</label><input type="number" id="INFLATION-Rate" placeholder="6" step="0.1"></div>
+            <div class="field"><label for="INFLATION-Years">Years</label><input type="number" id="INFLATION-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('INFLATION')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="INFLATION-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="INFLATION-error" role="alert"></div>
         </div>
-        <div class="result-box" id="INFLATION-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="INFLATION-chart-wrapper" style="display:none;"><canvas id="INFLATION-chart"></canvas></div><div class="result-grid" id="INFLATION-result-grid"></div><button class="result-copy-btn" onclick="copyResult('INFLATION')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="INFLATION-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="INFLATION-chart-wrapper" style="display:none;"><canvas id="INFLATION-chart"></canvas></div><div class="result-grid" id="INFLATION-result-grid"></div><button class="result-copy-btn" onclick="copyResult('INFLATION')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('INFLATION')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- CAGR -->
@@ -654,15 +668,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">CAGR</span></div>
           <div class="form-grid">
-            <div class="field"><label for="CAGR-initial_value">Initial Value (₹)</label><input type="number" id="CAGR-initial_value" placeholder="100000"></div>
-            <div class="field"><label for="CAGR-final_value">Final Value (₹)</label><input type="number" id="CAGR-final_value" placeholder="200000"></div>
-            <div class="field"><label for="CAGR-years">Years</label><input type="number" id="CAGR-years" placeholder="5"></div>
+            <div class="field"><label for="CAGR-Initial_value">Initial Value (₹)</label><input type="number" id="CAGR-Initial_value" placeholder="100000"></div>
+            <div class="field"><label for="CAGR-Final_value">Final Value (₹)</label><input type="number" id="CAGR-Final_value" placeholder="200000"></div>
+            <div class="field"><label for="CAGR-Years">Years</label><input type="number" id="CAGR-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('CAGR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="CAGR-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="CAGR-error" role="alert"></div>
         </div>
-        <div class="result-box" id="CAGR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="CAGR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAGR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="CAGR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="CAGR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAGR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('CAGR')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- EMI -->
@@ -670,15 +685,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">EMI</span></div>
           <div class="form-grid">
-            <div class="field"><label for="EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="EMI-loan_amount" placeholder="500000"></div>
-            <div class="field"><label for="EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="EMI-interest_rate" placeholder="10" step="0.01"></div>
-            <div class="field"><label for="EMI-years">Tenure (Years)</label><input type="number" id="EMI-years" placeholder="5"></div>
+            <div class="field"><label for="EMI-Loan_amount">Loan Amount (₹)</label><input type="number" id="EMI-Loan_amount" placeholder="500000"></div>
+            <div class="field"><label for="EMI-Interest_rate">Interest Rate (% p.a.)</label><input type="number" id="EMI-Interest_rate" placeholder="10" step="0.01"></div>
+            <div class="field"><label for="EMI-Years">Tenure (Years)</label><input type="number" id="EMI-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="EMI-chart-wrapper" style="display:none;"><canvas id="EMI-chart"></canvas></div><div class="result-grid" id="EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="EMI-chart-wrapper" style="display:none;"><canvas id="EMI-chart"></canvas></div><div class="result-grid" id="EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('EMI')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- HOME_LOAN_EMI -->
@@ -686,15 +702,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">HOME LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="HOME_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="HOME_LOAN_EMI-loan_amount" placeholder="5000000"></div>
-            <div class="field"><label for="HOME_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="HOME_LOAN_EMI-interest_rate" placeholder="8.5" step="0.01"></div>
-            <div class="field"><label for="HOME_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="HOME_LOAN_EMI-years" placeholder="20"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-Loan_amount">Loan Amount (₹)</label><input type="number" id="HOME_LOAN_EMI-Loan_amount" placeholder="5000000"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-Interest_rate">Interest Rate (% p.a.)</label><input type="number" id="HOME_LOAN_EMI-Interest_rate" placeholder="8.5" step="0.01"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="HOME_LOAN_EMI-Years" placeholder="20"></div>
           </div>
           <button class="btn-calc" onclick="calculate('HOME_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="HOME_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="HOME_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="HOME_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="HOME_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="HOME_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="HOME_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('HOME_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="HOME_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="HOME_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="HOME_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="HOME_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('HOME_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('HOME_LOAN_EMI')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- CAR_LOAN_EMI -->
@@ -702,15 +719,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">CAR LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="CAR_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="CAR_LOAN_EMI-loan_amount" placeholder="800000"></div>
-            <div class="field"><label for="CAR_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="CAR_LOAN_EMI-interest_rate" placeholder="9" step="0.01"></div>
-            <div class="field"><label for="CAR_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="CAR_LOAN_EMI-years" placeholder="5"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-Loan_amount">Loan Amount (₹)</label><input type="number" id="CAR_LOAN_EMI-Loan_amount" placeholder="800000"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-Interest_rate">Interest Rate (% p.a.)</label><input type="number" id="CAR_LOAN_EMI-Interest_rate" placeholder="9" step="0.01"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="CAR_LOAN_EMI-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('CAR_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="CAR_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="CAR_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="CAR_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="CAR_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="CAR_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="CAR_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAR_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="CAR_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="CAR_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="CAR_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="CAR_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('CAR_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('CAR_LOAN_EMI')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- GOLD_LOAN_EMI -->
@@ -718,15 +736,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">GOLD LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="GOLD_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="GOLD_LOAN_EMI-loan_amount" placeholder="200000"></div>
-            <div class="field"><label for="GOLD_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="GOLD_LOAN_EMI-interest_rate" placeholder="7.5" step="0.01"></div>
-            <div class="field"><label for="GOLD_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="GOLD_LOAN_EMI-years" placeholder="2"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-Loan_amount">Loan Amount (₹)</label><input type="number" id="GOLD_LOAN_EMI-Loan_amount" placeholder="200000"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-Interest_rate">Interest Rate (% p.a.)</label><input type="number" id="GOLD_LOAN_EMI-Interest_rate" placeholder="7.5" step="0.01"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="GOLD_LOAN_EMI-Years" placeholder="2"></div>
           </div>
           <button class="btn-calc" onclick="calculate('GOLD_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="GOLD_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="GOLD_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="GOLD_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="GOLD_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="GOLD_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="GOLD_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GOLD_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="GOLD_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="GOLD_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="GOLD_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="GOLD_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GOLD_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('GOLD_LOAN_EMI')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- EDUCATION_LOAN_EMI -->
@@ -734,15 +753,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">EDUCATION LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="EDUCATION_LOAN_EMI-loan_amount">Loan Amount (₹)</label><input type="number" id="EDUCATION_LOAN_EMI-loan_amount" placeholder="1000000"></div>
-            <div class="field"><label for="EDUCATION_LOAN_EMI-interest_rate">Interest Rate (% p.a.)</label><input type="number" id="EDUCATION_LOAN_EMI-interest_rate" placeholder="10" step="0.01"></div>
-            <div class="field"><label for="EDUCATION_LOAN_EMI-years">Tenure (Years)</label><input type="number" id="EDUCATION_LOAN_EMI-years" placeholder="10"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-Loan_amount">Loan Amount (₹)</label><input type="number" id="EDUCATION_LOAN_EMI-Loan_amount" placeholder="1000000"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-Interest_rate">Interest Rate (% p.a.)</label><input type="number" id="EDUCATION_LOAN_EMI-Interest_rate" placeholder="10" step="0.01"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="EDUCATION_LOAN_EMI-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('EDUCATION_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="EDUCATION_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="EDUCATION_LOAN_EMI-error" role="alert"></div>
         </div>
-        <div class="result-box" id="EDUCATION_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="EDUCATION_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="EDUCATION_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="EDUCATION_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EDUCATION_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="EDUCATION_LOAN_EMI-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="EDUCATION_LOAN_EMI-chart-wrapper" style="display:none;"><canvas id="EDUCATION_LOAN_EMI-chart"></canvas></div><div class="result-grid" id="EDUCATION_LOAN_EMI-result-grid"></div><button class="result-copy-btn" onclick="copyResult('EDUCATION_LOAN_EMI')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('EDUCATION_LOAN_EMI')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- FLAT_VS_REDUCING -->
@@ -750,15 +770,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">FLAT vs REDUCING</span></div>
           <div class="form-grid">
-            <div class="field"><label for="FLAT_VS_REDUCING-principal">Principal (₹)</label><input type="number" id="FLAT_VS_REDUCING-principal" placeholder="500000"></div>
-            <div class="field"><label for="FLAT_VS_REDUCING-annual_rate">Annual Rate (%)</label><input type="number" id="FLAT_VS_REDUCING-annual_rate" placeholder="10" step="0.01"></div>
-            <div class="field"><label for="FLAT_VS_REDUCING-years">Tenure (Years)</label><input type="number" id="FLAT_VS_REDUCING-years" placeholder="5"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-Principal">Principal (₹)</label><input type="number" id="FLAT_VS_REDUCING-Principal" placeholder="500000"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-Annual_rate">Annual Rate (%)</label><input type="number" id="FLAT_VS_REDUCING-Annual_rate" placeholder="10" step="0.01"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-Years">Tenure (Years)</label><input type="number" id="FLAT_VS_REDUCING-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('FLAT_VS_REDUCING')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="FLAT_VS_REDUCING-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="FLAT_VS_REDUCING-error" role="alert"></div>
         </div>
-        <div class="result-box" id="FLAT_VS_REDUCING-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="FLAT_VS_REDUCING-chart-wrapper" style="display:none;"><canvas id="FLAT_VS_REDUCING-chart"></canvas></div><div class="result-grid" id="FLAT_VS_REDUCING-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FLAT_VS_REDUCING')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="FLAT_VS_REDUCING-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="FLAT_VS_REDUCING-chart-wrapper" style="display:none;"><canvas id="FLAT_VS_REDUCING-chart"></canvas></div><div class="result-grid" id="FLAT_VS_REDUCING-result-grid"></div><button class="result-copy-btn" onclick="copyResult('FLAT_VS_REDUCING')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('FLAT_VS_REDUCING')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- SIMPLE_INTEREST -->
@@ -766,15 +787,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SIMPLE INTEREST</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SIMPLE_INTEREST-principal_amount">Principal (₹)</label><input type="number" id="SIMPLE_INTEREST-principal_amount" placeholder="100000"></div>
-            <div class="field"><label for="SIMPLE_INTEREST-rate_of_interest">Rate of Interest (%)</label><input type="number" id="SIMPLE_INTEREST-rate_of_interest" placeholder="8" step="0.1"></div>
-            <div class="field"><label for="SIMPLE_INTEREST-years">Years</label><input type="number" id="SIMPLE_INTEREST-years" placeholder="5"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-Principal_amount">Principal (₹)</label><input type="number" id="SIMPLE_INTEREST-Principal_amount" placeholder="100000"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-Rate_of_interest">Rate of Interest (%)</label><input type="number" id="SIMPLE_INTEREST-Rate_of_interest" placeholder="8" step="0.1"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-Years">Years</label><input type="number" id="SIMPLE_INTEREST-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('SIMPLE_INTEREST')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="SIMPLE_INTEREST-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="SIMPLE_INTEREST-error" role="alert"></div>
         </div>
-        <div class="result-box" id="SIMPLE_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="SIMPLE_INTEREST-chart-wrapper" style="display:none;"><canvas id="SIMPLE_INTEREST-chart"></canvas></div><div class="result-grid" id="SIMPLE_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SIMPLE_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="SIMPLE_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="SIMPLE_INTEREST-chart-wrapper" style="display:none;"><canvas id="SIMPLE_INTEREST-chart"></canvas></div><div class="result-grid" id="SIMPLE_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SIMPLE_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('SIMPLE_INTEREST')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- COMPOUND_INTEREST -->
@@ -782,12 +804,12 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">COMPOUND INTEREST</span></div>
           <div class="form-grid">
-            <div class="field"><label for="COMPOUND_INTEREST-principal_amount">Principal (₹)</label><input type="number" id="COMPOUND_INTEREST-principal_amount" placeholder="100000"></div>
-            <div class="field"><label for="COMPOUND_INTEREST-interest_rate">Interest Rate (%)</label><input type="number" id="COMPOUND_INTEREST-interest_rate" placeholder="8" step="0.1"></div>
-            <div class="field"><label for="COMPOUND_INTEREST-years">Years</label><input type="number" id="COMPOUND_INTEREST-years" placeholder="5"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-Principal_amount">Principal (₹)</label><input type="number" id="COMPOUND_INTEREST-Principal_amount" placeholder="100000"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-Interest_rate">Interest Rate (%)</label><input type="number" id="COMPOUND_INTEREST-Interest_rate" placeholder="8" step="0.1"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-Years">Years</label><input type="number" id="COMPOUND_INTEREST-Years" placeholder="5"></div>
             <div class="field">
-              <label for="COMPOUND_INTEREST-compounding_per_year">Compounding Frequency</label>
-              <select id="COMPOUND_INTEREST-compounding_per_year">
+              <label for="COMPOUND_INTEREST-Compounding_per_year">Compounding Frequency</label>
+              <select id="COMPOUND_INTEREST-Compounding_per_year">
                 <option value="1">Annually</option>
                 <option value="2">Semi-Annually</option>
                 <option value="4" selected>Quarterly</option>
@@ -800,7 +822,8 @@
           <div class="loading" id="COMPOUND_INTEREST-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="COMPOUND_INTEREST-error" role="alert"></div>
         </div>
-        <div class="result-box" id="COMPOUND_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="COMPOUND_INTEREST-chart-wrapper" style="display:none;"><canvas id="COMPOUND_INTEREST-chart"></canvas></div><div class="result-grid" id="COMPOUND_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('COMPOUND_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="COMPOUND_INTEREST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="COMPOUND_INTEREST-chart-wrapper" style="display:none;"><canvas id="COMPOUND_INTEREST-chart"></canvas></div><div class="result-grid" id="COMPOUND_INTEREST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('COMPOUND_INTEREST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('COMPOUND_INTEREST')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- GST -->
@@ -808,10 +831,10 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">GST</span></div>
           <div class="form-grid">
-            <div class="field"><label for="GST-original_price">Original Price (₹)</label><input type="number" id="GST-original_price" placeholder="1000"></div>
+            <div class="field"><label for="GST-Original_price">Original Price (₹)</label><input type="number" id="GST-Original_price" placeholder="1000"></div>
             <div class="field">
-              <label for="GST-gst_rate">GST Rate (%)</label>
-              <select id="GST-gst_rate">
+              <label for="GST-Gst_rate">GST Rate (%)</label>
+              <select id="GST-Gst_rate">
                 <option value="0">0%</option>
                 <option value="5">5%</option>
                 <option value="12">12%</option>
@@ -824,7 +847,8 @@
           <div class="loading" id="GST-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="GST-error" role="alert"></div>
         </div>
-        <div class="result-box" id="GST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="GST-chart-wrapper" style="display:none;"><canvas id="GST-chart"></canvas></div><div class="result-grid" id="GST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="GST-result"><div class="card"><div class="card-title">Results</div><div class="chart-wrapper" id="GST-chart-wrapper" style="display:none;"><canvas id="GST-chart"></canvas></div><div class="result-grid" id="GST-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GST')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('GST')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- GRATUITY -->
@@ -832,15 +856,16 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">GRATUITY</span></div>
           <div class="form-grid">
-            <div class="field"><label for="GRATUITY-basic_salary">Basic Salary (₹/month)</label><input type="number" id="GRATUITY-basic_salary" placeholder="50000"></div>
+            <div class="field"><label for="GRATUITY-Basic_salary">Basic Salary (₹/month)</label><input type="number" id="GRATUITY-Basic_salary" placeholder="50000"></div>
             <div class="field"><label for="GRATUITY-DA">Dearness Allowance (₹)</label><input type="number" id="GRATUITY-DA" placeholder="0"></div>
-            <div class="field"><label for="GRATUITY-years_of_service">Years of Service</label><input type="number" id="GRATUITY-years_of_service" placeholder="10"></div>
+            <div class="field"><label for="GRATUITY-Years_of_service">Years of Service</label><input type="number" id="GRATUITY-Years_of_service" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('GRATUITY')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="GRATUITY-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="GRATUITY-error" role="alert"></div>
         </div>
-        <div class="result-box" id="GRATUITY-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GRATUITY-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GRATUITY')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="GRATUITY-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="GRATUITY-result-grid"></div><button class="result-copy-btn" onclick="copyResult('GRATUITY')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('GRATUITY')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- SALARY_CALCULATOR -->
@@ -848,18 +873,19 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SALARY</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SALARY_CALCULATOR-ctc">CTC (Annual ₹)</label><input type="number" id="SALARY_CALCULATOR-ctc" placeholder="1200000"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-bonus">Bonus (Monthly ₹)</label><input type="number" id="SALARY_CALCULATOR-bonus" placeholder="0"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-proffesional_tax">Professional Tax (₹)</label><input type="number" id="SALARY_CALCULATOR-proffesional_tax" placeholder="200"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-employer_pf">Employer PF (₹)</label><input type="number" id="SALARY_CALCULATOR-employer_pf" placeholder="1800"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-employee_pf">Employee PF (₹)</label><input type="number" id="SALARY_CALCULATOR-employee_pf" placeholder="1800"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-other_deductions">Other Deductions (₹)</label><input type="number" id="SALARY_CALCULATOR-other_deductions" placeholder="0"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-CTC">CTC (Annual ₹)</label><input type="number" id="SALARY_CALCULATOR-CTC" placeholder="1200000"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Bonus">Bonus (Monthly ₹)</label><input type="number" id="SALARY_CALCULATOR-Bonus" placeholder="0"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Proffesional_tax">Professional Tax (₹)</label><input type="number" id="SALARY_CALCULATOR-Proffesional_tax" placeholder="200"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Employer_pf">Employer PF (₹)</label><input type="number" id="SALARY_CALCULATOR-Employer_pf" placeholder="1800"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Employee_pf">Employee PF (₹)</label><input type="number" id="SALARY_CALCULATOR-Employee_pf" placeholder="1800"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Other_deductions">Other Deductions (₹)</label><input type="number" id="SALARY_CALCULATOR-Other_deductions" placeholder="0"></div>
           </div>
           <button class="btn-calc" onclick="calculate('SALARY_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="SALARY_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="SALARY_CALCULATOR-error" role="alert"></div>
         </div>
-        <div class="result-box" id="SALARY_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SALARY_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SALARY_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="SALARY_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="SALARY_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('SALARY_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('SALARY_CALCULATOR')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- BROKERAGE_CALCULATOR -->
@@ -868,8 +894,8 @@
           <div class="card-title">Parameters <span class="badge">BROKERAGE</span></div>
           <div class="form-grid">
             <div class="field">
-              <label for="BROKERAGE_CALCULATOR-segment">Segment</label>
-              <select id="BROKERAGE_CALCULATOR-segment">
+              <label for="BROKERAGE_CALCULATOR-Segment">Segment</label>
+              <select id="BROKERAGE_CALCULATOR-Segment">
                 <option value="delivery">Delivery</option>
                 <option value="intraday">Intraday</option>
                 <option value="futures">Futures</option>
@@ -877,15 +903,16 @@
               </select>
             </div>
             <div class="field"><label for="BROKERAGE_CALCULATOR-Quantity">Quantity</label><input type="number" id="BROKERAGE_CALCULATOR-Quantity" placeholder="100"></div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-buy_price">Buy Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-buy_price" placeholder="500" step="0.01"></div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-sell_price">Sell Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-sell_price" placeholder="550" step="0.01"></div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-brokerage">Brokerage (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-brokerage" placeholder="20" step="0.01"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Buy_price">Buy Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-Buy_price" placeholder="500" step="0.01"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Sell_price">Sell Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-Sell_price" placeholder="550" step="0.01"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Brokerage">Brokerage (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-Brokerage" placeholder="20" step="0.01"></div>
           </div>
           <button class="btn-calc" onclick="calculate('BROKERAGE_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="BROKERAGE_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
           <div class="error-box" id="BROKERAGE_CALCULATOR-error" role="alert"></div>
         </div>
-        <div class="result-box" id="BROKERAGE_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="BROKERAGE_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('BROKERAGE_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button></div></div>
+        <div class="result-box" id="BROKERAGE_CALCULATOR-result"><div class="card"><div class="card-title">Results</div><div class="result-grid" id="BROKERAGE_CALCULATOR-result-grid"></div><button class="result-copy-btn" onclick="copyResult('BROKERAGE_CALCULATOR')"><i class="fas fa-copy" aria-hidden="true"></i> Copy Results</button>
+            <button class="result-pdf-btn" onclick="exportPDF('BROKERAGE_CALCULATOR')" title="Export to PDF"><i class="fas fa-file-pdf"></i> Export PDF</button></div></div>
       </div>
 
       <!-- HISTORY PANEL -->
@@ -1303,12 +1330,17 @@ const LAST_CALCULATION = new Map(); // type -> { result, params }
     const cs = getComputedStyle(document.documentElement);
     const isLight = cs.getPropertyValue('--bg-primary').includes('248') || cs.getPropertyValue('--bg-primary').includes('f0') || cs.getPropertyValue('--bg-primary').includes('fff');
     const rgb = (varName) => cs.getPropertyValue(varName).trim() || '108,140,255';
+    const rgbArr = (varName) => {
+      const val = cs.getPropertyValue(varName).trim() || '108,140,255';
+      return val.split(',').map(v => parseInt(v.trim(), 10));
+    };
     const textColor = isLight ? '#1a1a2e' : cs.getPropertyValue('--text-secondary').trim();
     const textPrimaryColor = isLight ? '#0a0a1a' : cs.getPropertyValue('--text-primary').trim();
     const gridColor = isLight ? 'rgba(26,26,46,0.1)' : `rgba(${cs.getPropertyValue('--text-muted').trim()}, 0.2)`;
     const bgColor = isLight ? 'rgba(255,255,255,0.95)' : cs.getPropertyValue('--bg-tertiary').trim();
     const borderColor = isLight ? 'rgba(26,26,46,0.15)' : cs.getPropertyValue('--border-glass-strong').trim();
     return {
+      // CSS rgba strings (for Chart.js)
       invested: `rgba(${rgb('--accent-primary-rgb')}, 0.95)`,
       investedLight: `rgba(${rgb('--accent-primary-rgb')}, 0.25)`,
       investedLightStart: `rgba(${rgb('--accent-primary-rgb')}, 0.4)`,
@@ -1329,6 +1361,14 @@ const LAST_CALCULATION = new Map(); // type -> { result, params }
       background: bgColor,
       borderGlass: borderColor,
       isLight,
+      // RGB arrays for jsPDF (e.g., [108, 140, 255])
+      investedRgb: rgbArr('--accent-primary-rgb'),
+      wealthRgb: rgbArr('--accent-gold-rgb'),
+      interestRgb: rgbArr('--accent-danger-rgb'),
+      successRgb: rgbArr('--accent-success-rgb'),
+      textRgb: isLight ? [26, 26, 46] : cs.getPropertyValue('--text-secondary').trim().split(',').map(v => parseInt(v.trim(), 10)),
+      textPrimaryRgb: isLight ? [10, 10, 26] : cs.getPropertyValue('--text-primary').trim().split(',').map(v => parseInt(v.trim(), 10)),
+      gridRgb: isLight ? [26, 26, 46] : cs.getPropertyValue('--text-muted').trim().split(',').map(v => parseInt(v.trim(), 10)),
     };
   }
 
@@ -1782,7 +1822,7 @@ case 'doughnut': {
     }
   };
 
-  const originalSetColorScheme = setColorScheme;
+const originalSetColorScheme = setColorScheme;
   setColorScheme = (scheme) => {
     originalSetColorScheme(scheme);
     const activePanel = document.querySelector('.calc-panel.active');
@@ -1794,6 +1834,141 @@ case 'doughnut': {
       }
     }
   };
+
+  // ═══════════════════════════════════════════════════════════════════
+  // PDF EXPORT MODULE
+  // ═══════════════════════════════════════════════════════════════════
+
+  async function exportPDF(calcType) {
+    const stored = LAST_CALCULATION.get(calcType);
+    if (!stored) {
+      console.warn('No calculation data for', calcType);
+      return;
+    }
+
+    const btn = document.querySelector(`.result-pdf-btn[onclick*="${calcType}"]`);
+    if (btn) {
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    }
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      let y = 25;
+
+      // Theme colors for PDF
+      const colors = getThemeColors();
+
+      // Helper: check page break
+      const checkPageBreak = (neededHeight) => {
+        if (y + neededHeight > pageHeight - 20) {
+          pdf.addPage();
+          y = 20;
+        }
+      };
+
+      // Add disclaimer to all pages (called at end)
+      const addDisclaimerToAllPages = () => {
+        const pageCount = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(8);
+          pdf.setTextColor(150);
+          pdf.setFont('helvetica', 'italic');
+          const disclaimer = 'Disclaimer: Calculations for illustration purposes only. Consult a qualified financial advisor before making investment decisions.';
+          const textWidth = pdf.getTextWidth(disclaimer);
+          pdf.text(disclaimer, (pageWidth - textWidth) / 2, pageHeight - 10);
+        }
+      };
+
+      // Header
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(22);
+      pdf.setTextColor(...colors.investedRgb);
+      pdf.text('FinCalc Pro', margin, y);
+
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(META[calcType].title, margin, y + 8);
+
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text(new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }), margin, y + 16);
+      y += 28;
+
+      // Section helper
+      const addSection = (title, data) => {
+        checkPageBreak(15);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(12);
+        pdf.setTextColor(60, 60, 60);
+        pdf.text(title, margin, y);
+        y += 10;
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        pdf.setTextColor(40, 40, 40);
+
+        Object.entries(data).forEach(([key, value]) => {
+          checkPageBreak(7);
+          pdf.text(`${key}:`, margin, y);
+          pdf.text(String(value), margin + 60, y);
+          y += 7;
+        });
+        y += 5;
+      };
+
+      // 1. Inputs Section
+      addSection('INPUTS', stored.params);
+
+      // 2. Results Section
+      addSection('RESULTS', stored.result);
+
+      // 3. Chart (if available)
+      const canvas = document.getElementById(`${calcType}-chart`);
+      if (canvas && canvas.width > 0) {
+        checkPageBreak(15);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(12);
+        pdf.setTextColor(60);
+        pdf.text('VISUALIZATION', margin, y);
+        y += 8;
+
+        try {
+          const chartCanvas = await html2canvas(canvas, { scale: 2, useCORS: true, logging: false });
+          const imgData = chartCanvas.toDataURL('image/png');
+          const imgWidth = pageWidth - 2 * margin;
+          const imgHeight = imgWidth * (canvas.height / canvas.width);
+          checkPageBreak(imgHeight + 5);
+          pdf.addImage(imgData, 'PNG', margin, y, imgWidth, imgHeight);
+          y += imgHeight + 10;
+        } catch (e) {
+          console.warn('Chart capture failed:', e);
+        }
+      }
+
+      // 4. Add disclaimer to all pages
+      addDisclaimerToAllPages();
+
+      // 5. Save
+      const safeTitle = META[calcType].title.replace(/[<>:"/\\|?*]/g, '');
+      pdf.save(`FinCalc Pro (${safeTitle}).pdf`);
+    } catch (e) {
+      console.error('PDF export error:', e);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
+      }
+    }
+  }
 
   // Initialize search, theme, and color scheme on load
   document.addEventListener('DOMContentLoaded', () => {
