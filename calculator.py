@@ -234,6 +234,7 @@ def SALARY_CALCULATOR(ctc, bonus, proffesional_tax, employer_pf, employee_pf, ot
         "Total Monthly Deduction": f"₹{round(total_monthly_deduction, 2):,.2f}",
         "Take Home Monthly": f"₹{round(take_home_monthly, 2):,.2f}",
         "Take Home Annual": f"₹{round(take_home_annual, 2):,.2f}",
+        "Total Annual Deduction": f"₹{round(annual_deduction, 2):,.2f}",
     }
 
 
