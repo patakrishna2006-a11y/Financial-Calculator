@@ -2,11 +2,17 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo 
 import os   
 from dotenv import load_dotenv
 import json
 import re
-laod = load_dotenv()
+load_dotenv()
+
+IST = ZoneInfo("Asia/Kolkata")
+
+def now_ist():
+    return datetime.now(IST)
 
 # Import your calculator functions
 from calculator import (
@@ -15,7 +21,8 @@ from calculator import (
     SALARY_CALCULATOR, EMI, HOME_LOAN_EMI, CAR_LOAN_EMI,
     GOLD_LOAN_EMI, EDUCATION_LOAN_EMI, FLAT_VS_REDUCING,
     SIMPLE_INTEREST, COMPOUND_INTEREST, GST, CAGR,
-    INFLATION, BROKERAGE_CALCULATOR
+    INFLATION, BROKERAGE_CALCULATOR,
+    format_indian_raw, PARAM_DECIMALS
 )
 
 app = Flask(__name__)
@@ -37,7 +44,7 @@ class CalculationHistory(db.Model):
     calc_type = db.Column(db.String(50), nullable=False)
     params = db.Column(db.Text, nullable=False)
     result = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=now_ist)
 
 with app.app_context():
     db.create_all()
@@ -47,7 +54,7 @@ with app.app_context():
 def format_json_data(json_str):
     try:
         data = json.loads(json_str)
-        # Removes {}, "", replaces _ with space, and titles keys
+        # Data is already formatted in Indian number system, just join
         return ", ".join([f"{str(k).replace('_', ' ').title()}: {v}" for k, v in data.items()])
     except:
         return json_str
@@ -103,23 +110,31 @@ def login():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('home'))
-    
-    raw_history = CalculationHistory.query.filter_by(user_id=session['user_id'])\
-        .order_by(CalculationHistory.timestamp.desc()).limit(10).all()
+
+    raw_history = (
+        CalculationHistory.query
+        .filter_by(user_id=session['user_id'])
+        .order_by(CalculationHistory.timestamp.desc())
+        .limit(10)
+        .all()
+    )
 
     processed_history = []
+
     for entry in raw_history:
-        # Time Logic: UTC to IST (+5:30)
-        ist_time = entry.timestamp + timedelta(hours=5, minutes=30)
-        
+        india_time = entry.timestamp
+
         processed_history.append({
             'calc_type': entry.calc_type.replace('_', ' '),
             'params': format_json_data(entry.params),
             'result': format_json_data(entry.result),
-            'timestamp': ist_time,
+            'timestamp': india_time
         })
 
-    return render_template("index.html", history=processed_history)
+    return render_template(
+        "index.html",
+        history=processed_history
+    )
 
 @app.route('/logout')
 def logout():
@@ -166,18 +181,27 @@ def calculate():
         if calc_type in calculators:
             result = calculators[calc_type](params)
             
+            # Format params for storage/display in Indian number system
+            formatted_params = {}
+            for key, value in params.items():
+                decimals = PARAM_DECIMALS.get(key, 2)
+                try:
+                    formatted_params[key] = format_indian_raw(float(value), decimals)
+                except (ValueError, TypeError):
+                    formatted_params[key] = value
+            
             # --- Store Result in History ---
             if 'user_id' in session:
                 history_entry = CalculationHistory(
                     user_id=session['user_id'],
                     calc_type=calc_type,
-                    params=json.dumps(params),
+                    params=json.dumps(formatted_params),
                     result=json.dumps(result)
                 )
                 db.session.add(history_entry)
                 db.session.commit()
 
-            return jsonify({"success": True, "result": result})
+            return jsonify({"success": True, "result": result, "formatted_params": formatted_params})
         else:
             return jsonify({"success": False, "error": f"Unknown calculator type: {calc_type}"}), 400
 

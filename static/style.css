@@ -1051,6 +1051,11 @@ form {
   flex-direction: column;
 }
 
+select option {
+    background-color: #000103;
+    color: #f9f7f7;
+}
+
 .field label {
   font-size: 0.82rem;
   font-weight: 500;

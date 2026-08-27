@@ -440,9 +440,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SIP</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SIP-Monthly investment">Monthly Investment (₹)</label><input type="number" id="SIP-Monthly investment" placeholder="5000"></div>
-            <div class="field"><label for="SIP-Expected return">Expected Return (%)</label><input type="number" id="SIP-Expected return" placeholder="12" step="0.1"></div>
-            <div class="field"><label for="SIP-Years">Time Period (Years)</label><input type="number" id="SIP-Years" placeholder="10"></div>
+            <div class="field"><label for="SIP-Monthly investment">Monthly Investment (₹)</label><input type="text" inputmode="numeric" id="SIP-Monthly investment" placeholder="5000"></div>
+            <div class="field"><label for="SIP-Expected return">Expected Return (%)</label><input type="text" inputmode="numeric" id="SIP-Expected return" placeholder="12"></div>
+            <div class="field"><label for="SIP-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="SIP-Years" placeholder="10"></div>
             <div class="field">
               <label for="SIP-Mode">Mode</label>
               <select id="SIP-Mode">
@@ -471,9 +471,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">LUMPSUM</span></div>
           <div class="form-grid">
-            <div class="field"><label for="LUMPSUM-Total investment">Total Investment (₹)</label><input type="number" id="LUMPSUM-Total investment" placeholder="100000"></div>
-            <div class="field"><label for="LUMPSUM-Expected return">Expected Return (%)</label><input type="number" id="LUMPSUM-Expected return" placeholder="12" step="0.1"></div>
-            <div class="field"><label for="LUMPSUM-Years">Time Period (Years)</label><input type="number" id="LUMPSUM-Years" placeholder="10"></div>
+            <div class="field"><label for="LUMPSUM-Total investment">Total Investment (₹)</label><input type="text" inputmode="numeric" id="LUMPSUM-Total investment" placeholder="100000"></div>
+            <div class="field"><label for="LUMPSUM-Expected return">Expected Return (%)</label><input type="text" inputmode="numeric" id="LUMPSUM-Expected return" placeholder="12"></div>
+            <div class="field"><label for="LUMPSUM-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="LUMPSUM-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('LUMPSUM')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="LUMPSUM-loading"><div class="spinner"></div> Computing...</div>
@@ -490,10 +490,10 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">STEP-UP SIP</span></div>
           <div class="form-grid">
-            <div class="field"><label for="STEP_UP_SIP-Monthly investment">Monthly Investment (₹)</label><input type="number" id="STEP_UP_SIP-Monthly investment" placeholder="5000"></div>
-            <div class="field"><label for="STEP_UP_SIP-Step up rate">Annual Step-Up (%)</label><input type="number" id="STEP_UP_SIP-Step up rate" placeholder="10" step="0.1"></div>
-            <div class="field"><label for="STEP_UP_SIP-Expected return">Expected Return (%)</label><input type="number" id="STEP_UP_SIP-Expected return" placeholder="12" step="0.1"></div>
-            <div class="field"><label for="STEP_UP_SIP-Years">Time Period (Years)</label><input type="number" id="STEP_UP_SIP-Years" placeholder="10"></div>
+            <div class="field"><label for="STEP_UP_SIP-Monthly investment">Monthly Investment (₹)</label><input type="text" inputmode="numeric" id="STEP_UP_SIP-Monthly investment" placeholder="5000"></div>
+            <div class="field"><label for="STEP_UP_SIP-Step up rate">Annual Step-Up (%)</label><input type="text" inputmode="numeric" id="STEP_UP_SIP-Step up rate" placeholder="10"></div>
+            <div class="field"><label for="STEP_UP_SIP-Expected return">Expected Return (%)</label><input type="text" inputmode="numeric" id="STEP_UP_SIP-Expected return" placeholder="12"></div>
+            <div class="field"><label for="STEP_UP_SIP-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="STEP_UP_SIP-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('STEP_UP_SIP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="STEP_UP_SIP-loading"><div class="spinner"></div> Computing...</div>
@@ -508,10 +508,10 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SWP</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SWP-Total investment">Total Investment (₹)</label><input type="number" id="SWP-Total investment" placeholder="1000000"></div>
-            <div class="field"><label for="SWP-Withdrawal amount">Monthly Withdrawal (₹)</label><input type="number" id="SWP-Withdrawal amount" placeholder="10000"></div>
-            <div class="field"><label for="SWP-Expected rate">Expected Return (%)</label><input type="number" id="SWP-Expected rate" placeholder="8" step="0.1"></div>
-            <div class="field"><label for="SWP-Years">Time Period (Years)</label><input type="number" id="SWP-Years" placeholder="10"></div>
+            <div class="field"><label for="SWP-Total investment">Total Investment (₹)</label><input type="text" inputmode="numeric" id="SWP-Total investment" placeholder="1000000"></div>
+            <div class="field"><label for="SWP-Withdrawal amount">Monthly Withdrawal (₹)</label><input type="text" inputmode="numeric" id="SWP-Withdrawal amount" placeholder="10000"></div>
+            <div class="field"><label for="SWP-Expected rate">Expected Return (%)</label><input type="text" inputmode="numeric" id="SWP-Expected rate" placeholder="8"></div>
+            <div class="field"><label for="SWP-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="SWP-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('SWP')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="SWP-loading"><div class="spinner"></div> Computing...</div>
@@ -526,9 +526,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">PPF</span></div>
           <div class="form-grid">
-            <div class="field"><label for="PPF-Yearly investment">Yearly Investment (₹)</label><input type="number" id="PPF-Yearly investment" placeholder="150000"></div>
-            <div class="field"><label for="PPF-Annual interest rate">Annual Interest Rate (%)</label><input type="number" id="PPF-Annual interest rate" placeholder="7.1" step="0.01"></div>
-            <div class="field"><label for="PPF-Years">Time Period (Years)</label><input type="number" id="PPF-Years" placeholder="15"></div>
+            <div class="field"><label for="PPF-Yearly investment">Yearly Investment (₹)</label><input type="text" inputmode="numeric" id="PPF-Yearly investment" placeholder="150000"></div>
+            <div class="field"><label for="PPF-Annual interest rate">Annual Interest Rate (%)</label><input type="text" inputmode="numeric" id="PPF-Annual interest rate" placeholder="7.1"></div>
+            <div class="field"><label for="PPF-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="PPF-Years" placeholder="15"></div>
           </div>
           <button class="btn-calc" onclick="calculate('PPF')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="PPF-loading"><div class="spinner"></div> Computing...</div>
@@ -543,11 +543,11 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">EPF</span></div>
           <div class="form-grid">
-            <div class="field"><label for="EPF-Basic salary">Basic Salary (₹/month)</label><input type="number" id="EPF-Basic salary" placeholder="30000"></div>
-            <div class="field"><label for="EPF-DA">Dearness Allowance (₹)</label><input type="number" id="EPF-DA" placeholder="0"></div>
-            <div class="field"><label for="EPF-Years of service">Years of Service</label><input type="number" id="EPF-Years of service" placeholder="30"></div>
-            <div class="field"><label for="EPF-Annual salary growth">Annual Salary Growth (%)</label><input type="number" id="EPF-Annual salary growth" placeholder="5" step="0.1"></div>
-            <div class="field"><label for="EPF-Epf interest rate">EPF Interest Rate (%)</label><input type="number" id="EPF-Epf interest rate" placeholder="8.15" step="0.01"></div>
+            <div class="field"><label for="EPF-Basic salary">Basic Salary (₹/month)</label><input type="text" inputmode="numeric" id="EPF-Basic salary" placeholder="30000"></div>
+            <div class="field"><label for="EPF-DA">Dearness Allowance (₹)</label><input type="text" inputmode="numeric" id="EPF-DA" placeholder="0"></div>
+            <div class="field"><label for="EPF-Years of service">Years of Service</label><input type="text" inputmode="numeric" id="EPF-Years of service" placeholder="30"></div>
+            <div class="field"><label for="EPF-Annual salary growth">Annual Salary Growth (%)</label><input type="text" inputmode="numeric" id="EPF-Annual salary growth" placeholder="5"></div>
+            <div class="field"><label for="EPF-Epf interest rate">EPF Interest Rate (%)</label><input type="text" inputmode="numeric" id="EPF-Epf interest rate" placeholder="8.15"></div>
           </div>
           <button class="btn-calc" onclick="calculate('EPF')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="EPF-loading"><div class="spinner"></div> Computing...</div>
@@ -562,10 +562,10 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">NPS</span></div>
           <div class="form-grid">
-            <div class="field"><label for="NPS-Monthly investment">Monthly Investment (₹)</label><input type="number" id="NPS-Monthly investment" placeholder="5000"></div>
-            <div class="field"><label for="NPS-Annual return">Annual Return (%)</label><input type="number" id="NPS-Annual return" placeholder="10" step="0.1"></div>
-            <div class="field"><label for="NPS-Current age">Current Age</label><input type="number" id="NPS-Current age" placeholder="30"></div>
-            <div class="field"><label for="NPS-Retirement age">Retirement Age</label><input type="number" id="NPS-Retirement age" placeholder="60"></div>
+            <div class="field"><label for="NPS-Monthly investment">Monthly Investment (₹)</label><input type="text" inputmode="numeric" id="NPS-Monthly investment" placeholder="5000"></div>
+            <div class="field"><label for="NPS-Annual return">Annual Return (%)</label><input type="text" inputmode="numeric" id="NPS-Annual return" placeholder="10"></div>
+            <div class="field"><label for="NPS-Current age">Current Age</label><input type="text" inputmode="numeric" id="NPS-Current age" placeholder="30"></div>
+            <div class="field"><label for="NPS-Retirement age">Retirement Age</label><input type="text" inputmode="numeric" id="NPS-Retirement age" placeholder="60"></div>
           </div>
           <button class="btn-calc" onclick="calculate('NPS')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="NPS-loading"><div class="spinner"></div> Computing...</div>
@@ -580,9 +580,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">NSC</span></div>
           <div class="form-grid">
-            <div class="field"><label for="NSC-Amount invested">Amount Invested (₹)</label><input type="number" id="NSC-Amount invested" placeholder="10000"></div>
-            <div class="field"><label for="NSC-Interest rate">Interest Rate (%)</label><input type="number" id="NSC-Interest rate" placeholder="7.7" step="0.01"></div>
-            <div class="field"><label for="NSC-Years">Years</label><input type="number" id="NSC-Years" placeholder="5"></div>
+            <div class="field"><label for="NSC-Amount invested">Amount Invested (₹)</label><input type="text" inputmode="numeric" id="NSC-Amount invested" placeholder="10000"></div>
+            <div class="field"><label for="NSC-Interest rate">Interest Rate (%)</label><input type="text" inputmode="numeric" id="NSC-Interest rate" placeholder="7.7"></div>
+            <div class="field"><label for="NSC-Years">Years</label><input type="text" inputmode="numeric" id="NSC-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('NSC')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="NSC-loading"><div class="spinner"></div> Computing...</div>
@@ -597,9 +597,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">FIXED DEPOSIT</span></div>
           <div class="form-grid">
-            <div class="field"><label for="FD_SIMPLE-Principal">Principal (₹)</label><input type="number" id="FD_SIMPLE-Principal" placeholder="100000"></div>
-            <div class="field"><label for="FD_SIMPLE-Interest rate">Interest Rate (% p.a.)</label><input type="number" id="FD_SIMPLE-Interest rate" placeholder="7" step="0.01"></div>
-            <div class="field"><label for="FD_SIMPLE-Years">Time Period (Years)</label><input type="number" id="FD_SIMPLE-Years" placeholder="3"></div>
+            <div class="field"><label for="FD_SIMPLE-Principal">Principal (₹)</label><input type="text" inputmode="numeric" id="FD_SIMPLE-Principal" placeholder="100000"></div>
+            <div class="field"><label for="FD_SIMPLE-Interest rate">Interest Rate (% p.a.)</label><input type="text" inputmode="numeric" id="FD_SIMPLE-Interest rate" placeholder="7"></div>
+            <div class="field"><label for="FD_SIMPLE-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="FD_SIMPLE-Years" placeholder="3"></div>
           </div>
           <button class="btn-calc" onclick="calculate('FD_SIMPLE')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="FD_SIMPLE-loading"><div class="spinner"></div> Computing...</div>
@@ -614,9 +614,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">RECURRING DEPOSIT</span></div>
           <div class="form-grid">
-            <div class="field"><label for="RD-Monthly investment">Monthly Investment (₹)</label><input type="number" id="RD-Monthly investment" placeholder="5000"></div>
-            <div class="field"><label for="RD-Expected rate">Interest Rate (%)</label><input type="number" id="RD-Expected rate" placeholder="6.5" step="0.01"></div>
-            <div class="field"><label for="RD-Years">Time Period (Years)</label><input type="number" id="RD-Years" placeholder="5"></div>
+            <div class="field"><label for="RD-Monthly investment">Monthly Investment (₹)</label><input type="text" inputmode="numeric" id="RD-Monthly investment" placeholder="5000"></div>
+            <div class="field"><label for="RD-Expected rate">Interest Rate (%)</label><input type="text" inputmode="numeric" id="RD-Expected rate" placeholder="6.5"></div>
+            <div class="field"><label for="RD-Years">Time Period (Years)</label><input type="text" inputmode="numeric" id="RD-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('RD')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="RD-loading"><div class="spinner"></div> Computing...</div>
@@ -631,12 +631,12 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">RETIREMENT</span></div>
           <div class="form-grid">
-            <div class="field"><label for="RETIREMENT_CALCULATOR-Age">Current Age</label><input type="number" id="RETIREMENT_CALCULATOR-Age" placeholder="30"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-Monthly expense">Monthly Expense (₹)</label><input type="number" id="RETIREMENT_CALCULATOR-Monthly expense" placeholder="50000"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-Retirement age">Retirement Age</label><input type="number" id="RETIREMENT_CALCULATOR-Retirement age" value="60"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-Life expectancy">Life Expectancy</label><input type="number" id="RETIREMENT_CALCULATOR-Life expectancy" value="85"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-Inflation">Inflation Rate</label><input type="number" id="RETIREMENT_CALCULATOR-Inflation" value="0.06" step="0.01"></div>
-            <div class="field"><label for="RETIREMENT_CALCULATOR-Annual return">Annual Return</label><input type="number" id="RETIREMENT_CALCULATOR-Annual return" value="0.07" step="0.01"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Age">Current Age</label><input type="text" inputmode="numeric" id="RETIREMENT_CALCULATOR-Age" placeholder="30"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Monthly expense">Monthly Expense (₹)</label><input type="text" inputmode="numeric" id="RETIREMENT_CALCULATOR-Monthly expense" placeholder="50000"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Retirement age">Retirement Age</label><input type="text" inputmode="numeric" id="RETIREMENT_CALCULATOR-Retirement age" placeholder="60"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Life expectancy">Life Expectancy</label><input type="text" inputmode="numeric" id="RETIREMENT_CALCULATOR-Life expectancy" placeholder="85"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Inflation">Inflation Rate (%)</label><input type="text" inputmode="numeric" id="RETIREMENT_CALCULATOR-Inflation" placeholder="6"></div>
+            <div class="field"><label for="RETIREMENT_CALCULATOR-Annual return">Annual Return (%)</label><input type="text" inputmode="numeric" id="RETIREMENT_CALCULATOR-Annual return" placeholder="7"></div>
           </div>
           <button class="btn-calc" onclick="calculate('RETIREMENT_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="RETIREMENT_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
@@ -651,9 +651,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">INFLATION</span></div>
           <div class="form-grid">
-            <div class="field"><label for="INFLATION-Current price">Current Price (₹)</label><input type="number" id="INFLATION-Current price" placeholder="1000"></div>
-            <div class="field"><label for="INFLATION-Rate">Inflation Rate (%)</label><input type="number" id="INFLATION-Rate" placeholder="6" step="0.1"></div>
-            <div class="field"><label for="INFLATION-Years">Years</label><input type="number" id="INFLATION-Years" placeholder="10"></div>
+            <div class="field"><label for="INFLATION-Current price">Current Price (₹)</label><input type="text" inputmode="numeric" id="INFLATION-Current price" placeholder="1000"></div>
+            <div class="field"><label for="INFLATION-Rate">Inflation Rate (%)</label><input type="text" inputmode="numeric" id="INFLATION-Rate" placeholder="6"></div>
+            <div class="field"><label for="INFLATION-Years">Years</label><input type="text" inputmode="numeric" id="INFLATION-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('INFLATION')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="INFLATION-loading"><div class="spinner"></div> Computing...</div>
@@ -668,9 +668,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">CAGR</span></div>
           <div class="form-grid">
-            <div class="field"><label for="CAGR-Initial value">Initial Value (₹)</label><input type="number" id="CAGR-Initial value" placeholder="100000"></div>
-            <div class="field"><label for="CAGR-Final value">Final Value (₹)</label><input type="number" id="CAGR-Final value" placeholder="200000"></div>
-            <div class="field"><label for="CAGR-Years">Years</label><input type="number" id="CAGR-Years" placeholder="5"></div>
+            <div class="field"><label for="CAGR-Initial value">Initial Value (₹)</label><input type="text" inputmode="numeric" id="CAGR-Initial value" placeholder="100000"></div>
+            <div class="field"><label for="CAGR-Final value">Final Value (₹)</label><input type="text" inputmode="numeric" id="CAGR-Final value" placeholder="200000"></div>
+            <div class="field"><label for="CAGR-Years">Years</label><input type="text" inputmode="numeric" id="CAGR-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('CAGR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="CAGR-loading"><div class="spinner"></div> Computing...</div>
@@ -685,9 +685,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">EMI</span></div>
           <div class="form-grid">
-            <div class="field"><label for="EMI-Loan amount">Loan Amount (₹)</label><input type="number" id="EMI-Loan amount" placeholder="500000"></div>
-            <div class="field"><label for="EMI-Interest rate">Interest Rate (% p.a.)</label><input type="number" id="EMI-Interest rate" placeholder="10" step="0.01"></div>
-            <div class="field"><label for="EMI-Years">Tenure (Years)</label><input type="number" id="EMI-Years" placeholder="5"></div>
+            <div class="field"><label for="EMI-Loan amount">Loan Amount (₹)</label><input type="text" inputmode="numeric" id="EMI-Loan amount" placeholder="500000"></div>
+            <div class="field"><label for="EMI-Interest rate">Interest Rate (% p.a.)</label><input type="text" inputmode="numeric" id="EMI-Interest rate" placeholder="10"></div>
+            <div class="field"><label for="EMI-Years">Tenure (Years)</label><input type="text" inputmode="numeric" id="EMI-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="EMI-loading"><div class="spinner"></div> Computing...</div>
@@ -702,9 +702,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">HOME LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="HOME_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="number" id="HOME_LOAN_EMI-Loan amount" placeholder="5000000"></div>
-            <div class="field"><label for="HOME_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="number" id="HOME_LOAN_EMI-Interest rate" placeholder="8.5" step="0.01"></div>
-            <div class="field"><label for="HOME_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="HOME_LOAN_EMI-Years" placeholder="20"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="text" inputmode="numeric" id="HOME_LOAN_EMI-Loan amount" placeholder="5000000"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="text" inputmode="numeric" id="HOME_LOAN_EMI-Interest rate" placeholder="8.5"></div>
+            <div class="field"><label for="HOME_LOAN_EMI-Years">Tenure (Years)</label><input type="text" inputmode="numeric" id="HOME_LOAN_EMI-Years" placeholder="20"></div>
           </div>
           <button class="btn-calc" onclick="calculate('HOME_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="HOME_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
@@ -719,9 +719,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">CAR LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="CAR_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="number" id="CAR_LOAN_EMI-Loan amount" placeholder="800000"></div>
-            <div class="field"><label for="CAR_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="number" id="CAR_LOAN_EMI-Interest rate" placeholder="9" step="0.01"></div>
-            <div class="field"><label for="CAR_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="CAR_LOAN_EMI-Years" placeholder="5"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="text" inputmode="numeric" id="CAR_LOAN_EMI-Loan amount" placeholder="800000"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="text" inputmode="numeric" id="CAR_LOAN_EMI-Interest rate" placeholder="9"></div>
+            <div class="field"><label for="CAR_LOAN_EMI-Years">Tenure (Years)</label><input type="text" inputmode="numeric" id="CAR_LOAN_EMI-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('CAR_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="CAR_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
@@ -736,9 +736,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">GOLD LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="GOLD_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="number" id="GOLD_LOAN_EMI-Loan amount" placeholder="200000"></div>
-            <div class="field"><label for="GOLD_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="number" id="GOLD_LOAN_EMI-Interest rate" placeholder="7.5" step="0.01"></div>
-            <div class="field"><label for="GOLD_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="GOLD_LOAN_EMI-Years" placeholder="2"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="text" inputmode="numeric" id="GOLD_LOAN_EMI-Loan amount" placeholder="200000"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="text" inputmode="numeric" id="GOLD_LOAN_EMI-Interest rate" placeholder="7.5"></div>
+            <div class="field"><label for="GOLD_LOAN_EMI-Years">Tenure (Years)</label><input type="text" inputmode="numeric" id="GOLD_LOAN_EMI-Years" placeholder="2"></div>
           </div>
           <button class="btn-calc" onclick="calculate('GOLD_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="GOLD_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
@@ -753,9 +753,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">EDUCATION LOAN</span></div>
           <div class="form-grid">
-            <div class="field"><label for="EDUCATION_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="number" id="EDUCATION_LOAN_EMI-Loan amount" placeholder="1000000"></div>
-            <div class="field"><label for="EDUCATION_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="number" id="EDUCATION_LOAN_EMI-Interest rate" placeholder="10" step="0.01"></div>
-            <div class="field"><label for="EDUCATION_LOAN_EMI-Years">Tenure (Years)</label><input type="number" id="EDUCATION_LOAN_EMI-Years" placeholder="10"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-Loan amount">Loan Amount (₹)</label><input type="text" inputmode="numeric" id="EDUCATION_LOAN_EMI-Loan amount" placeholder="1000000"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-Interest rate">Interest Rate (% p.a.)</label><input type="text" inputmode="numeric" id="EDUCATION_LOAN_EMI-Interest rate" placeholder="10"></div>
+            <div class="field"><label for="EDUCATION_LOAN_EMI-Years">Tenure (Years)</label><input type="text" inputmode="numeric" id="EDUCATION_LOAN_EMI-Years" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('EDUCATION_LOAN_EMI')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="EDUCATION_LOAN_EMI-loading"><div class="spinner"></div> Computing...</div>
@@ -770,9 +770,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">FLAT vs REDUCING</span></div>
           <div class="form-grid">
-            <div class="field"><label for="FLAT_VS_REDUCING-Principal">Principal (₹)</label><input type="number" id="FLAT_VS_REDUCING-Principal" placeholder="500000"></div>
-            <div class="field"><label for="FLAT_VS_REDUCING-Annual rate">Annual Rate (%)</label><input type="number" id="FLAT_VS_REDUCING-Annual rate" placeholder="10" step="0.01"></div>
-            <div class="field"><label for="FLAT_VS_REDUCING-Years">Tenure (Years)</label><input type="number" id="FLAT_VS_REDUCING-Years" placeholder="5"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-Principal">Principal (₹)</label><input type="text" inputmode="numeric" id="FLAT_VS_REDUCING-Principal" placeholder="500000"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-Annual rate">Annual Rate (%)</label><input type="text" inputmode="numeric" id="FLAT_VS_REDUCING-Annual rate" placeholder="10"></div>
+            <div class="field"><label for="FLAT_VS_REDUCING-Years">Tenure (Years)</label><input type="text" inputmode="numeric" id="FLAT_VS_REDUCING-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('FLAT_VS_REDUCING')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="FLAT_VS_REDUCING-loading"><div class="spinner"></div> Computing...</div>
@@ -787,9 +787,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SIMPLE INTEREST</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SIMPLE_INTEREST-Principal amount">Principal (₹)</label><input type="number" id="SIMPLE_INTEREST-Principal amount" placeholder="100000"></div>
-            <div class="field"><label for="SIMPLE_INTEREST-Rate of interest">Rate of Interest (%)</label><input type="number" id="SIMPLE_INTEREST-Rate of interest" placeholder="8" step="0.1"></div>
-            <div class="field"><label for="SIMPLE_INTEREST-Years">Years</label><input type="number" id="SIMPLE_INTEREST-Years" placeholder="5"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-Principal amount">Principal (₹)</label><input type="text" inputmode="numeric" id="SIMPLE_INTEREST-Principal amount" placeholder="100000"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-Rate of interest">Rate of Interest (%)</label><input type="text" inputmode="numeric" id="SIMPLE_INTEREST-Rate of interest" placeholder="8"></div>
+            <div class="field"><label for="SIMPLE_INTEREST-Years">Years</label><input type="text" inputmode="numeric" id="SIMPLE_INTEREST-Years" placeholder="5"></div>
           </div>
           <button class="btn-calc" onclick="calculate('SIMPLE_INTEREST')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="SIMPLE_INTEREST-loading"><div class="spinner"></div> Computing...</div>
@@ -804,9 +804,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">COMPOUND INTEREST</span></div>
           <div class="form-grid">
-            <div class="field"><label for="COMPOUND_INTEREST-Principal amount">Principal (₹)</label><input type="number" id="COMPOUND_INTEREST-Principal amount" placeholder="100000"></div>
-            <div class="field"><label for="COMPOUND_INTEREST-Interest rate">Interest Rate (%)</label><input type="number" id="COMPOUND_INTEREST-Interest rate" placeholder="8" step="0.1"></div>
-            <div class="field"><label for="COMPOUND_INTEREST-Years">Years</label><input type="number" id="COMPOUND_INTEREST-Years" placeholder="5"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-Principal amount">Principal (₹)</label><input type="text" inputmode="numeric" id="COMPOUND_INTEREST-Principal amount" placeholder="100000"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-Interest rate">Interest Rate (%)</label><input type="text" inputmode="numeric" id="COMPOUND_INTEREST-Interest rate" placeholder="8"></div>
+            <div class="field"><label for="COMPOUND_INTEREST-Years">Years</label><input type="text" inputmode="numeric" id="COMPOUND_INTEREST-Years" placeholder="5"></div>
             <div class="field">
               <label for="COMPOUND_INTEREST-Compounding_per_year">Compounding Frequency</label>
               <select id="COMPOUND_INTEREST-Compounding_per_year">
@@ -831,7 +831,7 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">GST</span></div>
           <div class="form-grid">
-            <div class="field"><label for="GST-Original price">Original Price (₹)</label><input type="number" id="GST-Original price" placeholder="1000"></div>
+            <div class="field"><label for="GST-Original price">Original Price (₹)</label><input type="text" inputmode="numeric" id="GST-Original price" placeholder="1000"></div>
             <div class="field">
               <label for="GST-Gst rate">GST Rate (%)</label>
               <select id="GST-Gst rate">
@@ -856,9 +856,9 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">GRATUITY</span></div>
           <div class="form-grid">
-            <div class="field"><label for="GRATUITY-Basic salary">Basic Salary (₹/month)</label><input type="number" id="GRATUITY-Basic salary" placeholder="50000"></div>
-            <div class="field"><label for="GRATUITY-DA">Dearness Allowance (₹)</label><input type="number" id="GRATUITY-DA" placeholder="0"></div>
-            <div class="field"><label for="GRATUITY-Years of service">Years of Service</label><input type="number" id="GRATUITY-Years of service" placeholder="10"></div>
+            <div class="field"><label for="GRATUITY-Basic salary">Basic Salary (₹/month)</label><input type="text" inputmode="numeric" id="GRATUITY-Basic salary" placeholder="50000"></div>
+            <div class="field"><label for="GRATUITY-DA">Dearness Allowance (₹)</label><input type="text" inputmode="numeric" id="GRATUITY-DA" placeholder="0"></div>
+            <div class="field"><label for="GRATUITY-Years of service">Years of Service</label><input type="text" inputmode="numeric" id="GRATUITY-Years of service" placeholder="10"></div>
           </div>
           <button class="btn-calc" onclick="calculate('GRATUITY')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="GRATUITY-loading"><div class="spinner"></div> Computing...</div>
@@ -873,12 +873,12 @@
         <div class="card">
           <div class="card-title">Parameters <span class="badge">SALARY</span></div>
           <div class="form-grid">
-            <div class="field"><label for="SALARY_CALCULATOR-CTC">CTC (Annual ₹)</label><input type="number" id="SALARY_CALCULATOR-CTC" placeholder="1200000"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-Bonus">Bonus (Monthly ₹)</label><input type="number" id="SALARY_CALCULATOR-Bonus" placeholder="0"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-Professional tax">Professional Tax (₹)</label><input type="number" id="SALARY_CALCULATOR-Professional tax" placeholder="200"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-Employer pf">Employer PF (₹)</label><input type="number" id="SALARY_CALCULATOR-Employer pf" placeholder="1800"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-Employee pf">Employee PF (₹)</label><input type="number" id="SALARY_CALCULATOR-Employee pf" placeholder="1800"></div>
-            <div class="field"><label for="SALARY_CALCULATOR-Other deductions">Other Deductions (₹)</label><input type="number" id="SALARY_CALCULATOR-Other deductions" placeholder="0"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-CTC">CTC (Annual ₹)</label><input type="text" inputmode="numeric" id="SALARY_CALCULATOR-CTC" placeholder="1200000"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Bonus">Bonus (Monthly ₹)</label><input type="text" inputmode="numeric" id="SALARY_CALCULATOR-Bonus" placeholder="0"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Professional tax">Professional Tax (₹)</label><input type="text" inputmode="numeric" id="SALARY_CALCULATOR-Professional tax" placeholder="200"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Employer pf">Employer PF (₹)</label><input type="text" inputmode="numeric" id="SALARY_CALCULATOR-Employer pf" placeholder="1800"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Employee pf">Employee PF (₹)</label><input type="text" inputmode="numeric" id="SALARY_CALCULATOR-Employee pf" placeholder="1800"></div>
+            <div class="field"><label for="SALARY_CALCULATOR-Other deductions">Other Deductions (₹)</label><input type="text" inputmode="numeric" id="SALARY_CALCULATOR-Other deductions" placeholder="0"></div>
           </div>
           <button class="btn-calc" onclick="calculate('SALARY_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="SALARY_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
@@ -902,10 +902,10 @@
                 <option value="options">Options</option>
               </select>
             </div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-Quantity">Quantity</label><input type="number" id="BROKERAGE_CALCULATOR-Quantity" placeholder="100"></div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-Buy price">Buy Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-Buy price" placeholder="500" step="0.01"></div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-Sell price">Sell Price (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-Sell price" placeholder="550" step="0.01"></div>
-            <div class="field"><label for="BROKERAGE_CALCULATOR-Brokerage">Brokerage (₹)</label><input type="number" id="BROKERAGE_CALCULATOR-Brokerage" placeholder="20" step="0.01"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Quantity">Quantity</label><input type="text" inputmode="numeric" id="BROKERAGE_CALCULATOR-Quantity" placeholder="100"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Buy price">Buy Price (₹)</label><input type="text" inputmode="numeric" id="BROKERAGE_CALCULATOR-Buy price" placeholder="500"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Sell price">Sell Price (₹)</label><input type="text" inputmode="numeric" id="BROKERAGE_CALCULATOR-Sell price" placeholder="550"></div>
+            <div class="field"><label for="BROKERAGE_CALCULATOR-Brokerage">Brokerage (₹)</label><input type="text" inputmode="numeric" id="BROKERAGE_CALCULATOR-Brokerage" placeholder="20"></div>
           </div>
           <button class="btn-calc" onclick="calculate('BROKERAGE_CALCULATOR')"><i class="fas fa-calculator" style="margin-right:6px;" aria-hidden="true"></i>Calculate</button>
           <div class="loading" id="BROKERAGE_CALCULATOR-loading"><div class="spinner"></div> Computing...</div>
@@ -1033,6 +1033,113 @@
     BROKERAGE_CALCULATOR: 'brokerage trading charges stt turnover pnl profit loss',
     HISTORY: 'history recent calculations past activity log',
   };
+
+  // ── Indian Number System Formatting ──
+  const PARAM_DECIMALS = {
+    "Monthly investment": 2, "Expected return": 2, "Total investment": 2,
+    "Withdrawal amount": 2, "Step up rate": 2, "Yearly investment": 2,
+    "Annual interest rate": 2, "Basic salary": 2, "DA": 2,
+    "Annual salary growth": 2, "Epf interest rate": 2, "Amount invested": 2,
+    "Interest rate": 2, "Principal": 2, "Monthly expense": 2,
+    "Inflation": 2, "Annual return": 2, "Loan amount": 2,
+    "CTC": 2, "Bonus": 2, "Professional tax": 2,
+    "Employer pf": 2, "Employee pf": 2, "Other deductions": 2,
+    "Original price": 2, "Gst rate": 2, "Current price": 2,
+    "Rate": 2, "Initial value": 2, "Final value": 2,
+    "Buy price": 2, "Sell price": 2, "Brokerage": 2,
+    "Years": 0, "Years of service": 0, "Current age": 0,
+    "Retirement age": 0, "Life expectancy": 0, "Age": 0,
+    "Quantity": 0, "Compounding_per_year": 0,
+  };
+
+  function formatIndianRaw(number, decimals = 2) {
+    const sign = number < 0 ? '-' : '';
+    number = Math.abs(number);
+    
+    const integerPart = Math.floor(number);
+    const decimalPart = Number((number - integerPart).toFixed(decimals));
+    
+    let s = String(integerPart);
+    let formattedInt;
+    if (s.length <= 3) {
+      formattedInt = s;
+    } else {
+      formattedInt = s.slice(-3);
+      s = s.slice(0, -3);
+      while (s.length > 2) {
+        formattedInt = s.slice(-2) + ',' + formattedInt;
+        s = s.slice(0, -2);
+      }
+      formattedInt = s + ',' + formattedInt;
+    }
+    
+    if (decimals > 0) {
+      const decimalStr = decimalPart.toFixed(decimals).split('.')[1];
+      return sign + formattedInt + '.' + decimalStr;
+    }
+    return sign + formattedInt;
+  }
+
+  function formatIndianWithSymbol(number, decimals = 2) {
+    return '₹' + formatIndianRaw(number, decimals);
+  }
+
+  function parseIndianNumber(formattedStr) {
+    // Remove ₹ and commas, return as number
+    return parseFloat(formattedStr.replace(/[₹,]/g, '')) || 0;
+  }
+
+  function initIndianFormatting() {
+    // Add real-time formatting to all calculator inputs (type="text" inputmode="numeric")
+    document.querySelectorAll('.calc-panel input[inputmode="numeric"]').forEach(input => {
+      // Skip certain fields that shouldn't be formatted (like years, age, quantity)
+      const key = input.id.split('-').pop();
+      const decimals = PARAM_DECIMALS[key] !== undefined ? PARAM_DECIMALS[key] : 2;
+      
+      // Format immediately on page load if value exists
+      if (input.value && input.value.trim() !== '') {
+        const raw = parseFloat(input.value.replace(/[₹,]/g, ''));
+        if (!isNaN(raw)) {
+          input.dataset.rawValue = raw;
+          input.value = formatIndianRaw(raw, decimals);
+        }
+      } else {
+        input.dataset.rawValue = '';
+      }
+      
+      // Format on blur (when user leaves field)
+      input.addEventListener('blur', function() {
+        const raw = this.value.replace(/[₹,]/g, '');
+        const num = parseFloat(raw);
+        if (!isNaN(num)) {
+          this.dataset.rawValue = num;
+          this.value = formatIndianRaw(num, decimals);
+        }
+      });
+      
+      // Show raw value on focus for editing
+      input.addEventListener('focus', function() {
+        if (this.dataset.rawValue !== undefined && this.dataset.rawValue !== '') {
+          this.value = this.dataset.rawValue;
+        }
+      });
+      
+      // Format on input for real-time feedback (with debounce)
+      let formatTimer;
+      input.addEventListener('input', function() {
+        clearTimeout(formatTimer);
+        formatTimer = setTimeout(() => {
+          const raw = this.value.replace(/[₹,]/g, '');
+          const num = parseFloat(raw);
+          if (!isNaN(num)) {
+            this.dataset.rawValue = num;
+            // Format while typing (after brief pause)
+            this.value = formatIndianRaw(num, decimals);
+          }
+        }, 500);
+      });
+    });
+  }
 
   let searchDebounceTimer = null;
 
@@ -1188,6 +1295,17 @@
 
     const panel = document.getElementById('panel-' + type);
     if (panel) panel.classList.add('active');
+    
+    // Format default values in input fields for the active panel
+    panel.querySelectorAll('input[inputmode="numeric"]').forEach(input => {
+      const key = input.id.split('-').pop();
+      const decimals = PARAM_DECIMALS[key] !== undefined ? PARAM_DECIMALS[key] : 2;
+      const raw = parseFloat(input.value);
+      if (!isNaN(raw)) {
+        input.dataset.rawValue = raw;
+        input.value = formatIndianRaw(raw, decimals);
+      }
+    });
 
     document.querySelectorAll('.nav-item').forEach(n => {
       if (n.getAttribute('onclick') === `show('${type}')`) n.classList.add('active');
@@ -1203,7 +1321,11 @@
     const params = {};
     panel.querySelectorAll('input, select').forEach(el => {
       const key = el.id.replace(type + '-', '');
-      params[key] = el.value;
+      if (el.inputMode === 'numeric' && el.dataset.rawValue !== undefined) {
+        params[key] = el.dataset.rawValue;
+      } else {
+        params[key] = el.value;
+      }
     });
 
     const loading  = document.getElementById(type + '-loading');
@@ -2184,6 +2306,7 @@ async function exportPDF(calcType) {
     initSearch();
     initTheme();
     initColorScheme();
+    initIndianFormatting();
 
     // Theme button delegation
     document.querySelectorAll('.theme-btn').forEach(btn => {
