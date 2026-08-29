@@ -22,7 +22,7 @@
     /* ── Hamburger / mobile sidebar ── */
     .sidebar-toggle {
       display: none;
-      width: 40px; height: 40px;
+      width: 44px; height: 44px;
       background: var(--surface-glass);
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-md);
@@ -2893,6 +2893,7 @@ async function exportPDF(calcType) {
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initColorScheme();
+    initSearch();
     document.querySelectorAll('.theme-btn').forEach(btn => {
         btn.addEventListener('click', () => setTheme(btn.dataset.theme));
     });

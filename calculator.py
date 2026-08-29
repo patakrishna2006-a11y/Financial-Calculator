@@ -68,12 +68,29 @@ PARAM_DECIMALS = {
 }
 
 def SIP(monthly_investment, Expected_return, years, mode="end"):
+    # Normalize mode to handle both frontend values and backend values
+    if mode in ("Beginning of Month", "begin"):
+        mode = "begin"
+    elif mode in ("End of Month", "end"):
+        mode = "end"
+    else:
+        mode = "end"  # default
+    
+    if monthly_investment < 0:
+        raise ValueError("Monthly investment cannot be negative")
+    if years <= 0:
+        raise ValueError("Years must be greater than 0")
+    if Expected_return < 0:
+        raise ValueError("Expected return cannot be negative")
+    
     r = Expected_return / 12 / 100
     n = years * 12
     
-    if mode == "begin": # Beginning of month SIP (extra compounding)
+    if r == 0:
+        fv = monthly_investment * n
+    elif mode == "begin":
         fv = monthly_investment * (((1 + r) ** n - 1) / r) * (1 + r)
-    else: # End of month SIP (standard case)
+    else:
         fv = monthly_investment * (((1 + r) ** n - 1) / r)
     
     invested = monthly_investment * n
@@ -251,12 +268,23 @@ def RETIREMENT_CALCULATOR(
     monthly_expense, 
     retirement_age=60, 
     life_expectancy=85, 
-    inflation=0.06, 
-    annual_return=0.07
+    inflation=6, 
+    annual_return=7
 ):
+    # Convert percentage to decimal if needed (handle both percentage and decimal inputs)
+    if inflation > 1:
+        inflation = inflation / 100
+    if annual_return > 1:
+        annual_return = annual_return / 100
+    
     # Years until retirement and retirement duration
     years_to_retire = retirement_age - age
+    if years_to_retire <= 0:
+        return {"Error": "Retirement age must be greater than current age."}
+    
     retirement_years = life_expectancy - retirement_age
+    if retirement_years <= 0:
+        return {"Error": "Life expectancy must be greater than retirement age."}
     
     # Future monthly expense adjusted for inflation
     future_monthly_expense = monthly_expense * ((1 + inflation) ** years_to_retire)
@@ -266,14 +294,22 @@ def RETIREMENT_CALCULATOR(
     real_return = ((1 + annual_return) / (1 + inflation)) - 1
     
     # Corpus required
-    corpus = annual_expense_retirement * (
-        (1 - (1 + real_return) ** (-retirement_years)) / real_return
-    )
+    if abs(real_return) < 1e-10:
+        corpus = annual_expense_retirement * retirement_years
+    else:
+        corpus = annual_expense_retirement * (
+            (1 - (1 + real_return) ** (-retirement_years)) / real_return
+        )
     
     # SIP required
     monthly_rate = annual_return / 12
     months = years_to_retire * 12
-    sip_needed = corpus * monthly_rate / ((1 + monthly_rate) ** months - 1)
+    if months <= 0:
+        sip_needed = 0
+    elif abs(monthly_rate) < 1e-10:
+        sip_needed = corpus / months
+    else:
+        sip_needed = corpus * monthly_rate / ((1 + monthly_rate) ** months - 1)
     
     return {
         "Retirement Corpus Required": format_indian(corpus, 2),
@@ -391,8 +427,13 @@ def FLAT_VS_REDUCING(principal, annual_rate, years):
 
     r = (annual_rate / 100) / 12
     n = int(years * 12)
-    reducing_emi = principal * r * (1 + r) ** n / ((1 + r) ** n - 1)
-    reducing_total = reducing_emi * n
+    
+    if r == 0:
+        reducing_emi = principal / n
+        reducing_total = principal
+    else:
+        reducing_emi = principal * r * (1 + r) ** n / ((1 + r) ** n - 1)
+        reducing_total = reducing_emi * n
 
     return {
         "Flat EMI": format_indian(flat_emi, 2),
@@ -434,6 +475,11 @@ def GST(original_price, gst_rate):
 
 # CAGR
 def CAGR(initial_value, final_value, years):
+    if years <= 0:
+        return {"Error": "Years must be greater than 0."}
+    if initial_value <= 0:
+        return {"Error": "Initial value must be greater than 0."}
+    
     cagr_value = (final_value / initial_value) ** (1 / years) - 1
 
     return {"CAGR %": f"{round(cagr_value * 100, 2)}%"}

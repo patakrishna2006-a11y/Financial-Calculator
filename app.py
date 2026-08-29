@@ -149,33 +149,45 @@ def calculate():
     result = data.get("result")
     params = data.get("params", {})
 
+    def safe_float(val, default=0):
+        try:
+            return float(val)
+        except (ValueError, TypeError):
+            return default
+
+    def safe_int(val, default=0):
+        try:
+            return int(val)
+        except (ValueError, TypeError):
+            return default
+
     try:
         calculators = {
-            "SIP": lambda p: SIP(float(p["Monthly investment"]), float(p["Expected return"]), float(p["Years"]), p.get("Mode", "end")),
-            "LUMPSUM": lambda p: LUMPSUM(float(p["Total investment"]), float(p["Expected return"]), float(p["Years"])),
-            "SWP": lambda p: SWP(float(p["Total investment"]), float(p["Withdrawal amount"]), float(p["Expected rate"]), float(p["Years"])),
-            "STEP_UP_SIP": lambda p: STEP_UP_SIP(float(p["Monthly investment"]), float(p["Step up rate"]), float(p["Expected return"]), float(p["Years"])),
-            "PPF": lambda p: PPF(float(p["Yearly investment"]), float(p["Annual interest rate"]), float(p["Years"])),
-            "EPF": lambda p: EPF(float(p["Basic salary"]), float(p["DA"]), int(p["Years of service"]), float(p["Annual salary growth"]), float(p["Epf interest rate"])),
-            "NSC": lambda p: NSC(float(p["Amount invested"]), float(p["Interest rate"]), int(p.get("Years", 5))),
-            "FD_SIMPLE": lambda p: FD_SIMPLE(float(p["Principal"]), float(p["Interest rate"]), float(p["Years"])),
-            "RD": lambda p: RD(float(p["Monthly investment"]), float(p["Expected rate"]), float(p["Years"])),
-            "NPS": lambda p: NPS(float(p["Monthly investment"]), float(p["Annual return"]), int(p["Current age"]), int(p.get("Retirement age", 60))),
-            "RETIREMENT_CALCULATOR": lambda p: RETIREMENT_CALCULATOR(int(p["Age"]), float(p["Monthly expense"]), int(p.get("Retirement age", 60)), int(p.get("Life expectancy", 85)), float(p.get("Inflation", 0.06)), float(p.get("Annual return", 0.07))),
-            "GRATUITY": lambda p: GRATUITY(float(p["Basic salary"]), float(p["DA"]), float(p["Years of service"])),
-            "SALARY_CALCULATOR": lambda p: SALARY_CALCULATOR(float(p["CTC"]), float(p["Bonus"]), float(p["Professional tax"]), float(p["Employer pf"]), float(p["Employee pf"]), float(p["Other deductions"])),
-            "EMI": lambda p: EMI(float(p["Loan amount"]), float(p["Interest rate"]), float(p["Years"])),
-            "HOME_LOAN_EMI": lambda p: HOME_LOAN_EMI(float(p["Loan amount"]), float(p["Interest rate"]), float(p["Years"])),
-            "CAR_LOAN_EMI": lambda p: CAR_LOAN_EMI(float(p["Loan amount"]), float(p["Interest rate"]), float(p["Years"])),
-            "GOLD_LOAN_EMI": lambda p: GOLD_LOAN_EMI(float(p["Loan amount"]), float(p["Interest rate"]), float(p["Years"])),
-            "EDUCATION_LOAN_EMI": lambda p: EDUCATION_LOAN_EMI(float(p["Loan amount"]), float(p["Interest rate"]), float(p["Years"])),
-            "FLAT_VS_REDUCING": lambda p: FLAT_VS_REDUCING(float(p["Principal"]), float(p["Annual rate"]), float(p["Years"])),
-            "SIMPLE_INTEREST": lambda p: SIMPLE_INTEREST(float(p["Principal amount"]), float(p["Rate of interest"]), float(p["Years"])),
-            "COMPOUND_INTEREST": lambda p: COMPOUND_INTEREST(float(p["Principal amount"]), float(p["Interest rate"]), float(p["Years"]), int(p["Compounding_per_year"])),
-            "GST": lambda p: GST(float(p["Original price"]), float(p["Gst rate"])),
-            "CAGR": lambda p: CAGR(float(p["Initial value"]), float(p["Final value"]), float(p["Years"])),
-            "INFLATION": lambda p: INFLATION(float(p["Current price"]), float(p["Rate"]), float(p["Years"])),
-            "BROKERAGE_CALCULATOR": lambda p: BROKERAGE_CALCULATOR(p["Segment"], int(p["Quantity"]), float(p["Buy price"]), float(p["Sell price"]), float(p["Brokerage"]))
+            "SIP": lambda p: SIP(safe_float(p.get("Monthly investment")), safe_float(p.get("Expected return")), safe_float(p.get("Years")), p.get("Mode", "End of Month")),
+            "LUMPSUM": lambda p: LUMPSUM(safe_float(p.get("Total investment")), safe_float(p.get("Expected return")), safe_float(p.get("Years"))),
+            "SWP": lambda p: SWP(safe_float(p.get("Total investment")), safe_float(p.get("Withdrawal amount")), safe_float(p.get("Expected rate")), safe_float(p.get("Years"))),
+            "STEP_UP_SIP": lambda p: STEP_UP_SIP(safe_float(p.get("Monthly investment")), safe_float(p.get("Step up rate")), safe_float(p.get("Expected return")), safe_float(p.get("Years"))),
+            "PPF": lambda p: PPF(safe_float(p.get("Yearly investment")), safe_float(p.get("Annual interest rate")), safe_float(p.get("Years"))),
+            "EPF": lambda p: EPF(safe_float(p.get("Basic salary")), safe_float(p.get("DA")), safe_int(p.get("Years of service")), safe_float(p.get("Annual salary growth")), safe_float(p.get("Epf interest rate"))),
+            "NSC": lambda p: NSC(safe_float(p.get("Amount invested")), safe_float(p.get("Interest rate")), safe_int(p.get("Years", 5))),
+            "FD_SIMPLE": lambda p: FD_SIMPLE(safe_float(p.get("Principal")), safe_float(p.get("Interest rate")), safe_float(p.get("Years"))),
+            "RD": lambda p: RD(safe_float(p.get("Monthly investment")), safe_float(p.get("Expected rate")), safe_float(p.get("Years"))),
+            "NPS": lambda p: NPS(safe_float(p.get("Monthly investment")), safe_float(p.get("Annual return")), safe_int(p.get("Current age")), safe_int(p.get("Retirement age", 60))),
+            "RETIREMENT_CALCULATOR": lambda p: RETIREMENT_CALCULATOR(safe_int(p.get("Age")), safe_float(p.get("Monthly expense")), safe_int(p.get("Retirement age", 60)), safe_int(p.get("Life expectancy", 85)), safe_float(p.get("Inflation", 6)), safe_float(p.get("Annual return", 7))),
+            "GRATUITY": lambda p: GRATUITY(safe_float(p.get("Basic salary")), safe_float(p.get("DA")), safe_float(p.get("Years of service"))),
+            "SALARY_CALCULATOR": lambda p: SALARY_CALCULATOR(safe_float(p.get("CTC")), safe_float(p.get("Bonus")), safe_float(p.get("Professional tax")), safe_float(p.get("Employer pf")), safe_float(p.get("Employee pf")), safe_float(p.get("Other deductions"))),
+            "EMI": lambda p: EMI(safe_float(p.get("Loan amount")), safe_float(p.get("Interest rate")), safe_float(p.get("Years"))),
+            "HOME_LOAN_EMI": lambda p: HOME_LOAN_EMI(safe_float(p.get("Loan amount")), safe_float(p.get("Interest rate")), safe_float(p.get("Years"))),
+            "CAR_LOAN_EMI": lambda p: CAR_LOAN_EMI(safe_float(p.get("Loan amount")), safe_float(p.get("Interest rate")), safe_float(p.get("Years"))),
+            "GOLD_LOAN_EMI": lambda p: GOLD_LOAN_EMI(safe_float(p.get("Loan amount")), safe_float(p.get("Interest rate")), safe_float(p.get("Years"))),
+            "EDUCATION_LOAN_EMI": lambda p: EDUCATION_LOAN_EMI(safe_float(p.get("Loan amount")), safe_float(p.get("Interest rate")), safe_float(p.get("Years"))),
+            "FLAT_VS_REDUCING": lambda p: FLAT_VS_REDUCING(safe_float(p.get("Principal")), safe_float(p.get("Annual rate")), safe_float(p.get("Years"))),
+            "SIMPLE_INTEREST": lambda p: SIMPLE_INTEREST(safe_float(p.get("Principal amount")), safe_float(p.get("Rate of interest")), safe_float(p.get("Years"))),
+            "COMPOUND_INTEREST": lambda p: COMPOUND_INTEREST(safe_float(p.get("Principal amount")), safe_float(p.get("Interest rate")), safe_float(p.get("Years")), safe_int(p.get("Compounding_per_year", 4))),
+            "GST": lambda p: GST(safe_float(p.get("Original price")), safe_float(p.get("Gst rate"))),
+            "CAGR": lambda p: CAGR(safe_float(p.get("Initial value")), safe_float(p.get("Final value")), safe_float(p.get("Years"))),
+            "INFLATION": lambda p: INFLATION(safe_float(p.get("Current price")), safe_float(p.get("Rate")), safe_float(p.get("Years"))),
+            "BROKERAGE_CALCULATOR": lambda p: BROKERAGE_CALCULATOR(p.get("Segment", "delivery"), safe_int(p.get("Quantity")), safe_float(p.get("Buy price")), safe_float(p.get("Sell price")), safe_float(p.get("Brokerage")))
         }
 
         if calc_type in calculators:
