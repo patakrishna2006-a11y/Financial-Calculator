@@ -2169,155 +2169,737 @@ const originalSetColorScheme = setColorScheme;
 async function exportPDF(calcType) {
     const stored = LAST_CALCULATION.get(calcType);
     if (!stored) {
-      console.warn('No calculation data for', calcType);
-      return;
+        console.warn(`No calculation data found for: ${calcType}`);
+        alert('Please calculate the result before exporting the PDF.');
+        return;
     }
-
-    const btn = document.querySelector(`.result-pdf-btn[onclick*="${calcType}"]`);
-    if (btn) {
-      btn.disabled = true;
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-    }
-
+    const button = document.querySelector(
+        `.result-pdf-btn[onclick*="${calcType}"]`
+    );
+    const originalButtonHTML = button
+        ? button.innerHTML
+        : '';
     try {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      let y = 25;
-
-      // Theme colors for PDF
-      const colors = getThemeColors();
-
-      // Helper: check page break
-      const checkPageBreak = (neededHeight) => {
-        if (y + neededHeight > pageHeight - 20) {
-          pdf.addPage();
-          y = 20;
+        if (button) {
+            button.disabled = true;
+            button.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> Generating...';
         }
-      };
-
-      // Add disclaimer to all pages (called at end)
-      const addDisclaimerToAllPages = () => {
-        const pageCount = pdf.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(8);
-          pdf.setTextColor(150);
-          pdf.setFont('helvetica', 'italic');
-          const disclaimer = 'Disclaimer: Calculations for illustration purposes only. Consult a qualified financial advisor before making investment decisions.';
-          const textWidth = pdf.getTextWidth(disclaimer);
-          pdf.text(disclaimer, (pageWidth - textWidth) / 2, pageHeight - 10);
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error(
+                'jsPDF library is not loaded.'
+            );
         }
-      };
-
-      // Header
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(22);
-      pdf.setTextColor(...colors.investedRgb);
-      pdf.text('FinCalc Pro', margin, y);
-
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(80, 80, 80);
-      pdf.text(META[calcType].title, margin, y + 8);
-
-      pdf.setFontSize(10);
-      pdf.setTextColor(120, 120, 120);
-      pdf.text(new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }), margin, y + 16);
-      y += 28;
-
-      // Section helper
-      const addSection = (title, data) => {
-        checkPageBreak(15);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(12);
-        pdf.setTextColor(60, 60, 60);
-        pdf.text(title, margin, y);
-        y += 10;
-
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(10);
-        pdf.setTextColor(40, 40, 40);
-
-        Object.entries(data).forEach(([key, value]) => {
-          checkPageBreak(7);
-          pdf.text(`${key}:`, margin, y);
-          pdf.text(String(value), margin + 60, y);
-          y += 7;
+        if (typeof html2canvas === 'undefined') {
+            console.warn(
+                'html2canvas is not available. Chart export will be skipped.'
+            );
+        }
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
         });
-        y += 5;
-      };
-
-      // 1. Inputs Section
-      addSection('INPUTS', stored.params);
-
-      // 2. Results Section
-      const formattedResults = {};
-      Object.entries(stored.result).forEach(([k, v]) => {
-        formattedResults[k] = formatResultValue(k, v);
-      });
-      addSection('RESULTS', formattedResults);
-
-      // 3. Chart (if available)
-      const canvas = document.getElementById(`${calcType}-chart`);
-      if (canvas && canvas.width > 0) {
-        checkPageBreak(15);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(12);
-        pdf.setTextColor(60);
-        pdf.text('VISUALIZATION', margin, y);
-        y += 8;
-
+        const pageWidth =
+            pdf.internal.pageSize.getWidth();
+        const pageHeight =
+            pdf.internal.pageSize.getHeight();
+        const margin = 18;
+        const contentWidth =
+            pageWidth - (margin * 2);
+        const footerHeight = 18;
+        let currentY = 20;
+        let theme;
         try {
-          const chartCanvas = await html2canvas(canvas, { scale: 2, useCORS: true, logging: false });
-          const imgData = chartCanvas.toDataURL('image/png');
-          const imgWidth = pageWidth - 2 * margin;
-          const imgHeight = imgWidth * (canvas.height / canvas.width);
-          checkPageBreak(imgHeight + 5);
-          pdf.addImage(imgData, 'PNG', margin, y, imgWidth, imgHeight);
-          y += imgHeight + 10;
-        } catch (e) {
-          console.warn('Chart capture failed:', e);
+            theme = getThemeColors();
+        } catch (error) {
+            console.warn('Unable to load theme colors. Using defaults.');
+            theme = {};
         }
-      }
+        const primaryColor =
+            Array.isArray(theme?.investedRgb)
+                ? theme.investedRgb
+                : [70, 100, 220];
+        const COLORS = {
+            primary: primaryColor,
+            text: [35, 40, 50],
+            secondary: [70, 75, 85],
+            muted: [125, 130, 140],
+            background: [247, 248, 251],
+            border: [ 225, 228, 235],
+            white: [ 255, 255, 255],
+            black: [ 0, 0, 0]
+        };
 
-      // 4. Add disclaimer to all pages
-      addDisclaimerToAllPages();
+        const FONT_CACHE_KEY =
+            '__FINCALC_NOTO_FONT_CACHE__';
+        const loadUnicodeFont = async () => {
+            if (window[FONT_CACHE_KEY]) {
+                return window[FONT_CACHE_KEY];
+            }
+            const regularFontURL =
+                'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf';
+            const boldFontURL =
+                'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Bold.ttf';
+            const arrayBufferToBase64 = (
+                arrayBuffer
+            ) => {
+                const bytes =
+                    new Uint8Array(arrayBuffer);
+                const chunkSize = 0x8000;
+                let binary = '';
+                for (
+                    let i = 0;
+                    i < bytes.length;
+                    i += chunkSize
+                ) {
+                    const chunk =
+                        bytes.subarray(
+                            i,
+                            Math.min(
+                                i + chunkSize,
+                                bytes.length
+                            )
+                        );
+                    binary += String.fromCharCode(
+                        ...chunk
+                    );
+                }
+                return btoa(binary);
+            };
+            const loadFont = async (
+                url
+            ) => {
+                const response =
+                    await fetch(url);
+                if (!response.ok) {
+                    throw new Error(
+                        `Font loading failed: ${response.status}`
+                    );
+                }
+                const buffer =
+                    await response.arrayBuffer();
+                return arrayBufferToBase64(
+                    buffer
+                );
+            };
+            const [
+                regularFont,
+                boldFont
+            ] = await Promise.all([
+                loadFont(
+                    regularFontURL
+                ),
+                loadFont(
+                    boldFontURL
+                )
+            ]);
+            window[FONT_CACHE_KEY] = {
+                regular: regularFont,
+                bold: boldFont
+            };
+            return window[FONT_CACHE_KEY];
+        };
+        let PDF_FONT = 'helvetica';
+        try {
+            const fonts =
+                await loadUnicodeFont();
+            pdf.addFileToVFS(
+                'NotoSans-Regular.ttf',
+                fonts.regular
+            );
+            pdf.addFont(
+                'NotoSans-Regular.ttf',
+                'NotoSans',
+                'normal'
+            );
+            pdf.addFileToVFS(
+                'NotoSans-Bold.ttf',
+                fonts.bold
+            );
+            pdf.addFont(
+                'NotoSans-Bold.ttf',
+                'NotoSans',
+                'bold'
+            );
+            PDF_FONT = 'NotoSans';
+        } catch (fontError) {
+            console.warn(
+                'Noto Sans could not be loaded. Falling back to Helvetica.',
+                fontError
+            );
+            PDF_FONT = 'helvetica';
+        }
+        const cleanText = (value) => {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return '-';
+            }
+            return String(value)
+                .replace(/â‚¹/g, '₹')
+                .replace(/¹(?=\s*[\d,])/g, '₹')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/\u00A0/g, ' ')
+                .trim();
+        };
+        const parseNumericValue = (value) => {
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return NaN;
+            }
+            const cleaned =
+                String(value)
+                    .replace(/₹/g, '')
+                    .replace(/¹/g, '')
+                    .replace(/,/g, '')
+                    .replace(/%/g, '')
+                    .replace(/\s+/g, '')
+                    .trim();
 
-      // 5. Save
-      const safeTitle = META[calcType].title.replace(/[<>:"/\\|?*]/g, '');
-      pdf.save(`FinCalc Pro (${safeTitle}).pdf`);
-    } catch (e) {
-      console.error('PDF export error:', e);
-      alert('Failed to generate PDF. Please try again.');
+            return Number(cleaned);
+        };
+        const formatIndianCurrency = (
+            value
+        ) => {
+            const number =
+                parseNumericValue(value);
+            if (!Number.isFinite(number)) {
+                return cleanText(value);
+            }
+            return `₹${number.toLocaleString(
+                'en-IN',
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )}`;
+        };
+        const formatPercentage = (
+            value
+        ) => {
+            const number =
+                parseNumericValue(value);
+            if (!Number.isFinite(number)) {
+                return cleanText(value);
+            }
+            return `${number.toFixed(2)}%`;
+        };
+        const formatPDFValue = (
+            key,
+            value
+        ) => {
+            let text =
+                cleanText(value);
+            const normalizedKey =
+                String(key)
+                    .toLowerCase()
+                    .replace(/_/g, ' ');
+            const currencyFields =
+                /amount|investment|principal|salary|expense|payment|deposit|withdrawal|premium|maturity|valuation|corpus|contribution|loan amount|loan|price|cost|income|savings|profit|loss|balance|emi|future value|present value|total investment|wealth gained|monthly investment|lump sum/i;
+            if (
+                text.includes('₹') ||
+                currencyFields.test(normalizedKey)
+            ) {
+                const currencyMatch =
+                    text.match(
+                        /₹?\s*(-?[\d,]+(?:\.\d+)?)/ 
+                    );
+                if (currencyMatch) {
+
+                    const formatted =
+                        formatIndianCurrency(
+                            currencyMatch[1]
+                        );
+                    return text.replace(
+                        currencyMatch[0],
+                        formatted
+                    );
+                }
+            }
+            const percentageFields =
+                /rate|return|interest|inflation|growth|percentage|cagr|gst|tax rate|step.?up|annual return|expected return/i;
+            if (
+                text.includes('%') ||
+                percentageFields.test(
+                    normalizedKey
+                )
+            ) {
+                const percentageMatch =
+                    text.match(
+                        /-?\d+(?:\.\d+)?/
+                    );
+                if (percentageMatch) {
+
+                    return text.replace(
+                        percentageMatch[0],
+                        formatPercentage(
+                            percentageMatch[0]
+                        )
+                    );
+                }
+            }
+            const yearFields =
+                /year|years|tenure|period|retirement period|service period/i;
+
+            if (
+                yearFields.test(
+                    normalizedKey
+                ) &&
+                !/times\/year/i.test(text) &&
+                !/year/i.test(text)
+            ) {
+
+                const yearMatch =
+                    text.match(
+                        /\d+(?:\.\d+)?/
+                    );
+
+                if (yearMatch) {
+                    return `${text} Years`;
+                }
+            }
+            const frequencyFields =
+                /frequency|compounding frequency|compound frequency/i;
+            if (
+                frequencyFields.test(
+                    normalizedKey
+                ) &&
+                !/times\/year/i.test(text)
+            ) {
+                const frequencyMatch =
+                    text.match(
+                        /\d+(?:\.\d+)?/
+                    );
+
+                if (frequencyMatch) {
+                    return `${text} times/year`;
+                }
+            }
+
+            return text;
+        };
+        const drawPageHeader = () => {
+
+            pdf.setFillColor(...COLORS.primary);
+            pdf.rect( 0, 0, pageWidth, 8, 'F');
+            pdf.setFont( PDF_FONT, 'bold');
+            pdf.setFontSize(8);
+            pdf.setTextColor(...COLORS.white);
+            pdf.text( 'FinCalc Pro', margin, 5.5);
+            pdf.setFont( PDF_FONT, 'normal');
+            pdf.text(
+                cleanText(
+                    META[calcType]?.title ||
+                    calcType
+                ),
+                pageWidth - margin,
+                5.5,
+                {
+                    align: 'right'
+                }
+            );
+        };
+        const addNewPage = () => {
+            pdf.addPage();
+            currentY = 22;
+            drawPageHeader();
+        };
+        const getBottomLimit = () => {
+            return pageHeight - footerHeight;
+        };
+        const checkPageBreak = (
+            requiredHeight = 15
+        ) => {
+            if (
+                currentY +
+                requiredHeight >
+                getBottomLimit()
+            ) {
+                addNewPage();
+                return true;
+            }
+            return false;
+        };
+        const addSectionHeader = (
+            title
+        ) => {
+            checkPageBreak(16);
+            pdf.setFont( PDF_FONT, 'bold');
+            pdf.setFontSize(11);
+            pdf.setTextColor(...COLORS.text);
+            pdf.text( title, margin, currentY);
+            pdf.setDrawColor(...COLORS.primary);
+            pdf.setLineWidth(
+                0.8
+            );
+            pdf.line( margin, currentY + 2, margin + 28, currentY + 2);
+            currentY += 10;
+        };
+        pdf.setFillColor(...COLORS.primary);
+        pdf.roundedRect( margin, currentY, contentWidth, 34, 4, 4, 'F');
+        pdf.setFont( PDF_FONT, 'bold');
+        pdf.setFontSize(22);
+        pdf.setTextColor(...COLORS.white);
+        pdf.text( 'FinCalc Pro', margin + 8, currentY + 12);
+        pdf.setFont( PDF_FONT, 'normal');
+        pdf.setFontSize(11);
+        pdf.text(
+            cleanText(
+                META[calcType]?.title ||
+                calcType
+            ),
+            margin + 8,
+            currentY + 20
+        );
+        const generatedDate =
+            new Date().toLocaleString(
+                'en-IN',
+                {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                }
+            );
+        pdf.setFontSize(8);
+        pdf.text( `Generated: ${generatedDate}`, margin + 8, currentY + 27);
+        currentY += 43;
+        pdf.setFillColor( ...COLORS.background);
+        pdf.roundedRect( margin, currentY - 5, contentWidth, 11, 2, 2, 'F');
+        pdf.setFont( PDF_FONT, 'bold');
+        pdf.setFontSize(8);
+        pdf.setTextColor(
+            ...COLORS.secondary
+        );
+        pdf.text(
+            `CALCULATOR: ${cleanText(
+                META[calcType]?.title ||
+                calcType
+            ).toUpperCase()}`,
+            margin + 5,
+            currentY + 2
+        );
+        currentY += 14;
+        addSectionHeader(
+            'INPUT PARAMETERS'
+        );
+        const parameters =
+            stored.params || {};
+        const parameterEntries =
+            Object.entries(parameters);
+        const inputRowHeight = 9;
+        const labelWidth = 72;
+        parameterEntries.forEach(
+            ([key, value], index) => {
+                checkPageBreak(
+                    inputRowHeight + 2
+                );
+                let label =
+                    String(key)
+                        .replace(/_/g, ' ')
+                        .replace(
+                            /\b\w/g,
+                            character =>
+                                character.toUpperCase()
+                        );
+                let formattedValue;
+                try {
+                    if (
+                        typeof formatParamValue ===
+                        'function'
+                    ) {
+                        const formatted =
+                            formatParamValue( calcType, key, value);
+                        if (
+                            formatted !== null &&
+                            formatted !== undefined
+                        ) {
+                            if (
+                                String(formatted)
+                                    .includes(':')
+                            ) {
+                                const parts =
+                                    String(formatted)
+                                        .split(':');
+                                label =
+                                    parts
+                                        .shift()
+                                        .trim();
+                                formattedValue =
+                                    parts
+                                        .join(':')
+                                        .trim();
+                            } else {
+                                formattedValue =
+                                    formatted;
+                            }
+                        }
+                    }
+
+                } catch (formatError) {
+                    console.warn(
+                        `Parameter formatting failed for ${key}:`,
+                        formatError
+                    );
+                }
+                if (
+                    formattedValue ===
+                    undefined ||
+                    formattedValue ===
+                    null
+                ) {
+                    formattedValue = value;
+                }
+                formattedValue =
+                    formatPDFValue(
+                        key,
+                        formattedValue
+                    );
+                if (index % 2 === 0) {
+                    pdf.setFillColor(...COLORS.background);
+                    pdf.rect(margin,currentY - 5.5,contentWidth,inputRowHeight,'F');
+                }
+                pdf.setFont( PDF_FONT, 'bold');
+                pdf.setFontSize(8.8);
+                pdf.setTextColor(...COLORS.secondary);
+                pdf.text( cleanText(label), margin + 5, currentY);
+                pdf.setFont( PDF_FONT, 'normal');
+                pdf.setTextColor( ...COLORS.text);
+                const valueLines =
+                    pdf.splitTextToSize(
+                        cleanText(
+                            formattedValue
+                        ),
+                        contentWidth -
+                        labelWidth -
+                        8
+                    );
+                pdf.text(
+                    valueLines,
+                    margin + labelWidth,
+                    currentY
+                );
+                currentY +=
+                    inputRowHeight;
+            }
+        );
+        currentY += 6;
+        addSectionHeader( 'CALCULATION RESULTS' );
+        const results =
+            stored.result || {};
+        const resultEntries =
+            Object.entries(results);
+        resultEntries.forEach(
+            ([key, value]) => {
+                const formattedValue =
+                    formatPDFValue( key, value );
+                const valueLines =
+                    pdf.splitTextToSize(
+                        cleanText( formattedValue ),
+                        contentWidth - 88
+                    );
+                const rowHeight =
+                    Math.max(
+                        13,
+                        (valueLines.length * 4) + 7
+                    );
+                checkPageBreak(rowHeight + 3);
+                pdf.setFillColor( 249, 250, 253 );
+                pdf.setDrawColor(...COLORS.border);
+                pdf.setLineWidth(0.3);
+                pdf.roundedRect( margin, currentY - 5.5, contentWidth, rowHeight, 2, 2, 'FD' );
+                pdf.setFont( PDF_FONT, 'bold' );
+                pdf.setFontSize(8.8);
+                pdf.setTextColor(...COLORS.secondary);
+                pdf.text(cleanText(key),margin + 5,currentY + 1.5);
+                pdf.setFont(PDF_FONT,'bold');
+                pdf.setFontSize(9.5);
+                pdf.setTextColor(...COLORS.primary);
+                pdf.text(valueLines,pageWidth - margin - 5,currentY + 1.5,{align: 'right'});
+                currentY +=
+                    rowHeight + 3;
+            }
+        );
+        const chartCanvas =
+            document.getElementById(
+                `${calcType}-chart`
+            );
+        if (
+            chartCanvas &&
+            chartCanvas.width > 0 &&
+            chartCanvas.height > 0 &&
+            typeof html2canvas === 'function'
+        ) {
+            try {
+                const capturedCanvas =
+                    await html2canvas(
+                        chartCanvas,
+                        {scale: 2,backgroundColor: '#ffffff',useCORS: true,logging: false}
+                    );
+                const imageData =
+                    capturedCanvas.toDataURL(
+                        'image/png',
+                        1.0
+                    );
+                const maximumWidth =
+                    contentWidth;
+                const maximumHeight =
+                    72;
+                let imageWidth =
+                    maximumWidth;
+                let imageHeight =
+                    imageWidth *
+                    (
+                        capturedCanvas.height /
+                        capturedCanvas.width
+                    );
+                if (
+                    imageHeight >
+                    maximumHeight
+                ) {
+                    imageHeight =
+                        maximumHeight;
+                    imageWidth =
+                        imageHeight *
+                        (
+                            capturedCanvas.width /
+                            capturedCanvas.height
+                        );
+                }
+                const visualizationHeight =
+                    10 +
+                    imageHeight +
+                    10;
+                if (
+                    currentY +
+                    visualizationHeight >
+                    getBottomLimit()
+                ) {
+                    addNewPage();
+                }
+                addSectionHeader(
+                    'VISUALIZATION'
+                );
+                const imageX =
+                    margin +
+                    (
+                        contentWidth -
+                        imageWidth
+                    ) / 2;
+                pdf.setFillColor(...COLORS.white);
+                pdf.setDrawColor(...COLORS.border);
+                pdf.setLineWidth(0.3);
+                pdf.roundedRect( imageX - 2, currentY - 2, imageWidth + 4, imageHeight + 4, 2, 2, 'FD' );
+                pdf.addImage( imageData, 'PNG', imageX, currentY, imageWidth, imageHeight );
+                currentY +=
+                    imageHeight + 10;
+            } catch (chartError) {
+                console.warn(
+                    'Chart export failed:',
+                    chartError
+                );
+            }
+        }
+        checkPageBreak(30);
+        pdf.setFillColor(...COLORS.primary);
+        pdf.roundedRect( margin, currentY, contentWidth, 23, 3, 3, 'F' );
+        pdf.setFont( PDF_FONT, 'bold' );
+        pdf.setFontSize(9);
+        pdf.setTextColor(...COLORS.white);
+        pdf.text('REPORT SUMMARY',margin + 6,currentY + 8);
+        pdf.setFont(PDF_FONT,'normal');
+        pdf.setFontSize(7.5);
+        pdf.text('This report contains the calculator inputs,',margin + 6,currentY + 14);
+        pdf.text('calculated results and available visualization.',margin + 6,currentY + 19);
+        currentY += 31;
+        checkPageBreak(24);
+        pdf.setFillColor(...COLORS.background);
+        pdf.setDrawColor(...COLORS.border);
+        pdf.setLineWidth(0.3);
+        pdf.roundedRect(margin, currentY, contentWidth, 19, 2.5, 2.5, 'FD');
+        pdf.setFont( PDF_FONT, 'bold' );
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(...COLORS.secondary);
+        pdf.text('DISCLAIMER',margin + 5,currentY + 7);
+        pdf.setFont(PDF_FONT,'normal');
+        pdf.setFontSize(6.8);
+        const disclaimer =
+            'Calculations are for informational and illustrative purposes only. ' +
+            'Actual financial outcomes may vary. Consult a qualified financial ' +
+            'advisor before making financial decisions.';
+        const disclaimerLines =
+            pdf.splitTextToSize(disclaimer,contentWidth - 42);
+        pdf.text(disclaimerLines,margin + 35,currentY + 6);
+        const totalPages =
+            pdf.internal.getNumberOfPages();
+        for (
+            let page = 1;
+            page <= totalPages;
+            page++
+        ) {
+            pdf.setPage(page);
+            pdf.setDrawColor( 220, 223, 230 );
+            pdf.setLineWidth(0.25);
+            pdf.line(margin,pageHeight - 14,pageWidth - margin,pageHeight - 14);
+            pdf.setFont(PDF_FONT,'normal');
+            pdf.setFontSize(7);
+            pdf.setTextColor(...COLORS.muted);
+            pdf.text('FinCalc Pro • Financial Calculation Report',margin,pageHeight - 8);
+            pdf.text(
+                `Page ${page} of ${totalPages}`,
+                pageWidth - margin,
+                pageHeight - 8,
+                {
+                    align: 'right'
+                }
+            );
+        }
+        const calculatorTitle =
+            META[calcType]?.title ||
+            calcType;
+        const safeTitle =
+            String(calculatorTitle)
+                .replace(
+                    /[<>:"/\\|?*]/g,
+                    ''
+                )
+                .replace(
+                    /\s+/g,
+                    ' '
+                )
+                .trim();
+        pdf.save(`FinCalc Pro - ${safeTitle}.pdf`);
+    } catch (error) {
+        console.error(
+            'PDF export error:',
+            error
+        );
+        alert(
+            'Failed to generate PDF. Please try again.'
+        );
     } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
-      }
+        if (button) {
+            button.disabled = false;
+            button.innerHTML =
+                originalButtonHTML ||
+                '<i class="fas fa-file-pdf"></i> Export PDF';
+        }
     }
-  }
-
-  // Initialize search, theme, and color scheme on load
-  document.addEventListener('DOMContentLoaded', () => {
-    initSearch();
+}
+document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initColorScheme();
-    initIndianFormatting();
-
-    // Theme button delegation
     document.querySelectorAll('.theme-btn').forEach(btn => {
-      btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+        btn.addEventListener('click', () => setTheme(btn.dataset.theme));
     });
-
-    // Color scheme button delegation
     document.querySelectorAll('.scheme-btn').forEach(btn => {
-      btn.addEventListener('click', () => setColorScheme(btn.dataset.scheme));
+        btn.addEventListener('click', () => setColorScheme(btn.dataset.scheme));
     });
-  });
+});
   </script>
 </body>
 </html>
