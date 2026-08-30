@@ -1,7 +1,7 @@
 # INVESTMENT CALCULATORS
 
-def format_indian(number: float, decimals: int = 2) -> str:
-    """Format number in Indian number system: 1,00,000.00"""
+def _format_indian_core(number: float, decimals: int = 2) -> tuple[str, str]:
+    """Core formatting logic returning (sign, formatted_int, decimal_str)"""
     sign = '-' if number < 0 else ''
     number = abs(number)
     
@@ -21,31 +21,22 @@ def format_indian(number: float, decimals: int = 2) -> str:
     
     if decimals > 0:
         decimal_str = f"{decimal_part:.{decimals}f}".split('.')[1]
+        return sign, formatted_int, decimal_str
+    return sign, formatted_int, ''
+
+
+def format_indian(number: float, decimals: int = 2) -> str:
+    """Format number in Indian number system: 1,00,000.00"""
+    sign, formatted_int, decimal_str = _format_indian_core(number, decimals)
+    if decimal_str:
         return f"{sign}₹{formatted_int}.{decimal_str}"
     return f"{sign}₹{formatted_int}"
 
 
 def format_indian_raw(number: float, decimals: int = 2) -> str:
     """Format number in Indian number system without ₹ prefix: 1,00,000.00"""
-    sign = '-' if number < 0 else ''
-    number = abs(number)
-    
-    integer_part = int(number)
-    decimal_part = round(number - integer_part, decimals)
-    
-    s = str(integer_part)
-    if len(s) <= 3:
-        formatted_int = s
-    else:
-        formatted_int = s[-3:]
-        s = s[:-3]
-        while len(s) > 2:
-            formatted_int = s[-2:] + ',' + formatted_int
-            s = s[:-2]
-        formatted_int = s + ',' + formatted_int if s else formatted_int
-    
-    if decimals > 0:
-        decimal_str = f"{decimal_part:.{decimals}f}".split('.')[1]
+    sign, formatted_int, decimal_str = _format_indian_core(number, decimals)
+    if decimal_str:
         return f"{sign}{formatted_int}.{decimal_str}"
     return f"{sign}{formatted_int}"
 
@@ -342,81 +333,40 @@ def SALARY_CALCULATOR(ctc, bonus, proffesional_tax, employer_pf, employee_pf, ot
 
 
 # EMI VARIANTS (Home, Car, Gold, Education)
+def _calculate_emi(loan_amount, interest_rate, years):
+    """Core EMI calculation logic shared by all EMI variants."""
+    n = years * 12
+    r = interest_rate / 12 / 100
+    emi_value = loan_amount * r * (1 + r) ** n / ((1 + r) ** n - 1)
+    total = emi_value * n
+    interest = total - loan_amount
+
+    return {
+        "Monthly EMI": format_indian(emi_value, 2),
+        "Principal": format_indian(loan_amount, 2),
+        "Total Interest": format_indian(interest, 2),
+        "Total Amount": format_indian(total, 2),
+    }
+
+
 def EMI(loan_amount, interest_rate, years):
-    n = years * 12
-    r = interest_rate / 12 / 100
-    emi_value = loan_amount * r * (1 + r) ** n / ((1 + r) ** n - 1)
-    total = emi_value * n
-    interest = total - loan_amount
+    return _calculate_emi(loan_amount, interest_rate, years)
 
-    return {
-        "Monthly EMI": format_indian(emi_value, 2),
-        "Principal": format_indian(loan_amount, 2),
-        "Total Interest": format_indian(interest, 2),
-        "Total Amount": format_indian(total, 2),
-    }
-# HOME LOAN EMI
+
 def HOME_LOAN_EMI(loan_amount, interest_rate, years):
-    n = years * 12
-    r = interest_rate / 12 / 100
-    emi_value = loan_amount * r * (1 + r) ** n / ((1 + r) ** n - 1)
-    total = emi_value * n
-    interest = total - loan_amount
-
-    return {
-        "Monthly EMI": format_indian(emi_value, 2),
-        "Principal": format_indian(loan_amount, 2),
-        "Total Interest": format_indian(interest, 2),
-        "Total Amount": format_indian(total, 2),
-    }
+    return _calculate_emi(loan_amount, interest_rate, years)
 
 
-# CAR LOAN EMI
 def CAR_LOAN_EMI(loan_amount, interest_rate, years):
-    n = years * 12
-    r = interest_rate / 12 / 100
-    emi_value = loan_amount * r * (1 + r) ** n / ((1 + r) ** n - 1)
-    total = emi_value * n
-    interest = total - loan_amount
-
-    return {
-        "Monthly EMI": format_indian(emi_value, 2),
-        "Principal": format_indian(loan_amount, 2),
-        "Total Interest": format_indian(interest, 2),
-        "Total Amount": format_indian(total, 2),
-    }
+    return _calculate_emi(loan_amount, interest_rate, years)
 
 
-# GOLD LOAN EMI
 def GOLD_LOAN_EMI(loan_amount, interest_rate, years):
-    n = years * 12
-    r = interest_rate / 12 / 100
-    emi_value = loan_amount * r * (1 + r) ** n / ((1 + r) ** n - 1)
-    total = emi_value * n
-    interest = total - loan_amount
-
-    return {
-        "Monthly EMI": format_indian(emi_value, 2),
-        "Principal": format_indian(loan_amount, 2),
-        "Total Interest": format_indian(interest, 2),
-        "Total Amount": format_indian(total, 2),
-    }
+    return _calculate_emi(loan_amount, interest_rate, years)
 
 
-# EDUCATION LOAN EMI
 def EDUCATION_LOAN_EMI(loan_amount, interest_rate, years):
-    n = years * 12
-    r = interest_rate / 12 / 100
-    emi_value = loan_amount * r * (1 + r) ** n / ((1 + r) ** n - 1)
-    total = emi_value * n
-    interest = total - loan_amount
-
-    return {
-        "Monthly EMI": format_indian(emi_value, 2),
-        "Principal": format_indian(loan_amount, 2),
-        "Total Interest": format_indian(interest, 2),
-        "Total Amount": format_indian(total, 2),
-    }
+    return _calculate_emi(loan_amount, interest_rate, years)
 
 
 # FLAT VS REDUCING LOAN

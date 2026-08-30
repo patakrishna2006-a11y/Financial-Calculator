@@ -968,6 +968,23 @@ header::before {
   transform: translateY(1px) scale(0.98);
 }
 
+.btn-auth.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+.btn-auth.loading::after {
+  content: '';
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+
 /* Calculator "Calculate" button (index.html) */
 .btn-calc {
   margin-top: 1.4rem;
