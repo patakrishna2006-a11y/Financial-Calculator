@@ -28,6 +28,9 @@ from calculator import (
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 db = SQLAlchemy(app)
 
 # --- Database Models ---
@@ -35,8 +38,12 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    
+    __table_args__ = (
+        db.UniqueConstraint('username', 'email', name='_username_email_uc'),
+    )
 
 class CalculationHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -78,15 +85,19 @@ def register():
             return redirect(url_for('register'))
             
         hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password=hashed_password , email=email)
+        new_user = User(username=username, password=hashed_password, email=email)
         try:
             db.session.add(new_user)
             db.session.commit()
             flash('Successfully registered!', 'success')
             return redirect(url_for('login'))
-        except:
+        except Exception as e:
             db.session.rollback()
-            flash('Username already exists', 'danger')
+            # Check which constraint was violated
+            if User.query.filter_by(username=username).first():
+                flash('Username already exists', 'danger')
+            else:
+                flash('An account with this username and email combination already exists', 'danger')
             return redirect(url_for('register'))
     return render_template('register.html')
 
