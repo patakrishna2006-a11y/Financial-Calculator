@@ -60,6 +60,7 @@
         <p>Join us today and start planning your financial future.</p>
 
         <form action="/register" method="POST" id="register-form" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
           <!-- Username -->
           <div class="input-group">

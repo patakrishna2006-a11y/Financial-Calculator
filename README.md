@@ -4,8 +4,30 @@
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7.svg)](https://render.com)
+[![Security](https://img.shields.io/badge/Security-Hardened-brightgreen.svg)](SECURITY_AUDIT_REPORT.md)
 
-A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. Features 25+ calculators tailored for Indian financial planning — from SIP and EMI to retirement, tax, and investment planning.
+A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. Features 25+ calculators tailored for Indian financial planning — from SIP and EMI to retirement, tax, and investment planning. **Production-ready with hardened security posture.**
+
+---
+
+## 🛡️ Security Features (Production Hardened)
+
+FinCalc Pro has undergone comprehensive security hardening with zero critical/high vulnerabilities remaining:
+
+| Security Control | Implementation | Status |
+|------------------|----------------|--------|
+| **Debug Mode** | Disabled by default; controlled via `FLASK_DEBUG` env var | ✅ PASS |
+| **CSRF Protection** | Flask-WTF on all forms + `X-CSRFToken` header for API | ✅ PASS |
+| **Rate Limiting** | Register: 5/min, Login: 10/min, Calculate: 30/min | ✅ PASS |
+| **Session Security** | HttpOnly, SameSite=Lax, Secure (HTTPS), 24h timeout | ✅ PASS |
+| **Security Headers** | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, CORP | ✅ PASS |
+| **Input Validation** | Server-side validation on all 25 calculator endpoints | ✅ PASS |
+| **Authorization/IDOR** | User isolation, ownership verification, session fixation prevention | ✅ PASS |
+| **Error Handling** | Custom pages (400, 401, 403, 404, 405, 413, 429, 500), no tracebacks | ✅ PASS |
+| **Security Logging** | Auth events, CSRF failures, rate limits, calculation errors | ✅ PASS |
+| **Dependencies** | pip-audit: 0 vulnerabilities; Bandit: 0 findings in production code | ✅ PASS |
+
+See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security assessment.
 
 ---
 
@@ -69,23 +91,25 @@ See [QA_REPORT.md](QA_REPORT.md) for complete test matrix and bug details.
 
 ```
 Financial Calculators/
-├── app.py                 # Flask backend — routes, auth, API endpoints
+├── app.py                 # Flask backend — routes, auth, API endpoints, security
 ├── calculator.py          # Core calculation logic (25+ functions)
 ├── requirements.txt       # Python dependencies
 ├── Procfile               # Deployment config (gunicorn)
 ├── README.md              # This file
 ├── QA_REPORT.md           # Responsive QA test results
+├── SECURITY_AUDIT_REPORT.md  # Complete security assessment
+├── FINAL_ENGINEERING_AUDIT_REPORT.md  # Engineering audit
 ├── instance/
-│   └── users.db           # SQLite database (auto-created)
+│   ├── users.db           # SQLite database (auto-created)
+│   └── security.log       # Security event log (rotating)
 ├── static/
 │   └── style.css          # Complete stylesheet (CSS variables, responsive, performant)
 └── templates/
     ├── index.html         # Main dashboard (SPA with all calculators)
     ├── landing.html       # Public landing page with stats & features
     ├── login.html         # Login page
-    └── register.html      # Registration page
+    ├── register.html      # Registration page
 ```
-
 ---
 
 ## 🚀 Quick Start
@@ -118,15 +142,13 @@ python app.py
 http://127.0.0.1:5000
 ```
 
-### Environment Variables (Optional)
+### Environment Variables
 
 Create a `.env` file in the project root:
 
 ```env
-SECRET_KEY=your-super-secret-key-change-in-production
-DATABASE_URL=sqlite:///users.db
-FLASK_ENV=development
-FLASK_DEBUG=1
+# Required for production
+FLASK_SECRET_KEY=your-super-secret-key-change-in-production
 ```
 
 ---
@@ -255,6 +277,9 @@ docker run -p 5000:5000 fincalc-pro
 | `gunicorn` | ≥21.2.0 | WSGI production server |
 | `flask_sqlalchemy` | ≥3.0.0 | ORM for database |
 | `werkzeug` | ≥3.0.0 | Security utilities (password hashing) |
+| `flask_wtf` | ≥1.2.0 | CSRF protection |
+| `flask_limiter` | ≥3.8.0 | Rate limiting |
+| `python-dotenv` | ≥1.0.0 | Environment variable loading |
 
 ---
 

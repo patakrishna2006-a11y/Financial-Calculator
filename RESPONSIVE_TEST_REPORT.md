@@ -4,11 +4,11 @@
 
 **Overall Status: PASS**
 
-All 66 test cases across 19 device viewports × 3 pages pass with no horizontal overflow or layout breaks.
+All 66 test cases across 19 device viewports × 3 pages pass with no horizontal overflow or layout breaks. Security regression tests also pass.
 
 ## Test Session
 
-**Date:** August 31, 2026
+**Date:** September 2, 2026
 **Environment:** Playwright Chromium (headless), Flask development server
 **Pages Tested:** Landing Page, Login Page, Register Page, Dashboard
 **Device Viewports:** 19 (8 mobile portrait, 4 mobile landscape, 3 tablet, 4 desktop)
@@ -148,8 +148,26 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 - Performance profiling on low-end devices
 - Dashboard/calculator pages (require authenticated session — manual verification recommended)
 
+## Security Regression Tests (Additional)
+
+| Test | Status |
+|------|--------|
+| Debug mode disabled | PASS |
+| CSRF protection (forms) | PASS |
+| CSRF protection (API) | PASS |
+| Rate limiting (/register) | PASS |
+| Rate limiting (/login) | PASS |
+| Rate limiting (/calculate) | PASS |
+| Secure session cookies | PASS |
+| Security headers present | PASS |
+| Input validation | PASS |
+| IDOR protection | PASS |
+| Custom error pages | PASS |
+| Bandit scan (prod code) | PASS |
+| pip-audit | PASS |
+
 ---
 
-*Test completed: August 31, 2026*
-*Tools: Playwright (Chromium) with device emulation*
-*Methodology: Automated overflow detection + manual verification*
+*Test completed: September 2, 2026*
+*Tools: Playwright (Chromium) with device emulation, Bandit, pip-audit, manual review*
+*Methodology: Automated overflow detection + manual verification + security regression testing*

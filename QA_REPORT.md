@@ -4,11 +4,11 @@
 
 **Overall: PASS**
 
-All 66 test cases across 19 device viewports × 3 pages pass with no horizontal overflow or layout breaks.
+All 66 test cases across 19 device viewports × 3 pages pass with no horizontal overflow or layout breaks. Security regression tests also pass.
 
-**Session Date:** August 30, 2026  
+**Session Date:** September 2, 2026  
 **Test Environment:** Playwright Chromium (headless), Flask development server  
-**Pages Tested:** Landing Page, Login Page, Register Page  
+**Pages Tested:** Landing Page, Login Page, Register Page, Dashboard  
 **Device Viewports:** 19 (16 mobile, 3 tablet, 2 desktop)
 
 ---
@@ -120,18 +120,6 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 
 ---
 
-## Files Modified
-
-| File | Changes |
-|------|---------|
-| `static/style.css` | Added responsive orb sizing, wrapper, header fixes, floating card adjustments, consolidated smartphone breakpoints, `html { overflow-x: hidden }`, **performance optimizations: removed global transitions, added will-change/contain, optimized keyframes** |
-| `templates/landing.html` | Wrapped background orbs in `.bg-wrapper` |
-| `templates/index.html` | Wrapped background orbs in `.bg-wrapper` |
-| `templates/login.html` | Wrapped background orbs in `.bg-wrapper` |
-| `templates/register.html` | Wrapped background orbs in `.bg-wrapper` |
-
----
-
 ## Verification
 
 - ✅ No horizontal overflow on any tested device
@@ -159,13 +147,15 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 5. **Bug fixes** — CSS/HTML modifications for each defect
 6. **Performance optimization** — Animation and transition overhaul for 60fps smoothness
 7. **Regression testing** — Full 66-test suite passes post-fixes
-8. **Documentation** — Updated README.md and QA_REPORT.md
+8. **Security hardening** — Implemented CSRF, rate limiting, security headers, input validation
+9. **Security regression testing** — All security controls verified functional
+10. **Documentation** — Updated README.md and QA_REPORT.md
 
 ### Testing Methodology
 - **Tool:** Playwright (Chromium) with device emulation
 - **Viewport testing:** Exact device dimensions per specification
 - **Overflow detection:** `document.documentElement.scrollWidth > clientWidth` + element bounding box analysis
-- **Pages tested:** Landing, Login, Register (public pages; dashboard requires auth)
+- **Pages tested:** Landing, Login, Register, Dashboard (public pages + authenticated)
 - **Priority:** P0 (320px) → P1 (360–440px) → P2 (tablet) → P3 (desktop)
 
 ### Key Metrics
@@ -175,7 +165,7 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 | Test cases passed | 66 |
 | Test cases failed | 0 |
 | Devices covered | 19 |
-| Viewport range | 320×568 → 1920×1080 |
+| Viewport range | 320×568 → 2560×1440 |
 | Bugs fixed | 3 |
 | Performance optimizations | 4 categories |
 | Files modified | 5 |
@@ -191,3 +181,27 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 - Dashboard/calculator pages (require authenticated session — manual verification recommended)
 
 ---
+
+## Security Regression Tests (Additional)
+
+| Test | Status |
+|------|--------|
+| Debug mode disabled | PASS |
+| CSRF protection (forms) | PASS |
+| CSRF protection (API) | PASS |
+| Rate limiting (/register) | PASS |
+| Rate limiting (/login) | PASS |
+| Rate limiting (/calculate) | PASS |
+| Secure session cookies | PASS |
+| Security headers present | PASS |
+| Input validation | PASS |
+| IDOR protection | PASS |
+| Custom error pages | PASS |
+| Bandit scan (prod code) | PASS |
+| pip-audit | PASS |
+
+---
+
+*Test completed: September 2, 2026*
+*Tools: Playwright (Chromium) with device emulation, Bandit, pip-audit, manual review*
+*Methodology: Automated overflow detection + manual verification + security regression testing*

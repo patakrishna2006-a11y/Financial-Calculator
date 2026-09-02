@@ -1155,7 +1155,8 @@
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token() }}'
         },
         credentials: 'include',
         body: JSON.stringify({ type, params })
