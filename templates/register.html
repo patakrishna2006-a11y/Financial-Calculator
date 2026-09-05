@@ -46,7 +46,7 @@
   <div class="auth-wrapper">
     <div class="auth-container" role="main">
 
-      <!-- ── FORM SIDE ── -->
+<!-- ── FORM SIDE ── -->
       <div class="auth-form-side">
         <a href="/" class="logo" style="display:inline-flex;margin-bottom:2rem;" aria-label="Back to home">
           <div class="logo-icon"><i class="fas fa-chart-simple" aria-hidden="true"></i></div>
@@ -56,6 +56,39 @@
           </div>
         </a>
 
+        {% if check_email %}
+        <!-- Check Email State -->
+        <div class="check-email-state" style="text-align: center; padding: 2rem 0;">
+          <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #6d28d9 0%, #2563eb 100%); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);">
+            <i class="fas fa-envelope-open" style="font-size: 32px; color: white;" aria-hidden="true"></i>
+          </div>
+          <h2 style="margin-bottom: 0.75rem;">Check your email</h2>
+          <p style="color: rgba(255,255,255,0.7); margin-bottom: 2rem; max-width: 320px; margin-left: auto; margin-right: auto;">
+            We've sent a verification link to your email address. The link expires in 1 hour. Please check your inbox (and spam folder) and click the link to verify your account.
+          </p>
+          
+          <!-- Resend Verification Form -->
+          <form action="/resend-verification" method="POST" id="resend-form" style="display: inline-flex; gap: 0.75rem; max-width: 380px; margin: 0 auto;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="email" 
+                   name="email" 
+                   id="resend-email"
+                   placeholder="Enter your email to resend" 
+                   autocomplete="email" 
+                   required
+                   style="flex: 1; padding: 0.875rem 1rem; background: #0e111b; border: 1px solid #1e2333; border-radius: 8px; color: #e8ecf4; font-size: 0.95rem; font-family: inherit;">
+            <button type="submit" class="btn-auth" id="resend-btn" style="white-space: nowrap;">
+              <i class="fas fa-paper-plane" style="margin-right: 6px;"></i> Resend
+            </button>
+          </form>
+          
+          <p style="margin-top: 1.5rem; font-size: 0.9rem; color: #8892a8;">
+            Didn't receive the email? 
+            <a href="{{ url_for('register') }}" style="color: var(--accent);">Start over</a>
+          </p>
+        </div>
+        {% else %}
+        <!-- Registration Form -->
         <h2>Create Account</h2>
         <p>Join us today and start planning your financial future.</p>
 
@@ -83,11 +116,11 @@
             <div class="input-icon-wrap">
               <i class="fas fa-envelope field-icon" aria-hidden="true"></i>
               <input type="email"
-                    id="reg-email"
-                    name="email"
-                    placeholder="Enter your email"
-                    autocomplete="email"
-                    required>
+                     id="reg-email"
+                     name="email"
+                     placeholder="Enter your email"
+                     autocomplete="email"
+                     required>
             </div>
           </div>
 
@@ -167,6 +200,7 @@
             Create Free Account <i class="fas fa-arrow-right" style="margin-left:6px;" aria-hidden="true"></i>
           </button>
         </form>
+        {% endif %}
 
         <div class="footer-links" style="margin-top:1.5rem;">
           <p>Already have an account?
@@ -297,6 +331,19 @@
         : '<i class="fas fa-circle-xmark" aria-hidden="true"></i> Passwords do not match';
     }
     confirmInput.addEventListener('input', checkMatch);
+
+    // ── Resend verification form ──
+    const resendForm = document.getElementById('resend-form');
+    const resendBtn = document.getElementById('resend-btn');
+    const resendEmailInput = document.getElementById('resend-email');
+    
+    if (resendForm) {
+      resendForm.addEventListener('submit', (e) => {
+        const btn = resendBtn;
+        btn.classList.add('loading');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Sending...';
+      });
+    }
 
     // ── Submit loading ──
     document.getElementById('register-form').addEventListener('submit', (e) => {

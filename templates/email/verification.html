@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your FinCalc Pro account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #060814;
+      color: #e8ecf4;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .email-wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #0e111b;
+      border-radius: 16px;
+      border: 1px solid #1e2333;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Background orbs effect */
+    .orb-container {
+      position: relative;
+      height: 120px;
+      overflow: hidden;
+    }
+    
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.4;
+    }
+    
+    .orb-purple {
+      width: 200px;
+      height: 200px;
+      background: #6d28d9;
+      top: -50px;
+      left: -50px;
+    }
+    
+    .orb-blue {
+      width: 180px;
+      height: 180px;
+      background: #2563eb;
+      top: 20px;
+      right: -40px;
+    }
+    
+    .orb-teal {
+      width: 140px;
+      height: 140px;
+      background: #0d9488;
+      bottom: -30px;
+      left: 30%;
+    }
+    
+    .content {
+      padding: 40px 32px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Logo */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6d28d9 0%, #2563eb 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    
+    .logo-text-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    
+    .logo-subtext {
+      font-size: 11px;
+      font-weight: 400;
+      color: #8892a8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    /* Heading */
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    
+    .greeting {
+      font-size: 16px;
+      color: #a8b2c8;
+      margin-bottom: 24px;
+    }
+    
+    .message {
+      font-size: 15px;
+      color: #c8d0e0;
+      margin-bottom: 32px;
+    }
+    
+    /* CTA Button */
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #6d28d9 0%, #2563eb 100%);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 16px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+    }
+    
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: #1e2333;
+      margin: 32px 0;
+    }
+    
+    /* Fallback link */
+    .fallback {
+      font-size: 13px;
+      color: #8892a8;
+    }
+    
+    .fallback strong {
+      color: #c8d0e0;
+    }
+    
+    .fallback a {
+      color: #818cf8;
+      word-break: break-all;
+      text-decoration: none;
+    }
+    
+    .fallback a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Expiry notice */
+    .expiry-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      color: #eab308;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    
+    .expiry-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    /* Footer */
+    .footer {
+      border-top: 1px solid #1e2333;
+      padding-top: 24px;
+      margin-top: 8px;
+    }
+    
+    .footer-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .footer-links a {
+      color: #8892a8;
+      font-size: 12px;
+      text-decoration: none;
+    }
+    
+    .footer-links a:hover {
+      color: #ffffff;
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .content {
+        padding: 32px 24px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .cta-button {
+        width: 100%;
+        padding: 14px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <!-- Background Orbs -->
+    <div class="orb-container">
+      <div class="orb orb-purple" aria-hidden="true"></div>
+      <div class="orb orb-blue" aria-hidden="true"></div>
+      <div class="orb orb-teal" aria-hidden="true"></div>
+    </div>
+    
+    <div class="content">
+      <!-- Logo -->
+      <a href="{{ config.BASE_URL if config.BASE_URL else 'https://fincalc.pro' }}" class="logo" style="color: inherit;">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18"/>
+            <path d="m19 9-5 5-4-4-3 3"/>
+          </svg>
+        </div>
+        <div class="logo-text-wrapper">
+          <div class="logo-text">FinCalc Pro</div>
+          <div class="logo-subtext">Smart Financial Calculators</div>
+        </div>
+      </a>
+      
+      <!-- Content -->
+      <h1>Verify your email</h1>
+      
+      <p class="greeting">Hi {{ username }},</p>
+      
+      <p class="message">Welcome to FinCalc Pro! Thanks for creating an account. To get started with 25+ financial calculators, please verify your email address by clicking the button below.</p>
+      
+      <!-- Expiry Notice -->
+      <div class="expiry-notice" role="alert">
+        <i class="fas fa-clock expiry-icon" aria-hidden="true"></i>
+        <span>This link expires in {{ expiry_hours }} hour{% if expiry_hours != 1 %}s{% endif %}</span>
+      </div>
+      
+      <!-- CTA Button -->
+      <div style="text-align: center; margin-bottom: 32px;">
+        <a href="{{ verify_url }}" class="cta-button">Verify Email</a>
+      </div>
+      
+      <!-- Divider -->
+      <div class="divider" aria-hidden="true"></div>
+      
+      <!-- Fallback Link -->
+      <p class="fallback">
+        <strong>Button not working?</strong> Copy and paste this link into your browser:<br>
+        <a href="{{ verify_url }}">{{ verify_url }}</a>
+      </p>
+      
+      <!-- Footer -->
+      <div class="footer">
+        <p class="footer-text">If you didn't create an account with FinCalc Pro, you can safely ignore this email.</p>
+        <div class="footer-links">
+          <a href="{{ config.BASE_URL if config.BASE_URL else 'https://fincalc.pro' }}">Website</a>
+          <a href="mailto:support@fincalc.pro">Support</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -8,10 +8,12 @@ from dotenv import load_dotenv
 import json
 import re
 import logging
+import secrets
 from logging.handlers import RotatingFileHandler
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_mail import Mail, Message
 
 load_dotenv()
 
@@ -69,6 +71,17 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
+# --- Mail Configuration ---
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+app.config['BASE_URL'] = os.environ.get('BASE_URL', 'http://localhost:5000')
+
+mail = Mail(app)
+
 # --- Security Logging Setup ---
 security_logger = logging.getLogger('security')
 security_logger.setLevel(logging.INFO)
@@ -84,6 +97,30 @@ def log_security_event(event_type, details, user_id=None, ip=None):
     ip = ip or request.remote_addr
     user_info = f"user_id={user_id}" if user_id else "anonymous"
     security_logger.info(f"{event_type} | ip={ip} | {user_info} | {details}")
+
+
+def generate_verification_token():
+    """Generate a secure random token for email verification."""
+    return secrets.token_urlsafe(32)
+
+
+def send_verification_email(user, token):
+    """Send verification email to user."""
+    verify_url = f"{app.config['BASE_URL']}/verify-email/{token}"
+    
+    html = render_template('email/verification.html',
+        username=user.username,
+        verify_url=verify_url,
+        expiry_hours=1
+    )
+    
+    msg = Message(
+        subject="Verify your FinCalc Pro account",
+        recipients=[user.email],
+        html=html
+    )
+    mail.send(msg)
+
 
 # --- Security Headers Middleware ---
 @app.after_request
@@ -204,6 +241,9 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    verification_token_expires = db.Column(db.DateTime, nullable=True)
     
     __table_args__ = (
         db.UniqueConstraint('username', 'email', name='_username_email_uc'),
@@ -295,17 +335,25 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 @limiter.limit("5 per minute; 20 per hour")
 def register():
+    check_email = request.args.get('check_email', '0') == '1'
+    
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('register.html', check_email=check_email)
     
     username = request.form.get('username', '').strip()
     email = request.form.get('email', '').strip()
     password = request.form.get('password', '')
+    confirm_password = request.form.get('confirm_password', '')
     
     # Input validation
-    if not username or not email or not password:
+    if not username or not email or not password or not confirm_password:
         log_security_event('REGISTRATION_FAILURE', 'missing_fields', ip=request.remote_addr)
         flash('All fields are required.', 'danger')
+        return redirect(url_for('register'))
+    
+    if password != confirm_password:
+        log_security_event('REGISTRATION_FAILURE', 'password_mismatch', ip=request.remote_addr)
+        flash('Passwords do not match.', 'danger')
         return redirect(url_for('register'))
     
     if len(username) > 50:
@@ -327,23 +375,166 @@ def register():
         flash('Password must be at least 9 characters long and include a letter, a number, and a symbol.', 'danger')
         return redirect(url_for('register'))
     
+    # Check if user already exists (unverified)
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        if existing_user.is_verified:
+            flash('Username already exists', 'danger')
+            return redirect(url_for('register'))
+        else:
+            # Resend verification for unverified user
+            token = generate_verification_token()
+            existing_user.verification_token = token
+            existing_user.verification_token_expires = now_ist() + timedelta(hours=1)
+            db.session.commit()
+            try:
+                send_verification_email(existing_user, token)
+                log_security_event('VERIFICATION_RESENT', f'username={username}', user_id=existing_user.id, ip=request.remote_addr)
+            except Exception as e:
+                log_security_event('VERIFICATION_EMAIL_FAILED', f'username={username} error={str(e)}', ip=request.remote_addr)
+            return redirect(url_for('register', check_email=1))
+    
+    existing_email = User.query.filter_by(email=email).first()
+    if existing_email:
+        if existing_email.is_verified:
+            flash('An account with this email already exists', 'danger')
+            return redirect(url_for('register'))
+        else:
+            # Resend verification for unverified user
+            token = generate_verification_token()
+            existing_email.verification_token = token
+            existing_email.verification_token_expires = now_ist() + timedelta(hours=1)
+            db.session.commit()
+            try:
+                send_verification_email(existing_email, token)
+                log_security_event('VERIFICATION_RESENT', f'email={email}', user_id=existing_email.id, ip=request.remote_addr)
+            except Exception as e:
+                log_security_event('VERIFICATION_EMAIL_FAILED', f'email={email} error={str(e)}', ip=request.remote_addr)
+            return redirect(url_for('register', check_email=1))
+    
     hashed_password = generate_password_hash(password)
-    new_user = User(username=username, password=hashed_password, email=email)
+    token = generate_verification_token()
+    token_expires = now_ist() + timedelta(hours=1)
+    
+    new_user = User(
+        username=username,
+        password=hashed_password,
+        email=email,
+        is_verified=False,
+        verification_token=token,
+        verification_token_expires=token_expires
+    )
     
     try:
         db.session.add(new_user)
         db.session.commit()
         log_security_event('REGISTRATION_SUCCESS', f'username={username}', user_id=new_user.id, ip=request.remote_addr)
-        flash('Successfully registered!', 'success')
-        return redirect(url_for('login'))
+        
+        # Send verification email (non-blocking - log failure but don't fail registration)
+        try:
+            send_verification_email(new_user, token)
+            log_security_event('VERIFICATION_EMAIL_SENT', f'username={username}', user_id=new_user.id, ip=request.remote_addr)
+            flash('Verification email sent! Please check your inbox (valid for 1 hour).', 'success')
+        except Exception as e:
+            log_security_event('VERIFICATION_EMAIL_FAILED', f'username={username} error={str(e)}', user_id=new_user.id, ip=request.remote_addr)
+            flash('Account created but verification email could not be sent. Use the "Resend" option on the next page.', 'warning')
+        
+        return redirect(url_for('register', check_email=1))
     except Exception as e:
         db.session.rollback()
         log_security_event('REGISTRATION_FAILURE', f'db_error={str(e)}', ip=request.remote_addr)
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'danger')
-        else:
-            flash('An account with this username and email combination already exists', 'danger')
+        flash('Registration failed. Please try again.', 'danger')
         return redirect(url_for('register'))
+
+
+@app.route('/verify-email/<token>')
+def verify_email(token):
+    """Verify user's email with token from email link."""
+    user = User.query.filter_by(verification_token=token).first()
+    
+    if not user:
+        log_security_event('VERIFICATION_FAILED', 'invalid_token', ip=request.remote_addr)
+        flash('Invalid verification link.', 'danger')
+        return redirect(url_for('register'))
+    
+    # Parse expiry datetime - handle both naive and aware datetimes
+    token_expires = user.verification_token_expires
+    if token_expires is None:
+        log_security_event('VERIFICATION_EXPIRED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+        flash('Verification link has expired. Please register again.', 'danger')
+        return redirect(url_for('register'))
+    
+    # Convert to timezone-aware if naive (assume IST)
+    if token_expires.tzinfo is None:
+        token_expires = token_expires.replace(tzinfo=IST)
+    
+    if token_expires < now_ist():
+        log_security_event('VERIFICATION_EXPIRED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+        flash('Verification link has expired. Please register again.', 'danger')
+        return redirect(url_for('register'))
+    
+    if user.is_verified:
+        log_security_event('VERIFICATION_ALREADY_DONE', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+        flash('Email already verified. Please login.', 'info')
+        return redirect(url_for('login'))
+    
+    user.is_verified = True
+    user.verification_token = None
+    user.verification_token_expires = None
+    db.session.commit()
+    
+    log_security_event('EMAIL_VERIFIED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+    flash('Email verified successfully! You can now login.', 'success')
+    return redirect(url_for('login'))
+
+
+@app.route('/resend-verification', methods=['POST'])
+@limiter.limit("1 per 5 minutes; 5 per hour", error_message="Too many requests. Please wait before resending.")
+def resend_verification():
+    """Resend verification email for unverified users."""
+    email = request.form.get('email', '').strip()
+    
+    if not email:
+        flash('Email is required.', 'danger')
+        return redirect(url_for('register', check_email=1))
+    
+    user = User.query.filter_by(email=email, is_verified=False).first()
+    
+    if not user:
+        # Don't reveal if email exists or not for security
+        flash('If this email is registered and unverified, a new verification link has been sent.', 'info')
+        return redirect(url_for('register', check_email=1))
+    
+    token = generate_verification_token()
+    user.verification_token = token
+    user.verification_token_expires = now_ist() + timedelta(hours=1)
+    db.session.commit()
+    
+    try:
+        send_verification_email(user, token)
+        log_security_event('VERIFICATION_RESENT', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+        flash('Verification email resent! Please check your inbox (valid for 1 hour).', 'success')
+    except Exception as e:
+        log_security_event('VERIFICATION_EMAIL_FAILED', f'username={user.username} error={str(e)}', user_id=user.id, ip=request.remote_addr)
+        flash('Failed to send verification email. Please try again later.', 'danger')
+    
+    return redirect(url_for('register', check_email=1))
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    """Handle rate limit exceeded with proper redirect for form submissions."""
+    if request.path == '/resend-verification':
+        flash('Too many requests. Please wait 5 minutes before resending.', 'warning')
+        return redirect(url_for('register', check_email=1))
+    # Default handler for other routes
+    retry_after = getattr(e, 'retry_after', 60)
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        resp = jsonify({"success": False, "error": "Rate limit exceeded. Please try again later."})
+        resp.headers['Retry-After'] = str(retry_after)
+        return resp, 429
+    return render_template('errors/429.html', retry_after=retry_after), 429
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("10 per minute; 50 per hour")
@@ -361,6 +552,11 @@ def login():
         return redirect(url_for('login'))
     
     user = User.query.filter_by(username=username, email=email).first()
+    
+    if user and not user.is_verified:
+        log_security_event('LOGIN_FAILURE', 'unverified_email', ip=request.remote_addr)
+        flash('Please verify your email first. Check your inbox for the verification link.', 'warning')
+        return redirect(url_for('login'))
     
     if user and check_password_hash(user.password, password):
         session.clear()  # Prevent session fixation
