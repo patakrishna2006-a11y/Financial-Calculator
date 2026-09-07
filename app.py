@@ -14,6 +14,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail, Message
+from sqlalchemy import inspect, text
 
 load_dotenv()
 
@@ -116,6 +117,23 @@ def send_verification_email(user, token):
     
     msg = Message(
         subject="Verify your FinCalc Pro account",
+        recipients=[user.email],
+        html=html
+    )
+    mail.send(msg)
+
+
+def send_password_reset_email(user, token):
+    """Send a one-hour password reset email to the user."""
+    reset_url = f"{app.config['BASE_URL']}/reset-password/{token}"
+    html = render_template('email/verification.html',
+        username=user.username,
+        reset_url=reset_url,
+        expiry_hours=1,
+        email_type='password_reset'
+    )
+    msg = Message(
+        subject="Reset your FinCalc Pro password",
         recipients=[user.email],
         html=html
     )
@@ -244,6 +262,8 @@ class User(db.Model):
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     verification_token = db.Column(db.String(100), unique=True, nullable=True)
     verification_token_expires = db.Column(db.DateTime, nullable=True)
+    reset_token = db.Column(db.String(100), unique=True, nullable=True)
+    reset_token_expires = db.Column(db.DateTime, nullable=True)
     
     __table_args__ = (
         db.UniqueConstraint('username', 'email', name='_username_email_uc'),
@@ -259,6 +279,12 @@ class CalculationHistory(db.Model):
 
 with app.app_context():
     db.create_all()
+    existing_columns = {column['name'] for column in inspect(db.engine).get_columns('user')}
+    with db.engine.begin() as connection:
+        if 'reset_token' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token VARCHAR(100)'))
+        if 'reset_token_expires' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token_expires TIMESTAMP'))
 
 # --- Helper Functions ---
 def format_json_data(json_str):
@@ -521,12 +547,83 @@ def resend_verification():
     return redirect(url_for('register', check_email=1))
 
 
+@app.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
+def forgot_password():
+    """Request a password reset link without revealing account existence."""
+    if request.method == 'GET':
+        return render_template('forgot_password.html')
+
+    email = request.form.get('email', '').strip()
+    if email and len(email) <= 100 and re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = generate_verification_token()
+            user.reset_token = token
+            user.reset_token_expires = now_ist() + timedelta(hours=1)
+            db.session.commit()
+            try:
+                send_password_reset_email(user, token)
+                log_security_event('PASSWORD_RESET_EMAIL_SENT', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+            except Exception as e:
+                log_security_event('PASSWORD_RESET_EMAIL_FAILED', f'username={user.username} error={str(e)}', user_id=user.id, ip=request.remote_addr)
+
+    log_security_event('PASSWORD_RESET_REQUEST', 'email_submitted', ip=request.remote_addr)
+    flash('If an account is registered with that email, a password reset link has been sent. It is valid for 1 hour.', 'info')
+    return redirect(url_for('login'))
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Render and process a one-time password reset link."""
+    user = User.query.filter_by(reset_token=token).first()
+    if not user or not user.reset_token_expires:
+        flash('This password reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    token_expires = user.reset_token_expires
+    if token_expires.tzinfo is None:
+        token_expires = token_expires.replace(tzinfo=IST)
+    if token_expires < now_ist():
+        user.reset_token = None
+        user.reset_token_expires = None
+        db.session.commit()
+        flash('This password reset link has expired. Please request a new one.', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'GET':
+        return render_template('reset_password.html', token=token)
+
+    password = request.form.get('password', '')
+    confirm_password = request.form.get('confirm_password', '')
+    if not password or not confirm_password:
+        flash('Both password fields are required.', 'danger')
+        return render_template('reset_password.html', token=token)
+    if password != confirm_password:
+        flash('Passwords do not match.', 'danger')
+        return render_template('reset_password.html', token=token)
+    if len(password) < 9 or not re.search(r'[A-Za-z]', password) or not re.search(r'\d', password) or not re.search(r'[^A-Za-z0-9]', password):
+        flash('Password must be at least 9 characters long and include a letter, a number, and a symbol.', 'danger')
+        return render_template('reset_password.html', token=token)
+
+    user.password = generate_password_hash(password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.session.commit()
+    log_security_event('PASSWORD_RESET_SUCCESS', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+    flash('Your password has been changed. Please login with your new password.', 'success')
+    return redirect(url_for('login'))
+
+
 @app.errorhandler(429)
 def ratelimit_handler(e):
     """Handle rate limit exceeded with proper redirect for form submissions."""
     if request.path == '/resend-verification':
         flash('Too many requests. Please wait 5 minutes before resending.', 'warning')
         return redirect(url_for('register', check_email=1))
+    if request.path == '/forgot-password':
+        flash('Too many requests. Please wait before requesting another reset link.', 'warning')
+        return redirect(url_for('forgot_password'))
     # Default handler for other routes
     retry_after = getattr(e, 'retry_after', 60)
     if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
