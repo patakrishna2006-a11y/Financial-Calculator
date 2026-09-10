@@ -2132,7 +2132,8 @@ async function exportPDF(calcType) {
             pdf.addFont(
                 'NotoSans-Regular.ttf',
                 'NotoSans',
-                'normal'
+              'normal',
+              'Identity-H'
             );
             pdf.addFileToVFS(
                 'NotoSans-Bold.ttf',
@@ -2141,7 +2142,8 @@ async function exportPDF(calcType) {
             pdf.addFont(
                 'NotoSans-Bold.ttf',
                 'NotoSans',
-                'bold'
+              'bold',
+              'Identity-H'
             );
             PDF_FONT = 'NotoSans';
         } catch (fontError) {
@@ -2160,7 +2162,7 @@ async function exportPDF(calcType) {
             }
             return String(value)
                 .replace(/â‚¹/g, '₹')
-                .replace(/¹(?=\s*[\d,])/g, '₹')
+              .replace(/¹(?=\s*[\d,])/g, '₹')
                 .replace(/&nbsp;/g, ' ')
                 .replace(/\u00A0/g, ' ')
                 .trim();
@@ -2498,7 +2500,7 @@ async function exportPDF(calcType) {
                         8
                     );
                 pdf.text(
-                    valueLines,
+                      valueLines.length === 1 ? valueLines[0] : valueLines,
                     margin + labelWidth,
                     currentY
                 );
@@ -2516,10 +2518,13 @@ async function exportPDF(calcType) {
             ([key, value]) => {
                 const formattedValue =
                     formatPDFValue( key, value );
+            const resultLabelWidth = 72;
+            const resultValueX = margin + resultLabelWidth;
+            const resultValueWidth = contentWidth - resultLabelWidth - 10;
                 const valueLines =
                     pdf.splitTextToSize(
                         cleanText( formattedValue ),
-                        contentWidth - 88
+                resultValueWidth
                     );
                 const rowHeight =
                     Math.max(
@@ -2538,7 +2543,11 @@ async function exportPDF(calcType) {
                 pdf.setFont(PDF_FONT,'bold');
                 pdf.setFontSize(9.5);
                 pdf.setTextColor(...COLORS.primary);
-                pdf.text(valueLines,pageWidth - margin - 5,currentY + 1.5,{align: 'right'});
+                pdf.text(
+                  valueLines.length === 1 ? valueLines[0] : valueLines,
+                  resultValueX,
+                  currentY + 1.5
+                );
                 currentY +=
                     rowHeight + 3;
             }
