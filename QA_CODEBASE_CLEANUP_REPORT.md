@@ -5,10 +5,10 @@
 **Files analyzed:** 10  
 **Files modified:** 6  
 **Files removed:** 0  
-**Functions removed:** 4 (duplicate EMI functions consolidated)  
+**Functions removed:** 0 public calculator functions; four implementations were consolidated behind a shared private helper
 **CSS selectors removed:** 0 (duplicates were responsive media query overrides, not true duplicates)  
 **JavaScript functions removed:** 0  
-**Python functions removed:** 4 (HOME_LOAN_EMI, CAR_LOAN_EMI, GOLD_LOAN_EMI, EDUCATION_LOAN_EMI consolidated into _calculate_emi)  
+**Python functions consolidated:** 4 duplicate EMI bodies now delegate to `_calculate_emi`; public wrappers remain available
 **Imports removed:** 0  
 **Assets removed:** 0  
 **Duplicate code consolidated:** 5 locations  
@@ -45,7 +45,7 @@
 
 ### 1. EMI Calculation Functions (calculator.py)
 **Before:** 5 separate functions (EMI, HOME_LOAN_EMI, CAR_LOAN_EMI, GOLD_LOAN_EMI, EDUCATION_LOAN_EMI) with identical logic  
-**After:** Single `_calculate_emi()` core function + 5 thin wrappers for backward compatibility  
+**After:** Single `_calculate_emi()` core function plus 5 thin public wrappers for backward compatibility  
 **Impact:** Reduced 160+ lines of duplicate code, easier maintenance
 
 ### 2. Indian Number Formatting (calculator.py)
@@ -66,7 +66,7 @@
 - Security headers middleware (CSP, HSTS, etc.)
 - Input validation
 - Security event logging
-- Custom error pages
+- Error handlers with referenced custom templates
 - Session security hardening
 **Impact:** Production-grade security posture
 
@@ -145,7 +145,7 @@
 | Security headers (CSP, HSTS, etc.) | PASS |
 | Input validation | PASS |
 | IDOR protection | PASS |
-| Custom error pages | PASS |
+| Error handlers | PRESENT; templates require verification |
 | Security event logging | PASS |
 | Bandit scan (production code) | PASS |
 | pip-audit | PASS |
@@ -184,11 +184,11 @@
 
 ### Metrics
 - **Total lines before:** 9,869
-- **Total lines after:** 9,195 (excluding security additions)
+- **Total lines after:** 9,195 (excluding security additions; historical audit metric)
 - **Net reduction:** 674 lines (6.8%)
 - **Security additions:** ~400 lines (security framework)
 - **All 25 calculators:** WORKING
 - **All routes:** WORKING
 - **Themes (5 × 2 modes):** WORKING
 - **Responsive breakpoints:** PRESERVED
-- **Security posture:** PRODUCTION READY
+- **Security posture:** PASS WITH PRODUCTION CONFIGURATION ITEMS

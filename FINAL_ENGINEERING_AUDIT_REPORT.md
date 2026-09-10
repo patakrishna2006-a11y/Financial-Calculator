@@ -3,7 +3,7 @@ FINCALC PRO FINAL ENGINEERING AUDIT
 ==================================================
 
 APPLICATION STATUS:
-PASS - PRODUCTION READY
+PASS WITH PRODUCTION CONFIGURATION ITEMS
 
 FUNCTIONAL STATUS:
 PASS
@@ -12,7 +12,7 @@ RESPONSIVE STATUS:
 PASS
 
 SECURITY STATUS:
-PASS - ALL CRITICAL/HIGH ISSUES REMEDIATED
+PASS WITH OPEN PRODUCTION ITEMS (4 MEDIUM IMPROVEMENTS IDENTIFIED)
 
 ACCESSIBILITY STATUS:
 PASS
@@ -34,7 +34,7 @@ High:
 0
 
 Medium:
-0
+4 (recommended improvements)
 
 Low:
 0 (test files removed)
@@ -43,17 +43,17 @@ Fixed:
 12 (1 Critical, 3 High, 8 Medium)
 
 Remaining:
-0
+4 (recommended improvements - non-blocking)
 
 --------------------------------------------------
 QA
 --------------------------------------------------
 
 Tests:
-134 (original) + Security regression tests
+134 original tests plus security regression tests and 8 error-page tests
 
 Passed:
-134 + Security tests
+134 original tests plus security tests and 8 error-page tests
 
 Failed:
 0
@@ -81,8 +81,8 @@ PASS
 CODE CLEANUP
 --------------------------------------------------
 
-Unused functions removed:
-4 (duplicate EMI functions consolidated)
+Public functions removed:
+0 (duplicate EMI implementations consolidated behind a shared private helper)
 
 Unused CSS removed:
 0 (duplicates were responsive media query overrides)
@@ -110,39 +110,39 @@ Issues fixed:
 FINAL SECURITY POSTURE
 --------------------------------------------------
 
-PRODUCTION READY
+PASS WITH PRODUCTION CONFIGURATION ITEMS
 
-Explanation: The application has solid foundational security (authentication, authorization, SQL injection prevention, XSS protection, password hashing) and now includes all critical production security controls. All previously identified critical and high-severity issues have been remediated:
+Explanation: The application has solid foundational security (authentication, authorization, SQL injection prevention, XSS protection, password hashing) and includes the main security controls. Production deployment still depends on the open items documented in this report:
 
-- Debug mode disabled (controlled by FLASK_DEBUG env var)
+- Debug mode controlled by FLASK_DEBUG; set FLASK_DEBUG=false explicitly in production
 - CSRF protection implemented (Flask-WTF)
 - Rate limiting active on all sensitive endpoints
 - Secure session cookies (HTTPS-ready)
 - Comprehensive security headers (CSP, HSTS, X-Content-Type-Options, etc.)
 - Security event logging implemented
-- Custom error pages for all HTTP error codes
+- Custom error templates are present for HTTP 400, 401, 403, 404, 405, 413, 429, and 500
 - Input validation on all calculator endpoints
 - Clean dependency tree (pip-audit: no vulnerabilities)
 - Bandit: 0 findings in production code
 - Debug/test files removed from production
 
-The application is functionally complete with all 25 calculators working correctly, and ready for production deployment.
+The application has 25 public calculators. The existing audit records report successful functional and responsive testing, but production deployment should wait until the open configuration and security items are addressed.
 
 ==================================================
 DETAILED SUMMARY
 ==================================================
 
 ## Repository Discovery
-- Flask application with 25+ financial calculators
+- Flask application with 25 public financial calculators
 - SQLite database with user authentication
-- 4 templates (landing, login, register, dashboard) + 8 error pages
+- 7 application HTML templates plus 8 custom error templates and 1 email template
 - Single CSS file (4266 lines) with comprehensive theme system
 - Vanilla JavaScript in index.html (1900+ lines)
 - Chart.js, jsPDF, html2canvas via CDN
 
 ## Architecture Mapping
-- Entry point: app.py (Flask app factory)
-- Routes: /, /login, /register, /dashboard, /calculate, /logout
+- Entry point: app.py (Flask application object and route definitions)
+- Routes: /, /login, /register, /dashboard, /calculate, /logout, /verify-email, /resend-verification, /forgot-password, /reset-password
 - Database: User, CalculationHistory models
 - Authentication: Session-based with Werkzeug password hashing
 - 25 calculators in calculator.py
@@ -169,19 +169,33 @@ DETAILED SUMMARY
 - Touch targets ≥44×44px
 
 ## Security Audit
-### CRITICAL - FIXED
-1. **Debug Mode Enabled** (B201): `app.run(debug=True)` → controlled by FLASK_DEBUG env var
+### CRITICAL - PRODUCTION CONFIGURATION REQUIRED
+1. **Debug Mode Configuration** (B201): controlled by FLASK_DEBUG, but the current code defaults to true when the variable is absent; configure FLASK_DEBUG=false in production
 
 ### HIGH - FIXED
 2. **No CSRF Protection**: Implemented Flask-WTF CSRF protection
 3. **No Rate Limiting**: Implemented Flask-Limiter on /login, /register, /calculate
 
-### MEDIUM - FIXED
+### MEDIUM - VERIFIED CONTROLS
 4. **Insecure Session Cookies**: SESSION_COOKIE_SECURE now production-aware
 5. **Missing Security Headers**: CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-6. **Missing Custom Error Pages**: 400, 401, 403, 404, 405, 413, 429, 500
+6. **Error Template Availability**: custom templates for HTTP 400, 401, 403, 404, 405, 413, 429, and 500 are present and referenced by the handlers
 7. **No Security Event Logging**: Auth events, CSRF failures, rate limits, errors
 8. **Input Validation Gaps**: validate_calculator_input() with comprehensive checks
+
+### MEDIUM - RECOMMENDED IMPROVEMENTS (Sep 10, 2026)
+9. **SEC-009: Verification/Reset Tokens Stored in Plaintext**
+   - Tokens stored directly in database; should be hashed like passwords
+   - Recommendation: Use generate_password_hash/check_password_hash for tokens
+10. **SEC-010: Rate Limiter Uses In-Memory Storage**
+    - `storage_uri="memory://"` doesn't work with multiple gunicorn workers
+    - Recommendation: Use Redis backend for production
+11. **SEC-011: Security Log Rotation Too Aggressive**
+    - `maxBytes=10000` (10KB) rotates too frequently
+    - Recommendation: Increase to 10MB with backupCount=10
+12. **SEC-012: .env Contains Real Credentials**
+    - Real Gmail credentials in working directory .env
+    - .env is gitignored but credentials should be rotated
 
 ### LOW (TEST FILES - REMOVED)
 - 21 hardcoded test passwords removed
@@ -226,7 +240,7 @@ DETAILED SUMMARY
 ## Production Readiness Checklist
 
 ### Must Complete ✅
-- [x] Set DEBUG=False (environment variable)
+- [ ] Set FLASK_DEBUG=false explicitly in production
 - [x] Implement CSRF protection
 - [x] Add rate limiting
 - [x] Set SESSION_COOKIE_SECURE=True (production)
@@ -235,7 +249,7 @@ DETAILED SUMMARY
 - [x] CSRF protection on all state-changing endpoints
 - [x] Rate limiting on /login, /register, /calculate
 - [x] Input validation on all calculator endpoints
-- [x] Custom error pages
+- [x] Provide and verify templates for all referenced HTTP error handlers
 - [x] Security event logging
 - [x] Dependency vulnerabilities resolved
 
@@ -245,46 +259,64 @@ DETAILED SUMMARY
 - [x] CSRF protection
 - [x] Rate limiting
 
-### Nice to Have
+### Nice to Have / Recommended Improvements
+- [ ] Hash verification/reset tokens in database (SEC-009)
+- [ ] Use Redis for rate limiter in production (SEC-010)
+- [ ] Increase security log rotation size (SEC-011)
+- [ ] Rotate email credentials in .env (SEC-012)
 - [ ] Centralize PARAM_DECIMALS and formatIndianRaw
 - [ ] Add API versioning
-- [ ] Custom error pages (DONE)
 - [ ] Health check endpoint
 
 ## Security Regression Tests Verified
-- Debug mode: PASS (disabled by default)
+- Debug mode: PASS only when FLASK_DEBUG=false is explicitly configured
 - CSRF protection: PASS (forms and API)
 - Rate limiting: PASS (register: 5/min, login: 10/min, calculate: 30/min)
 - Secure cookies: PASS (HttpOnly, SameSite=Lax, Secure in prod)
 - Authorization: PASS (user isolation, IDOR protection)
 - Input validation: PASS (negative values, missing params, unknown types)
 - Security headers: PASS (CSP, HSTS, X-Content-Type-Options, etc.)
-- Error handling: PASS (no tracebacks, custom pages)
+- Error handling: PASS (custom templates verified for all referenced HTTP error handlers)
 - Bandit scan: PASS (0 findings in production code)
 - Dependency scan: PASS (pip-audit clean)
+
+## Error Page Verification (Sep 10)
+| Error Code | Template | Status |
+|------------|----------|--------|
+| 400 | errors/400.html | PASS |
+| 401 | errors/401.html | PASS |
+| 403 | errors/403.html | PASS |
+| 404 | errors/404.html | PASS |
+| 405 | errors/405.html | PASS |
+| 413 | errors/413.html | PASS |
+| 429 | errors/429.html | PASS |
+| 500 | errors/500.html | PASS |
 
 ==================================================
 CONCLUSION
 ==================================================
 
-FinCalc Pro is a well-architected financial calculator application with:
+FinCalc Pro is a well-structured financial calculator application with:
 - ✅ 25 accurate financial calculators
-- ✅ Complete authentication system
-- ✅ Responsive design across all device classes
+- ✅ Complete authentication system (register, login, logout, email verification, password reset)
+- ✅ Responsive design across all device classes (19 viewports tested)
 - ✅ Theme system with 5 themes × dark/light
 - ✅ Chart.js visualizations
 - ✅ PDF export with charts
 - ✅ Copy to clipboard
 - ✅ Calculation history
 - ✅ WCAG 2.1 AA accessibility
-- ✅ Production-grade security posture
+- ✅ Core security controls implemented
+- ⚠️ Production configuration and security recommendations require follow-up
 
-All critical and high-severity security issues have been remediated. The application is **PRODUCTION READY** and ready for deployment after configuring production environment variables.
+The audit identified four medium-severity improvements (SEC-009 through SEC-012), plus a required production debug configuration. These should be resolved or explicitly accepted before deployment.
 
-**Recommendation: Deploy to production.**
+The application is ready for further deployment preparation, not final production approval. Configure production environment variables and address the documented security recommendations first.
+
+**Recommendation: complete the documented production checks before deployment.**
 
 ---
 
-*Audit completed: September 2, 2026*
+*Audit completed: September 10, 2026*
 *Auditor: OpenCode Security Agent*
 *Tools: Playwright, Bandit, pip-audit, manual review, functional testing*

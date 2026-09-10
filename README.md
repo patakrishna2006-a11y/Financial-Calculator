@@ -2,11 +2,10 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7.svg)](https://render.com)
-[![Security](https://img.shields.io/badge/Security-Hardened-brightgreen.svg)](SECURITY_AUDIT_REPORT.md)
+[![Security](https://img.shields.io/badge/Security-Review%20Documented-brightgreen.svg)](SECURITY_AUDIT_REPORT.md)
 
-A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. Features 25+ calculators tailored for Indian financial planning — from SIP and EMI to retirement, tax, and investment planning. **Production-ready with hardened security posture.**
+A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. It includes 25 financial calculators tailored for Indian financial planning, from SIP and EMI to retirement, tax, and investment planning.
 
 ---
 
@@ -16,16 +15,16 @@ FinCalc Pro has undergone comprehensive security hardening with zero critical/hi
 
 | Security Control | Implementation | Status |
 |------------------|----------------|--------|
-| **Debug Mode** | Disabled by default; controlled via `FLASK_DEBUG` env var | ✅ PASS |
+| **Debug Mode** | Controlled by `FLASK_DEBUG`; set it explicitly to `false` for production | ⚠️ CONFIGURE |
 | **CSRF Protection** | Flask-WTF on all forms + `X-CSRFToken` header for API | ✅ PASS |
 | **Rate Limiting** | Register: 5/min, Login: 10/min, Calculate: 30/min | ✅ PASS |
 | **Session Security** | HttpOnly, SameSite=Lax, Secure (HTTPS), 24h timeout | ✅ PASS |
 | **Security Headers** | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, CORP | ✅ PASS |
 | **Input Validation** | Server-side validation on all 25 calculator endpoints | ✅ PASS |
 | **Authorization/IDOR** | User isolation, ownership verification, session fixation prevention | ✅ PASS |
-| **Error Handling** | Custom pages (400, 401, 403, 404, 405, 413, 429, 500), no tracebacks | ✅ PASS |
+| **Error Handling** | Flask handlers return JSON or render referenced error templates; error templates are not present in the current tree | ⚠️ VERIFY |
 | **Security Logging** | Auth events, CSRF failures, rate limits, calculation errors | ✅ PASS |
-| **Dependencies** | pip-audit: 0 vulnerabilities; Bandit: 0 findings in production code | ✅ PASS |
+| **Dependencies** | Reported clean by the existing audit documents; rerun scans after dependency changes | ⚠️ RECHECK |
 
 See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security assessment.
 
@@ -38,7 +37,7 @@ See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security a
 - **Session Management** — Flask sessions with SQLite database
 - **Calculation History** — Persistent history per user with timestamps
 
-### 📊 25+ Financial Calculators
+### 📊 25 Financial Calculators
 
 | Category | Calculators |
 |----------|-------------|
@@ -92,9 +91,8 @@ See [QA_REPORT.md](QA_REPORT.md) for complete test matrix and bug details.
 ```
 Financial Calculators/
 ├── app.py                 # Flask backend — routes, auth, API endpoints, security
-├── calculator.py          # Core calculation logic (25+ functions)
+├── calculator.py          # Core calculation logic (25 public calculators)
 ├── requirements.txt       # Python dependencies
-├── Procfile               # Deployment config (gunicorn)
 ├── README.md              # This file
 ├── QA_REPORT.md           # Responsive QA test results
 ├── SECURITY_AUDIT_REPORT.md  # Complete security assessment
@@ -103,13 +101,18 @@ Financial Calculators/
 │   ├── users.db           # SQLite database (auto-created)
 │   └── security.log       # Security event log (rotating)
 ├── static/
-│   └── style.css          # Complete stylesheet (CSS variables, responsive, performant)
+│   └── style.css          # Complete stylesheet (themes, responsive rules, animations)
 └── templates/
     ├── index.html         # Main dashboard (SPA with all calculators)
     ├── landing.html       # Public landing page with stats & features
     ├── login.html         # Login page
     ├── register.html      # Registration page
+    ├── forgot_password.html
+    ├── reset_password.html
+    └── email/verification.html
 ```
+
+The current workspace also contains the audit and QA documents linked below. Runtime-generated files such as the SQLite database and security log may appear under `instance/` after the application starts.
 ---
 
 ## 🚀 Quick Start
@@ -123,7 +126,7 @@ Financial Calculators/
 ```bash
 # 1. Clone the repository
 git clone https://github.com/patakrishna2006-a11y/Financial-calculator.git
-cd "Financial Calculators"
+cd "Financial Calculator"
 
 # 2. Create virtual environment (recommended)
 python -m venv venv
@@ -149,6 +152,16 @@ Create a `.env` file in the project root:
 ```env
 # Required for production
 FLASK_SECRET_KEY=your-super-secret-key-change-in-production
+FLASK_DEBUG=false
+DATABASE_URL=sqlite:///users.db
+# Mail settings are required for verification and password reset email delivery.
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USERNAME=your-mailbox@example.com
+MAIL_PASSWORD=your-mail-password
+MAIL_DEFAULT_SENDER=your-mailbox@example.com
+BASE_URL=http://localhost:5000
 ```
 
 ---
@@ -255,12 +268,12 @@ docker run -p 5000:5000 fincalc-pro
 
 ### Database
 - **Default**: SQLite (`instance/users.db`) — auto-created on first run
-- **Production**: Set `DATABASE_URL` to PostgreSQL/MySQL URI
+- **Production**: Set `DATABASE_URL` to a supported SQLAlchemy database URI and install its matching driver
 
 ### Security
 - Change `SECRET_KEY` in production (use `secrets.token_hex(32)`)
 - Enable HTTPS in production (Render/Railway/Heroku provide this automatically)
-- Consider adding rate limiting for API endpoints
+- Keep `FLASK_DEBUG=false` and provide a shared rate-limit store such as Redis when running multiple workers
 
 ### Customization
 - **Calculators**: Modify `calculator.py` to add/change formulas
@@ -279,6 +292,7 @@ docker run -p 5000:5000 fincalc-pro
 | `werkzeug` | ≥3.0.0 | Security utilities (password hashing) |
 | `flask_wtf` | ≥1.2.0 | CSRF protection |
 | `flask_limiter` | ≥3.8.0 | Rate limiting |
+| `flask-mail` | ≥0.10.0 | Verification and password-reset email delivery |
 | `python-dotenv` | ≥1.0.0 | Environment variable loading |
 
 ---
@@ -318,12 +332,6 @@ def api_my_calculator():
 
 ---
 
-## 📄 License
-
-MIT License — feel free to use, modify, and distribute.
-
----
-
 ## 🙏 Acknowledgments
 
 - **Flask** — Lightweight Python web framework
@@ -352,4 +360,4 @@ Complete responsive test results: [QA_REPORT.md](QA_REPORT.md)
 
 ---
 
-**Made with ❤️ for Indian Financial Planning**
+**Documentation scope:** This README describes the current workspace structure and configuration. The audit documents are historical test records and should be rerun when application code or dependencies change.

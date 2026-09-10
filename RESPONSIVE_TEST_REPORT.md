@@ -10,7 +10,7 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 
 **Date:** September 2, 2026
 **Environment:** Playwright Chromium (headless), Flask development server
-**Pages Tested:** Landing Page, Login Page, Register Page, Dashboard
+**Pages Tested:** Landing Page, Login Page, Register Page, Dashboard (authenticated coverage is separately noted below)
 **Device Viewports:** 19 (8 mobile portrait, 4 mobile landscape, 3 tablet, 4 desktop)
 
 ## Device Testing Results
@@ -113,7 +113,7 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 - ✅ Tables scroll horizontally within container (not page)
 - ✅ PDF export accessible on all devices
 - ✅ No console errors
-- ✅ Existing calculations unchanged
+- ✅ Existing calculations unchanged in the responsive regression scope
 - ✅ Authentication flow works
 - ✅ History accessible
 
@@ -146,7 +146,11 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 - Safari iOS / Chrome Android on physical hardware (tested via Chromium emulation)
 - PDF generation output visual verification on mobile browsers
 - Performance profiling on low-end devices
-- Dashboard/calculator pages (require authenticated session — manual verification recommended)
+- Full authenticated dashboard/calculator interaction coverage was not independently reproduced in this report; manual verification remains recommended
+
+## Current Workspace Note
+
+This report records the September 2, 2026 test session. The current workspace contains the seven HTML templates listed in the README and one stylesheet; this document does not add or imply any test harness files.
 
 ## Security Regression Tests (Additional)
 
@@ -162,7 +166,7 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 | Security headers present | PASS |
 | Input validation | PASS |
 | IDOR protection | PASS |
-| Custom error pages | PASS |
+| Error handlers | PRESENT; templates require verification |
 | Bandit scan (prod code) | PASS |
 | pip-audit | PASS |
 
