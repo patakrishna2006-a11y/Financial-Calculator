@@ -53,6 +53,7 @@ PARAM_DECIMALS = {
     "Original price": 2, "Gst rate": 2, "Current price": 2,
     "Rate": 2, "Initial value": 2, "Final value": 2,
     "Buy price": 2, "Sell price": 2, "Brokerage": 2,
+    "From Currency": 0, "To Currency": 0, "Amount": 8,
     "Years": 0, "Years of service": 0, "Current age": 0,
     "Retirement age": 0, "Life expectancy": 0, "Age": 0,
     "Quantity": 0, "Compounding_per_year": 0,
@@ -500,4 +501,40 @@ def BROKERAGE_CALCULATOR(segment, Quantity, buy_price, sell_price, brokerage):
         "Stamp Duty": format_indian(stamp, 2),
         "Total Charges": format_indian(total_charges, 2),
         "Net P&L": format_indian(net_pnl, 2)
+    }
+
+
+# CRYPTOCURRENCY CONVERTER
+def CRYPTO_CONVERTER(from_currency, to_currency, amount, prices):
+    """Convert between two cryptocurrencies using cached prices."""
+    from_currency = from_currency.lower()
+    to_currency = to_currency.lower()
+    
+    if from_currency not in prices or to_currency not in prices:
+        return {"Error": "Currency not found in price data"}
+    
+    from_price = prices[from_currency]
+    to_price = prices[to_currency]
+    
+    if from_price == 0 or to_price == 0:
+        return {"Error": "Invalid price data"}
+    
+    # Convert: amount * from_price = USD value, then USD value / to_price = result
+    usd_value = amount * from_price
+    result = usd_value / to_price
+    
+    # Also calculate INR values if INR rate is available
+    inr_rate = prices.get("inr", 83.0)  # Default fallback
+    from_inr = amount * from_price * inr_rate
+    to_inr = result * to_price * inr_rate
+    
+    return {
+        "From Currency": from_currency.upper(),
+        "To Currency": to_currency.upper(),
+        "From Amount": f"{amount:.8f}",
+        "To Amount": f"{result:.8f}",
+        "From Value (USD)": f"${usd_value:,.2f}",
+        "To Value (USD)": f"${usd_value:,.2f}",
+        "From Value (INR)": f"₹{from_inr:,.2f}",
+        "To Value (INR)": f"₹{to_inr:,.2f}",
     }
