@@ -53,6 +53,7 @@ PARAM_DECIMALS = {
     "Original price": 2, "Gst rate": 2, "Current price": 2,
     "Rate": 2, "Initial value": 2, "Final value": 2,
     "Buy price": 2, "Sell price": 2, "Brokerage": 2,
+    "From Currency": 0, "To Currency": 0, "Amount": 8,
     "Years": 0, "Years of service": 0, "Current age": 0,
     "Retirement age": 0, "Life expectancy": 0, "Age": 0,
     "Quantity": 0, "Compounding_per_year": 0,
@@ -500,4 +501,77 @@ def BROKERAGE_CALCULATOR(segment, Quantity, buy_price, sell_price, brokerage):
         "Stamp Duty": format_indian(stamp, 2),
         "Total Charges": format_indian(total_charges, 2),
         "Net P&L": format_indian(net_pnl, 2)
+    }
+
+
+# CRYPTOCURRENCY CONVERTER
+def CRYPTO_CONVERTER(from_currency, to_currency, amount, prices):
+    """Convert crypto/INR using live USD-denominated market prices and live USD/INR FX data."""
+    from_currency = from_currency.lower()
+    to_currency = to_currency.lower()
+
+    if from_currency not in prices or to_currency not in prices:
+        return {"Error": "Currency not found in price data"}
+
+    from_price = float(prices[from_currency])
+    to_price = float(prices[to_currency])
+
+    if from_price <= 0 or to_price <= 0:
+        return {"Error": "Invalid price data"}
+
+    usd_value = amount * from_price
+    result = usd_value / to_price
+
+    usd_inr_rate = float(prices.get("usd_inr_rate", 0))
+    if usd_inr_rate <= 0:
+        usd_per_inr = float(prices.get("inr", 0))
+        usd_inr_rate = 1 / usd_per_inr if usd_per_inr > 0 else 0
+
+    from_inr = usd_value * usd_inr_rate if usd_inr_rate > 0 else 0
+    to_inr = result * to_price * usd_inr_rate if usd_inr_rate > 0 else 0
+
+    return {
+        "From Currency": from_currency.upper(),
+        "To Currency": to_currency.upper(),
+        "From Amount": f"{amount:.8f}",
+        "To Amount": f"{result:.8f}",
+        "From Value (USD)": f"${usd_value:,.2f}",
+        "To Value (USD)": f"${(result * to_price):,.2f}",
+        "From Value (INR)": f"₹{from_inr:,.2f}",
+        "To Value (INR)": f"₹{to_inr:,.2f}",
+    }
+
+# USD/INR CONVERTER
+def USD_INR_CONVERTER(from_currency, to_currency, amount, usd_inr_rate):
+    """Convert between USD and INR using live exchange rate."""
+    from_currency = from_currency.upper()
+    to_currency = to_currency.upper()
+    
+    if from_currency not in ("USD", "INR") or to_currency not in ("USD", "INR"):
+        return {"Error": "Only USD and INR conversions are supported"}
+    
+    if from_currency == to_currency:
+        return {
+            "From Currency": from_currency,
+            "To Currency": to_currency,
+            "From Amount": f"{amount:.2f}",
+            "To Amount": f"{amount:.2f}",
+            "Rate": f"1 {from_currency} = 1 {to_currency}",
+        }
+    
+    if from_currency == "USD" and to_currency == "INR":
+        result = amount * usd_inr_rate
+        rate_str = f"1 USD = ₹{usd_inr_rate:.4f}"
+    else:  # INR to USD
+        result = amount / usd_inr_rate
+        rate_str = f"1 USD = ₹{usd_inr_rate:.4f}"
+    
+    return {
+        "From Currency": from_currency,
+        "To Currency": to_currency,
+        "From Amount": f"{amount:.2f}",
+        "To Amount": f"{result:.2f}",
+        "Rate": rate_str,
+        "From Value (INR)": f"₹{amount:.2f}" if from_currency == "INR" else f"₹{amount * usd_inr_rate:,.2f}",
+        "To Value (INR)": f"₹{result:.2f}" if to_currency == "INR" else f"₹{result * usd_inr_rate:,.2f}",
     }
