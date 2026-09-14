@@ -31,6 +31,7 @@ from calculator import (
     GOLD_LOAN_EMI, EDUCATION_LOAN_EMI, FLAT_VS_REDUCING,
     SIMPLE_INTEREST, COMPOUND_INTEREST, GST, CAGR,
     INFLATION, BROKERAGE_CALCULATOR, CRYPTO_CONVERTER,
+    USD_INR_CONVERTER,
     format_indian_raw, PARAM_DECIMALS
 )
 
@@ -149,6 +150,11 @@ _crypto_cache = {"prices": {}, "timestamp": 0, "coins": []}
 _crypto_lock = threading.Lock()
 CACHE_TTL = 30  # seconds
 
+# --- USD/INR Exchange Rate Caching ---
+_usd_inr_cache = {"rate": None, "timestamp": 0, "source_updated_at": None}
+_usd_inr_lock = threading.Lock()
+USD_INR_CACHE_TTL = 60  # Recheck provider every 60 seconds
+
 COINGECKO_TOP_100_IDS = [
     "bitcoin", "ethereum", "tether", "binancecoin", "solana",
     "usd-coin", "staked-ether", "xrp", "dogecoin", "toncoin",
@@ -165,8 +171,7 @@ COINGECKO_TOP_100_IDS = [
     "sushi", "1inch", "balancer", "bancor", "kyber-network",
     "0x", "loopring", "ren", "uma", "alchemy-pay",
     "mask-network", "audius", "rally", "superrare", "nftx",
-    "fractional", "whale", "nft-index", "muse", "rare",
-    "inr"
+    "fractional", "whale", "nft-index", "muse", "rare"
 ]
 
 def fetch_crypto_prices():
@@ -270,12 +275,13 @@ def fetch_crypto_prices():
             # Also store lowercase for lookup
             prices[symbol.lower()] = price_data.get("usd", 0)
         
-        # Add INR rate
-        if "inr" in data:
-            prices["inr"] = data["inr"].get("inr", 83.0)
-        else:
-            prices["inr"] = 83.0
-        
+        # Normalize INR to USD-per-INR so it can participate in
+        # the same conversion formula as crypto assets.
+        usd_inr_rate = get_cached_usd_inr_rate()
+        if usd_inr_rate and usd_inr_rate > 0:
+            prices["inr"] = 1.0 / usd_inr_rate
+            prices["usd_inr_rate"] = usd_inr_rate
+
         return prices
     except Exception as e:
         log_security_event('CRYPTO_PRICE_FETCH_ERROR', str(e), ip=request.remote_addr if request else None)
@@ -304,15 +310,101 @@ def get_cached_crypto_prices():
         return _crypto_cache["prices"], _crypto_cache["coins"]
 
 
+def fetch_usd_inr_rate():
+    """Fetch the latest USD/INR rate from CurrencyAPI.
+
+    CurrencyAPI requires an API key. Its freshness depends on the plan:
+    free = daily, Small = hourly, Medium/Large = 60-second updates.
+    We never substitute a hard-coded FX value.
+    """
+    api_key = os.environ.get("CURRENCY_API_KEY")
+    if not api_key:
+        log_security_event(
+            'USD_INR_CONFIG_ERROR',
+            'CURRENCY_API_KEY is not configured',
+            ip=request.remote_addr if request else None
+        )
+        return None
+
+    try:
+        url = "https://api.currencyapi.com/v3/latest"
+        resp = requests.get(
+            url,
+            headers={"apikey": api_key},
+            params={"base_currency": "USD", "currencies": "INR"},
+            timeout=10
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        rate = (data.get("data", {}).get("INR", {}) or {}).get("value")
+        if rate is not None and float(rate) > 0:
+            return float(rate)
+
+        raise ValueError("CurrencyAPI returned no valid USD/INR rate")
+    except Exception as e:
+        log_security_event('USD_INR_FETCH_ERROR', str(e), ip=request.remote_addr if request else None)
+
+    return None
+
+
+def get_cached_usd_inr_rate():
+    """Get cached USD/INR rate, fetching if stale."""
+    global _usd_inr_cache
+    now = time.time()
+    
+    with _usd_inr_lock:
+        if now - _usd_inr_cache["timestamp"] < USD_INR_CACHE_TTL and _usd_inr_cache["rate"]:
+            return _usd_inr_cache["rate"]
+        
+        # Fetch fresh rate
+        rate = fetch_usd_inr_rate()
+        if rate:
+            _usd_inr_cache["rate"] = rate
+            _usd_inr_cache["timestamp"] = now
+            return rate
+        
+        # Return the last successful rate only. Never invent a fallback FX rate.
+        return _usd_inr_cache["rate"]
+
+
+@app.route('/api/usd-inr/rate')
+@limiter.limit("60 per minute")
+def usd_inr_rate():
+    """Return the latest available USD/INR rate from CurrencyAPI."""
+    rate = get_cached_usd_inr_rate()
+    if not rate:
+        return jsonify({
+            "success": False,
+            "error": "Live USD/INR rate is unavailable. Configure CURRENCY_API_KEY."
+        }), 503
+
+    return jsonify({
+        "success": True,
+        "rate": rate,
+        "provider": "CurrencyAPI",
+        "cached_at": _usd_inr_cache["timestamp"],
+        "source_updated_at": _usd_inr_cache.get("source_updated_at")
+    })
+
+
 @app.route('/api/crypto/prices')
 @limiter.limit("60 per minute")
 def crypto_prices():
     """API endpoint for cached crypto prices."""
     prices, coins = get_cached_crypto_prices()
+    usd_inr_rate = get_cached_usd_inr_rate()
+    if not prices or not usd_inr_rate:
+        return jsonify({
+            "success": False,
+            "error": "Live market rates are temporarily unavailable"
+        }), 503
+
     return jsonify({
         "success": True,
         "prices": prices,
         "coins": coins,
+        "usd_inr_rate": usd_inr_rate,
         "cached_at": _crypto_cache["timestamp"]
     })
 
@@ -500,6 +592,7 @@ def validate_calculator_input(calc_type, params):
         'INFLATION': lambda p: all(k in p for k in ['Current price', 'Rate', 'Years']),
         'BROKERAGE_CALCULATOR': lambda p: all(k in p for k in ['Segment', 'Quantity', 'Buy price', 'Sell price', 'Brokerage']),
         'CRYPTO_CONVERTER': lambda p: all(k in p for k in ['From Currency', 'To Currency', 'Amount']),
+        'USD_INR_CONVERTER': lambda p: all(k in p for k in ['From Currency', 'To Currency', 'Amount']),
     }
     
     if calc_type not in validators:
@@ -906,7 +999,8 @@ def calculate():
         "SALARY_CALCULATOR", "EMI", "HOME_LOAN_EMI", "CAR_LOAN_EMI",
         "GOLD_LOAN_EMI", "EDUCATION_LOAN_EMI", "FLAT_VS_REDUCING",
         "SIMPLE_INTEREST", "COMPOUND_INTEREST", "GST", "CAGR",
-        "INFLATION", "BROKERAGE_CALCULATOR", "CRYPTO_CONVERTER"
+        "INFLATION", "BROKERAGE_CALCULATOR", "CRYPTO_CONVERTER",
+        "USD_INR_CONVERTER"
     ]
     
     if calc_type not in valid_types:
@@ -956,7 +1050,8 @@ def calculate():
             "CAGR": lambda p: CAGR(safe_float(p.get("Initial value")), safe_float(p.get("Final value")), safe_float(p.get("Years"))),
             "INFLATION": lambda p: INFLATION(safe_float(p.get("Current price")), safe_float(p.get("Rate")), safe_float(p.get("Years"))),
             "BROKERAGE_CALCULATOR": lambda p: BROKERAGE_CALCULATOR(p.get("Segment", "delivery"), safe_int(p.get("Quantity")), safe_float(p.get("Buy price")), safe_float(p.get("Sell price")), safe_float(p.get("Brokerage"))),
-            "CRYPTO_CONVERTER": lambda p: CRYPTO_CONVERTER(p.get("From Currency"), p.get("To Currency"), safe_float(p.get("Amount")), get_cached_crypto_prices()[0])
+            "CRYPTO_CONVERTER": lambda p: CRYPTO_CONVERTER(p.get("From Currency"), p.get("To Currency"), safe_float(p.get("Amount")), get_cached_crypto_prices()[0]),
+            "USD_INR_CONVERTER": lambda p: USD_INR_CONVERTER(p.get("From Currency"), p.get("To Currency"), safe_float(p.get("Amount")), get_cached_usd_inr_rate())
         }
 
         if calc_type in calculators:
@@ -993,5 +1088,5 @@ def calculate():
         return jsonify({"success": False, "error": "Calculation failed"}), 500
 
 if __name__ == "__main__":
-    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    debug_mode = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
     app.run(debug=debug_mode)

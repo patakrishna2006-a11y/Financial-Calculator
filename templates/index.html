@@ -1316,11 +1316,10 @@
 
   function convertCrypto() {
     if (isUpdatingInputs) return;
-    
+
     const fromSelect = document.getElementById('CRYPTO_CONVERTER-From Currency');
     const toSelect = document.getElementById('CRYPTO_CONVERTER-To Currency');
     const amountInput = document.getElementById('CRYPTO_CONVERTER-Amount');
-    const loading = document.getElementById('CRYPTO_CONVERTER-loading');
     const errorBox = document.getElementById('CRYPTO_CONVERTER-error');
     const resultBox = document.getElementById('CRYPTO_CONVERTER-result');
 
@@ -1328,123 +1327,81 @@
     const toCurrency = toSelect.value;
     const amount = parseFloat(amountInput.value) || 0;
 
-    if (!fromCurrency || !toCurrency || amount <= 0) {
+    if (!fromCurrency || !toCurrency || amount <= 0) return;
+
+    const usdInrRate = Number(cryptoPrices.usd_inr_rate);
+    if (!Number.isFinite(usdInrRate) || usdInrRate <= 0) {
+      errorBox.textContent = '⚠ USD/INR rate is unavailable';
+      errorBox.classList.add('show');
       return;
     }
 
-    // Use cached prices for instant conversion
-    const prices = cryptoPrices;
-    if (!prices[fromCurrency] || !prices[toCurrency]) {
+    // Normalize every currency to USD per unit. INR is the reciprocal of USD/INR.
+    const fromPrice = fromCurrency === 'INR'
+      ? 1 / usdInrRate
+      : Number(cryptoPrices[fromCurrency]);
+    const toPrice = toCurrency === 'INR'
+      ? 1 / usdInrRate
+      : Number(cryptoPrices[toCurrency]);
+
+    if (!Number.isFinite(fromPrice) || !Number.isFinite(toPrice) || fromPrice <= 0 || toPrice <= 0) {
       errorBox.textContent = '⚠ Price data not available for selected currencies';
       errorBox.classList.add('show');
       return;
     }
 
-    const fromPrice = prices[fromCurrency];
-    const toPrice = prices[toCurrency];
-
-    // Convert: amount * fromPrice = USD value, then USD value / toPrice = result
     const usdValue = amount * fromPrice;
     const result = usdValue / toPrice;
-    
-    // Fetch latest INR rate in real-time
-    fetch('/api/crypto/inr')
-      .then(res => res.json())
-      .then(data => {
-        const inrRate = data.success ? data.inr_rate : (prices['inr'] || prices['INR'] || 83.0);
-        
-        // INR values
-        const fromInr = usdValue * inrRate;
-        const toInr = usdValue * inrRate; // Same USD value
+    const toUsdValue = result * toPrice;
+    const fromInr = usdValue * usdInrRate;
+    const toInr = toUsdValue * usdInrRate;
+    const rate = fromPrice / toPrice;
 
-        // Update result grid
-        const grid = document.getElementById('CRYPTO_CONVERTER-result-grid');
-        grid.innerHTML = '';
+    const grid = document.getElementById('CRYPTO_CONVERTER-result-grid');
+    grid.innerHTML = '';
 
-        const results = [
-          { key: 'From Amount', value: `${amount.toFixed(4)} ${fromCurrency}`, class: '' },
-          { key: 'To Amount', value: `${result.toFixed(4)} ${toCurrency}`, class: 'highlight' },
-          { key: 'From Value (USD)', value: `$${usdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: '' },
-          { key: 'To Value (USD)', value: `$${usdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: 'gold-val' },
-          { key: 'From Value (INR)', value: `₹${fromInr.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: '' },
-          { key: 'To Value (INR)', value: `₹${toInr.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: 'gold-val' },
-        ];
+    const results = [
+      { key: 'From Amount', value: `${amount.toFixed(4)} ${fromCurrency}`, class: '' },
+      { key: 'To Amount', value: `${result.toFixed(4)} ${toCurrency}`, class: 'highlight' },
+      { key: 'From Value (USD)', value: `$${usdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: '' },
+      { key: 'To Value (USD)', value: `$${toUsdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: 'gold-val' },
+      { key: 'From Value (INR)', value: `₹${fromInr.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: '' },
+      { key: 'To Value (INR)', value: `₹${toInr.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: 'gold-val' },
+    ];
 
-        results.forEach(({ key, value, class: valClass }) => {
-          const item = document.createElement('div');
-          item.className = 'result-item';
-          item.innerHTML = `
-            <div class="result-key">${key}</div>
-            <div class="result-value ${valClass}">${value}</div>
-          `;
-          grid.appendChild(item);
-        });
+    results.forEach(({ key, value, class: valClass }) => {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      item.innerHTML = `
+        <div class="result-key">${key}</div>
+        <div class="result-value ${valClass}">${value}</div>
+      `;
+      grid.appendChild(item);
+    });
 
-        // Update rate info
-        const rateInfo = document.getElementById('crypto-rate-info');
-        const rate = fromPrice / toPrice; // 1 fromCurrency = rate toCurrency
-        rateInfo.innerHTML = `
-          <strong>Rate:</strong> 1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency} 
-          | 1 ${toCurrency} = ${(1/rate).toFixed(4)} ${fromCurrency}
-          <br><small style="color:var(--text-muted);">Prices cached from CoinGecko • Auto-refreshes every 30s • INR rate: real-time</small>
-        `;
+    const rateInfo = document.getElementById('crypto-rate-info');
+    rateInfo.innerHTML = `
+      <strong>Rate:</strong> 1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}
+      | 1 ${toCurrency} = ${(1 / rate).toFixed(4)} ${fromCurrency}
+      <br><small style="color:var(--text-muted);">Crypto prices: CoinGecko • Refresh: 30s • USD/INR Exchange rate: ${usdInrRate.toFixed(4)}</small>
+    `;
 
-        resultBox.classList.add('show');
-        errorBox.classList.remove('show');
-      })
-      .catch(err => {
-        console.warn('INR rate fetch failed, using cached:', err);
-        // Fallback to cached INR rate
-        const inrRate = prices['inr'] || prices['INR'] || 83.0;
-        const fromInr = usdValue * inrRate;
-        const toInr = usdValue * inrRate;
-
-        const grid = document.getElementById('CRYPTO_CONVERTER-result-grid');
-        grid.innerHTML = '';
-
-        const results = [
-          { key: 'From Amount', value: `${amount.toFixed(4)} ${fromCurrency}`, class: '' },
-          { key: 'To Amount', value: `${result.toFixed(4)} ${toCurrency}`, class: 'highlight' },
-          { key: 'From Value (USD)', value: `$${usdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: '' },
-          { key: 'To Value (USD)', value: `$${usdValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: 'gold-val' },
-          { key: 'From Value (INR)', value: `₹${fromInr.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: '' },
-          { key: 'To Value (INR)', value: `₹${toInr.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, class: 'gold-val' },
-        ];
-
-        results.forEach(({ key, value, class: valClass }) => {
-          const item = document.createElement('div');
-          item.className = 'result-item';
-          item.innerHTML = `
-            <div class="result-key">${key}</div>
-            <div class="result-value ${valClass}">${value}</div>
-          `;
-          grid.appendChild(item);
-        });
-
-        const rateInfo = document.getElementById('crypto-rate-info');
-        const rate = fromPrice / toPrice;
-        rateInfo.innerHTML = `
-          <strong>Rate:</strong> 1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency} 
-          | 1 ${toCurrency} = ${(1/rate).toFixed(4)} ${fromCurrency}
-          <br><small style="color:var(--text-muted);">Prices cached from CoinGecko • Auto-refreshes every 30s</small>
-        `;
-
-        resultBox.classList.add('show');
-        errorBox.classList.remove('show');
-      });
+    resultBox.classList.add('show');
+    errorBox.classList.remove('show');
   }
 
   function startCryptoPriceRefresh() {
     // Clear any existing timer
     if (cryptoPriceFetchTimer) clearInterval(cryptoPriceFetchTimer);
     
-    // Refresh every 30 seconds
+    // Refresh every 60 seconds
     cryptoPriceFetchTimer = setInterval(async () => {
       try {
         const response = await fetch('/api/crypto/prices');
         const data = await response.json();
         if (data.success) {
           cryptoPrices = data.prices || {};
+          if (data.usd_inr_rate) cryptoPrices.usd_inr_rate = Number(data.usd_inr_rate);
           cryptoCoins = data.coins || [];
           
           // If panel is active, update the conversion
@@ -1455,7 +1412,7 @@
       } catch (e) {
         console.warn('Crypto price refresh failed:', e);
       }
-    }, 30000);
+    }, 60000);
   }
 
   function stopCryptoPriceRefresh() {
@@ -3081,4 +3038,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
   </script>
 </body>
-</html>
+</html>s
