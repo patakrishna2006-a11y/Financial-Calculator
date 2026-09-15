@@ -1432,9 +1432,11 @@
   };
 
   async function calculate(type) {
-    // Crypto converter uses client-side conversion with cached prices
+    // Crypto converter: do client-side conversion for real-time updates AND call API for history storage
     if (type === 'CRYPTO_CONVERTER') {
-      convertCrypto();
+      convertCrypto(); // Real-time UI update
+      // Also call API to store in history
+      await calculateCryptoForHistory();
       return;
     }
 
@@ -1484,6 +1486,44 @@
       loading.classList.remove('show');
       errorBox.textContent = '⚠ Network error: ' + e.message;
       errorBox.classList.add('show');
+    }
+  }
+
+  // Call /calculate for crypto converter to store in history
+  async function calculateCryptoForHistory() {
+    const fromSelect = document.getElementById('CRYPTO_CONVERTER-From Currency');
+    const toSelect = document.getElementById('CRYPTO_CONVERTER-To Currency');
+    const amountInput = document.getElementById('CRYPTO_CONVERTER-Amount');
+
+    if (!fromSelect || !toSelect || !amountInput) return;
+
+    const fromCurrency = fromSelect.value;
+    const toCurrency = toSelect.value;
+    const amount = parseFloat(amountInput.value) || 0;
+
+    if (!fromCurrency || !toCurrency || amount <= 0) return;
+
+    const params = {
+      'From Currency': fromCurrency,
+      'To Currency': toCurrency,
+      'Amount': amount
+    };
+
+    try {
+      const res = await fetch('/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ type: 'CRYPTO_CONVERTER', params })
+      });
+      // Don't need to handle response - just storing in history
+      const data = await res.json();
+    } catch (e) {
+      console.warn('Failed to store crypto conversion in history:', e);
     }
   }
 

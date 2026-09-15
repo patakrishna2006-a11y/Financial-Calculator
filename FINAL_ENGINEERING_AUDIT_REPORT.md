@@ -137,7 +137,7 @@ DETAILED SUMMARY
 ==================================================
 
 ## Repository Discovery
-- Flask application with 25 public financial calculators
+- Flask application with 26 public financial calculators
 - SQLite database with user authentication
 - 7 application HTML templates plus 8 custom error templates and 1 email template
 - Single CSS file (4266 lines) with comprehensive theme system
@@ -149,18 +149,18 @@ DETAILED SUMMARY
 - Routes: /, /login, /register, /dashboard, /calculate, /logout, /verify-email, /resend-verification, /forgot-password, /reset-password
 - Database: User, CalculationHistory models
 - Authentication: Session-based with Werkzeug password hashing
-- 25 calculators in calculator.py
+- 26 calculators in calculator.py (including Crypto Converter)
 - Theme system: 5 themes × dark/light mode
 - Responsive breakpoints: 320px, 360px, 375px, 390px, 414px, 768px, 1024px, 1280px, 1920px
 
 ## Functional Testing
-- All 25 calculators verified with known values
+- All 26 calculators verified with known values
 - Authentication flow: register → login → dashboard → logout
 - Navigation: sidebar, search, theme switching
 - Charts: 10 calculator types with Chart.js
 - PDF Export: jsPDF + html2canvas
 - Copy Results: Clipboard API
-- History: Persistent per-user storage
+- History: Persistent per-user storage (including Crypto Converter)
 - All previously passing functionality maintained
 
 ## Responsive Testing
@@ -223,7 +223,7 @@ DETAILED SUMMARY
 - Consolidated format_indian functions (shared core)
 - Moved ~645 lines of inline CSS from templates to style.css
 - Net reduction: 674 lines (6.8%)
-- All 25 calculators still work correctly
+- All 26 calculators still work correctly (including Crypto Converter)
 - Debug/test files removed from production
 
 ## Accessibility (WCAG 2.1 AA)
@@ -276,6 +276,7 @@ DETAILED SUMMARY
 - [x] Use Redis for rate limiter in production (SEC-010) — **RESOLVED**
 - [x] Increase security log rotation size (SEC-011) — **RESOLVED**
 - [x] Rotate email credentials in .env (SEC-012) — **RESOLVED**
+- [x] Crypto converter history storage with real-time rates — **RESOLVED**
 - [ ] Centralize PARAM_DECIMALS and formatIndianRaw
 - [ ] Add API versioning
 - [ ] Health check endpoint
@@ -295,6 +296,7 @@ DETAILED SUMMARY
 - Rate limiter Redis config (SEC-010): PASS
 - Log rotation (SEC-011): PASS
 - .env credentials (SEC-012): PASS
+- Crypto converter history storage: PASS
 
 ## Error Page Verification (Sep 15)
 | Error Code | Template | Status |
