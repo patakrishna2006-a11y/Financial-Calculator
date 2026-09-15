@@ -38,7 +38,7 @@ See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security a
 - **Session Management** — Flask sessions with SQLite database
 - **Calculation History** — Persistent history per user with timestamps
 
-### 📊 25 Financial Calculators
+### 📊 26 Financial Calculators
 
 | Category | Calculators |
 |----------|-------------|
@@ -46,6 +46,7 @@ See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security a
 | **Retirement & Planning** | Retirement Corpus, Inflation Impact, CAGR |
 | **Loans & EMIs** | EMI, Home Loan, Car Loan, Gold Loan, Education Loan, Flat vs Reducing Balance |
 | **General Finance** | Simple Interest, Compound Interest, GST, Gratuity, Salary Breakdown, Brokerage |
+| **Crypto** | Crypto Converter (100+ coins, real-time rates, USD/INR conversion) |
 
 ### 🎨 Modern UI/UX
 - **Dark/Light Theme** — 5 color themes (Indigo, Green, Orange, Purple, Teal) with glassmorphism effects
@@ -223,6 +224,12 @@ CURRENCY_API_KEY=<your-currency-api-key>
 | **Gratuity** | `GRATUITY(basic, DA, years)` | End-of-service benefit (15/26 formula) |
 | **Salary** | `SALARY_CALCULATOR(ctc)` | CTC breakdown: basic, HRA, PF, tax, in-hand |
 | **Brokerage** | `BROKERAGE_CALCULATOR(buy, sell, qty, brokerage%)` | Trade charges, STT, turnover, net P&L |
+
+### Crypto Calculator
+
+| Calculator | Function | Key Parameters |
+|------------|----------|----------------|
+| **Crypto Converter** | `CRYPTO_CONVERTER(from, to, amount, prices)` | From/to currency (100+ coins + INR), amount, real-time prices |
 
 ---
 

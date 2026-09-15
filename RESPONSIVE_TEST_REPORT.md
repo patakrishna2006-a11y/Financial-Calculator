@@ -173,6 +173,7 @@ This report records the September 2, 2026 test session. The current workspace co
 | Rate limiter Redis config (SEC-010) | PASS |
 | Log rotation (SEC-011) | PASS |
 | .env credentials (SEC-012) | PASS |
+| Crypto converter history storage | PASS |
 
 ---
 

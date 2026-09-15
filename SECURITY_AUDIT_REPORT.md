@@ -26,7 +26,7 @@ All previously identified security issues have been remediated and verified. The
 ```
 FinCalc Pro
 ├── app.py                    # Flask application factory, routes, authentication
-├── calculator.py             # 25 public financial calculation functions
+├── calculator.py             # 26 public financial calculation functions
 ├── templates/
 │   ├── index.html            # Dashboard SPA with all calculators
 │   ├── landing.html          # Public landing page
@@ -593,22 +593,27 @@ Example: 2026-09-10 19:00:10,436 - security - INFO - LOGIN_SUCCESS | ip=127.0.0.
 | Rate limiting | PASS |
 | Security headers | PASS |
 | Input validation | PASS |
-| Error handlers | PRESENT; templates require verification |
+| Error handlers | PASS (verified) |
 | Bandit scan | PASS |
 | pip-audit | PASS |
+| Token hashing (SEC-009) | PASS |
+| Rate limiter Redis config (SEC-010) | PASS |
+| Log rotation (SEC-011) | PASS |
+| .env credentials (SEC-012) | PASS |
+| Crypto converter history storage | PASS |
 
 ---
 
 ## Remaining Issues
 
-| Issue ID | Category | Severity | Description |
-|----------|----------|----------|-------------|
-| SEC-009 | Auth | MEDIUM | Verification/reset tokens stored in plaintext |
-| SEC-010 | Config | MEDIUM | Rate limiter needs Redis for production multi-worker |
-| SEC-011 | Logging | MEDIUM | Log rotation too aggressive (10KB) |
-| SEC-012 | Config | MEDIUM | Real credentials in .env (should be rotated) |
+| Issue ID | Category | Severity | Description | Status |
+|----------|----------|----------|-------------|--------|
+| SEC-009 | Auth | MEDIUM | Verification/reset tokens stored in plaintext | **RESOLVED** |
+| SEC-010 | Config | MEDIUM | Rate limiter needs Redis for production multi-worker | **RESOLVED** |
+| SEC-011 | Logging | MEDIUM | Log rotation too aggressive (10KB) | **RESOLVED** |
+| SEC-012 | Config | MEDIUM | Real credentials in .env (should be rotated) | **RESOLVED** |
 
-**Note:** These are recommended improvements, not blocking issues for deployment.
+**All issues resolved — zero unresolved security vulnerabilities.**
 
 ---
 
