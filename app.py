@@ -67,11 +67,18 @@ db = SQLAlchemy(app)
 # --- Initialize Extensions ---
 csrf = CSRFProtect(app)
 
+# Rate limiter storage: Redis for production, memory for development
+redis_url = os.environ.get('REDIS_URL')
+if redis_url:
+    storage_uri = redis_url
+else:
+    storage_uri = "memory://"
+
 limiter = Limiter(
     get_remote_address,
     app=app,
     default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://",
+    storage_uri=storage_uri,
 )
 
 # --- Mail Configuration ---
@@ -89,7 +96,7 @@ mail = Mail(app)
 security_logger = logging.getLogger('security')
 security_logger.setLevel(logging.INFO)
 if not security_logger.handlers:
-    handler = RotatingFileHandler('security.log', maxBytes=10000, backupCount=3)
+    handler = RotatingFileHandler('security.log', maxBytes=10_000_000, backupCount=10)
     handler.setFormatter(logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     ))
@@ -105,6 +112,18 @@ def log_security_event(event_type, details, user_id=None, ip=None):
 def generate_verification_token():
     """Generate a secure random token for email verification."""
     return secrets.token_urlsafe(32)
+
+
+def hash_token(token):
+    """Hash a token for secure storage."""
+    return generate_password_hash(token)
+
+
+def verify_token(token_hash, token):
+    """Verify a token against its hash using constant-time comparison."""
+    if not token_hash or not token:
+        return False
+    return check_password_hash(token_hash, token)
 
 
 def send_verification_email(user, token):
@@ -529,10 +548,13 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
-    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    verification_token_hash = db.Column(db.String(100), unique=True, nullable=True)
     verification_token_expires = db.Column(db.DateTime, nullable=True)
-    reset_token = db.Column(db.String(100), unique=True, nullable=True)
+    reset_token_hash = db.Column(db.String(100), unique=True, nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
+    # Legacy plaintext columns (for migration compatibility)
+    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    reset_token = db.Column(db.String(100), unique=True, nullable=True)
     
     __table_args__ = (
         db.UniqueConstraint('username', 'email', name='_username_email_uc'),
@@ -554,6 +576,19 @@ with app.app_context():
             connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token VARCHAR(100)'))
         if 'reset_token_expires' not in existing_columns:
             connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token_expires TIMESTAMP'))
+        if 'verification_token_hash' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN verification_token_hash VARCHAR(100)'))
+        if 'reset_token_hash' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token_hash VARCHAR(100)'))
+        # Create unique indexes for token hashes
+        try:
+            connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_verification_token_hash ON "user" (verification_token_hash)'))
+        except Exception:
+            pass
+        try:
+            connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_reset_token_hash ON "user" (reset_token_hash)'))
+        except Exception:
+            pass
 
 # --- Helper Functions ---
 def format_json_data(json_str):
@@ -681,7 +716,8 @@ def register():
         else:
             # Resend verification for unverified user
             token = generate_verification_token()
-            existing_user.verification_token = token
+            existing_user.verification_token_hash = hash_token(token)
+            existing_user.verification_token = None  # Clear legacy
             existing_user.verification_token_expires = now_ist() + timedelta(hours=1)
             db.session.commit()
             try:
@@ -699,7 +735,8 @@ def register():
         else:
             # Resend verification for unverified user
             token = generate_verification_token()
-            existing_email.verification_token = token
+            existing_email.verification_token_hash = hash_token(token)
+            existing_email.verification_token = None  # Clear legacy
             existing_email.verification_token_expires = now_ist() + timedelta(hours=1)
             db.session.commit()
             try:
@@ -718,7 +755,7 @@ def register():
         password=hashed_password,
         email=email,
         is_verified=False,
-        verification_token=token,
+        verification_token_hash=hash_token(token),
         verification_token_expires=token_expires
     )
     
@@ -747,7 +784,29 @@ def register():
 @app.route('/verify-email/<token>')
 def verify_email(token):
     """Verify user's email with token from email link."""
-    user = User.query.filter_by(verification_token=token).first()
+    # Find user by verifying token hash (constant-time comparison)
+    # Query candidates with non-expired token hashes
+    candidates = User.query.filter(
+        User.verification_token_hash.isnot(None),
+        User.verification_token_expires > now_ist()
+    ).all()
+    
+    user = None
+    for candidate in candidates:
+        if verify_token(candidate.verification_token_hash, token):
+            user = candidate
+            break
+    
+    # Fallback: check legacy plaintext tokens (for migration)
+    if not user:
+        legacy_user = User.query.filter_by(verification_token=token).first()
+        if legacy_user:
+            # Verify legacy token hasn't expired
+            token_expires = legacy_user.verification_token_expires
+            if token_expires and token_expires.tzinfo is None:
+                token_expires = token_expires.replace(tzinfo=IST)
+            if token_expires and token_expires >= now_ist():
+                user = legacy_user
     
     if not user:
         log_security_event('VERIFICATION_FAILED', 'invalid_token', ip=request.remote_addr)
@@ -776,7 +835,8 @@ def verify_email(token):
         return redirect(url_for('login'))
     
     user.is_verified = True
-    user.verification_token = None
+    user.verification_token_hash = None
+    user.verification_token = None  # Clear legacy
     user.verification_token_expires = None
     db.session.commit()
     
@@ -803,7 +863,8 @@ def resend_verification():
         return redirect(url_for('register', check_email=1))
     
     token = generate_verification_token()
-    user.verification_token = token
+    user.verification_token_hash = hash_token(token)
+    user.verification_token = None  # Clear legacy
     user.verification_token_expires = now_ist() + timedelta(hours=1)
     db.session.commit()
     
@@ -830,7 +891,8 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         if user:
             token = generate_verification_token()
-            user.reset_token = token
+            user.reset_token_hash = hash_token(token)
+            user.reset_token = None  # Clear legacy
             user.reset_token_expires = now_ist() + timedelta(hours=1)
             db.session.commit()
             try:
@@ -847,7 +909,28 @@ def forgot_password():
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     """Render and process a one-time password reset link."""
-    user = User.query.filter_by(reset_token=token).first()
+    # Find user by verifying token hash (constant-time comparison)
+    candidates = User.query.filter(
+        User.reset_token_hash.isnot(None),
+        User.reset_token_expires > now_ist()
+    ).all()
+    
+    user = None
+    for candidate in candidates:
+        if verify_token(candidate.reset_token_hash, token):
+            user = candidate
+            break
+    
+    # Fallback: check legacy plaintext tokens (for migration)
+    if not user:
+        legacy_user = User.query.filter_by(reset_token=token).first()
+        if legacy_user:
+            token_expires = legacy_user.reset_token_expires
+            if token_expires and token_expires.tzinfo is None:
+                token_expires = token_expires.replace(tzinfo=IST)
+            if token_expires and token_expires >= now_ist():
+                user = legacy_user
+    
     if not user or not user.reset_token_expires:
         flash('This password reset link is invalid or has expired.', 'danger')
         return redirect(url_for('forgot_password'))
@@ -856,7 +939,8 @@ def reset_password(token):
     if token_expires.tzinfo is None:
         token_expires = token_expires.replace(tzinfo=IST)
     if token_expires < now_ist():
-        user.reset_token = None
+        user.reset_token_hash = None
+        user.reset_token = None  # Clear legacy
         user.reset_token_expires = None
         db.session.commit()
         flash('This password reset link has expired. Please request a new one.', 'danger')
@@ -878,7 +962,8 @@ def reset_password(token):
         return render_template('reset_password.html', token=token)
 
     user.password = generate_password_hash(password)
-    user.reset_token = None
+    user.reset_token_hash = None
+    user.reset_token = None  # Clear legacy
     user.reset_token_expires = None
     db.session.commit()
     log_security_event('PASSWORD_RESET_SUCCESS', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
@@ -1088,5 +1173,5 @@ def calculate():
         return jsonify({"success": False, "error": "Calculation failed"}), 500
 
 if __name__ == "__main__":
-    debug_mode = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     app.run(debug=debug_mode)
