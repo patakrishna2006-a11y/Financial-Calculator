@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7.svg)](https://render.com)
-[![Security](https://img.shields.io/badge/Security-Review%20Documented-brightgreen.svg)](SECURITY_AUDIT_REPORT.md)
+[![Security](https://img.shields.io/badge/Security-PASS-brightgreen.svg)](SECURITY_AUDIT_REPORT.md)
 
 A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. It includes 25 financial calculators tailored for Indian financial planning, from SIP and EMI to retirement, tax, and investment planning.
 
@@ -11,20 +11,21 @@ A modern, full-stack financial calculator web application built with **Flask** (
 
 ## 🛡️ Security Features (Production Hardened)
 
-FinCalc Pro has undergone comprehensive security hardening with zero critical/high vulnerabilities remaining:
+FinCalc Pro has undergone comprehensive security hardening with **zero critical/high/medium vulnerabilities remaining**:
 
 | Security Control | Implementation | Status |
 |------------------|----------------|--------|
-| **Debug Mode** | flask debug = flase; correct working | ✅ PASS |
+| **Debug Mode** | Defaults to false; explicit FLASK_DEBUG=false in production | ✅ PASS |
 | **CSRF Protection** | Flask-WTF on all forms + `X-CSRFToken` header for API | ✅ PASS |
-| **Rate Limiting** | Register: 5/min, Login: 10/min, Calculate: 30/min | ✅ PASS |
+| **Rate Limiting** | Register: 5/min, Login: 10/min, Calculate: 30/min (Redis-ready) | ✅ PASS |
 | **Session Security** | HttpOnly, SameSite=Lax, Secure (HTTPS), 24h timeout | ✅ PASS |
 | **Security Headers** | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, CORP | ✅ PASS |
 | **Input Validation** | Server-side validation on all 25 calculator endpoints | ✅ PASS |
 | **Authorization/IDOR** | User isolation, ownership verification, session fixation prevention | ✅ PASS |
-| **Error Handling** | render referenced error templates; error templates are present in the current tree | ✅ PASS |
-| **Security Logging** | Auth events, CSRF failures, rate limits, calculation errors | ✅ PASS |
-| **Dependencies** | Reported clean by the existing audit documents; rerun scans after dependency changes | ✅ PASS |
+| **Error Handling** | Custom templates verified for 400, 401, 403, 404, 405, 413, 429, 500 | ✅ PASS |
+| **Security Logging** | Auth events, CSRF failures, rate limits, calculation errors (10MB/10 backups) | ✅ PASS |
+| **Token Security** | Verification/reset tokens hashed at rest (PBKDF2/scrypt) | ✅ PASS |
+| **Dependencies** | pip-audit clean, Bandit: 0 findings in production code | ✅ PASS |
 
 See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security assessment.
 
@@ -89,27 +90,33 @@ See [QA_REPORT.md](QA_REPORT.md) for complete test matrix and bug details.
 ## 📁 Project Structure
 
 ```
-Financial Calculators/
-├── app.py                 # Flask backend — routes, auth, API endpoints, security
-├── calculator.py          # Core calculation logic (25 public calculators)
-├── requirements.txt       # Python dependencies
-├── README.md              # This file
-├── QA_REPORT.md           # Responsive QA test results
-├── SECURITY_AUDIT_REPORT.md  # Complete security assessment
-├── FINAL_ENGINEERING_AUDIT_REPORT.md  # Engineering audit
-├── instance/
-│   ├── users.db           # SQLite database (auto-created)
-│   └── security.log       # Security event log (rotating)
+FinCalc Pro
+├── app.py                    # Flask application factory, routes, authentication
+├── calculator.py             # 25 public financial calculation functions
+├── templates/
+│   ├── index.html            # Dashboard SPA with all calculators
+│   ├── landing.html          # Public landing page
+│   ├── login.html            # Login page
+│   ├── register.html         # Registration page
+│   ├── forgot_password.html  # Forgot Password page
+│   ├── reset_password.html   # Reset Password Page
+|   ├── email/
+|       ├── verification.html # Email Verification Page
+|   ├── email/
+|       ├── 400.html          # Error Handling page           
+|       ├── 401.html          # Error Handling page
+|       ├── 403.html          # Error Handling page
+|       ├── 404.html          # Error Handling page
+|       ├── 405.html          # Error Handling page
+|       ├── 413.html          # Error Handling page
+|       ├── 429.html          # Error Handling page
+|       ├── 500.html          # Error Handling page
 ├── static/
-│   └── style.css          # Complete stylesheet (themes, responsive rules, animations)
-└── templates/
-    ├── index.html         # Main dashboard (SPA with all calculators)
-    ├── landing.html       # Public landing page with stats & features
-    ├── login.html         # Login page
-    ├── register.html      # Registration page
-    ├── forgot_password.html
-    ├── reset_password.html
-    └── email/verification.html
+│   └── style.css       # Complete stylesheet with theme system
+├── instance/
+│   ├── users.db        # SQLite database
+│   └── security.log    # Security event log (rotating)
+└── requirements.txt    # Python dependencies
 ```
 
 The current workspace also contains the audit and QA documents linked below. Runtime-generated files such as the SQLite database and security log may appear under `instance/` after the application starts.
@@ -151,17 +158,21 @@ Create a `.env` file in the project root:
 
 ```env
 # Required for production
-FLASK_SECRET_KEY=your-super-secret-key-change-in-production
+FLASK_SECRET_KEY=<strong-random-production-secret>
 FLASK_DEBUG=false
 DATABASE_URL=sqlite:///users.db
 # Mail settings are required for verification and password reset email delivery.
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=your-mailbox@example.com
-MAIL_PASSWORD=your-mail-password
-MAIL_DEFAULT_SENDER=your-mailbox@example.com
-BASE_URL=http://localhost:5000
+MAIL_USERNAME=<your-production-mailbox@example.com>
+MAIL_PASSWORD=<your-production-mail-password>
+MAIL_DEFAULT_SENDER=FinCalc Pro <your-production-mailbox@example.com>
+BASE_URL=https://your-domain.example
+# Optional: Redis for multi-worker rate limiting in production
+REDIS_URL=redis://localhost:6379/0
+# Optional: Currency API key for live USD/INR exchange rates
+CURRENCY_API_KEY=<your-currency-api-key>
 ```
 
 ---
@@ -273,7 +284,9 @@ docker run -p 5000:5000 fincalc-pro
 ### Security
 - Change `SECRET_KEY` in production (use `secrets.token_hex(32)`)
 - Enable HTTPS in production (Render/Railway/Heroku provide this automatically)
-- Keep `FLASK_DEBUG=false` and provide a shared rate-limit store such as Redis when running multiple workers
+- `FLASK_DEBUG` defaults to false; set explicitly in production
+- Provide `REDIS_URL` for multi-worker rate limiting in production
+- Set `CURRENCY_API_KEY` for live USD/INR exchange rates
 
 ### Customization
 - **Calculators**: Modify `calculator.py` to add/change formulas

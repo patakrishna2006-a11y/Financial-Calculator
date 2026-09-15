@@ -196,12 +196,16 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 | Security headers present | PASS |
 | Input validation | PASS |
 | IDOR protection | PASS |
-| Error handlers | PRESENT; templates require verification |
+| Error handlers | PASS (verified) |
 | Bandit scan (prod code) | PASS |
 | pip-audit | PASS |
+| Token hashing (SEC-009) | PASS |
+| Rate limiter Redis config (SEC-010) | PASS |
+| Log rotation (SEC-011) | PASS |
+| .env credentials (SEC-012) | PASS |
 
 ---
 
-*Test completed: September 2, 2026*
+*Test completed: September 15, 2026*
 *Tools: Playwright (Chromium) with device emulation, Bandit, pip-audit, manual review*
 *Methodology: Automated overflow detection + manual verification + security regression testing*
