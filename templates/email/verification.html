@@ -278,35 +278,43 @@
       </a>
       
       <!-- Content -->
-      <h1>Verify your email</h1>
-      
-      <p class="greeting">Hi {{ username }},</p>
-      
-      <p class="message">Welcome to FinCalc Pro! Thanks for creating an account. To get started with 25+ financial calculators, please verify your email address by clicking the button below.</p>
-      
-      <!-- Expiry Notice -->
-      <div class="expiry-notice" role="alert">
-        <i class="fas fa-clock expiry-icon" aria-hidden="true"></i>
-        <span>This link expires in {{ expiry_hours }} hour{% if expiry_hours != 1 %}s{% endif %}</span>
-      </div>
-      
-      <!-- CTA Button -->
-      <div style="text-align: center; margin-bottom: 32px;">
-        <a href="{{ verify_url }}" class="cta-button">Verify Email</a>
-      </div>
-      
-      <!-- Divider -->
-      <div class="divider" aria-hidden="true"></div>
-      
-      <!-- Fallback Link -->
-      <p class="fallback">
-        <strong>Button not working?</strong> Copy and paste this link into your browser:<br>
-        <a href="{{ verify_url }}">{{ verify_url }}</a>
-      </p>
+      {% if email_type == 'password_reset' %}
+        <h1>Reset your password</h1>
+        <p class="greeting">Hi {{ username }},</p>
+        <p class="message">You requested a password reset for your FinCalc Pro account. Click the button below to create a new password. This link is valid for {{ expiry_hours }} hour{% if expiry_hours != 1 %}s{% endif %}.</p>
+        <div style="text-align: center; margin-bottom: 32px;">
+          <a href="{{ reset_url }}" class="cta-button">Reset Password</a>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <p class="fallback">
+          <strong>Button not working?</strong> Copy and paste this link into your browser:<br>
+          <a href="{{ reset_url }}">{{ reset_url }}</a>
+        </p>
+      {% else %}
+        <h1>Verify your email</h1>
+        <p class="greeting">Hi {{ username }},</p>
+        <p class="message">Welcome to FinCalc Pro! Thanks for creating an account. To get started with 25+ financial calculators, please verify your email address by clicking the button below.</p>
+        <div class="expiry-notice" role="alert">
+          <i class="fas fa-clock expiry-icon" aria-hidden="true"></i>
+          <span>This link expires in {{ expiry_hours }} hour{% if expiry_hours != 1 %}s{% endif %}</span>
+        </div>
+        <div style="text-align: center; margin-bottom: 32px;">
+          <a href="{{ verify_url }}" class="cta-button">Verify Email</a>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <p class="fallback">
+          <strong>Button not working?</strong> Copy and paste this link into your browser:<br>
+          <a href="{{ verify_url }}">{{ verify_url }}</a>
+        </p>
+      {% endif %}
       
       <!-- Footer -->
       <div class="footer">
-        <p class="footer-text">If you didn't create an account with FinCalc Pro, you can safely ignore this email.</p>
+        {% if email_type == 'password_reset' %}
+          <p class="footer-text">If you didn't request a password reset, you can safely ignore this email.</p>
+        {% else %}
+          <p class="footer-text">If you didn't create an account with FinCalc Pro, you can safely ignore this email.</p>
+        {% endif %}
         <div class="footer-links">
           <a href="{{ config.BASE_URL if config.BASE_URL else 'https://fincalc.pro' }}">Website</a>
           <a href="mailto:support@fincalc.pro">Support</a>
