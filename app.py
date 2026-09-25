@@ -77,7 +77,7 @@ else:
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["1000 per day", "200 per hour"],
+    default_limits=["200 per day", "50 per hour"],
     storage_uri=storage_uri,
 )
 
@@ -555,10 +555,6 @@ class User(db.Model):
     # Legacy plaintext columns (for migration compatibility)
     verification_token = db.Column(db.String(100), unique=True, nullable=True)
     reset_token = db.Column(db.String(100), unique=True, nullable=True)
-    # Profile fields
-    profile_picture = db.Column(db.String(255), nullable=True)
-    last_login = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=now_ist, nullable=False)
     
     __table_args__ = (
         db.UniqueConstraint('username', 'email', name='_username_email_uc'),
@@ -584,13 +580,6 @@ with app.app_context():
             connection.execute(text('ALTER TABLE "user" ADD COLUMN verification_token_hash VARCHAR(100)'))
         if 'reset_token_hash' not in existing_columns:
             connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token_hash VARCHAR(100)'))
-        if 'profile_picture' not in existing_columns:
-            connection.execute(text('ALTER TABLE "user" ADD COLUMN profile_picture VARCHAR(255)'))
-        if 'last_login' not in existing_columns:
-            connection.execute(text('ALTER TABLE "user" ADD COLUMN last_login TIMESTAMP'))
-        if 'created_at' not in existing_columns:
-            connection.execute(text('ALTER TABLE "user" ADD COLUMN created_at TIMESTAMP'))
-            connection.execute(text('UPDATE "user" SET created_at = datetime("now") WHERE created_at IS NULL'))
         # Create unique indexes for token hashes
         try:
             connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_verification_token_hash ON "user" (verification_token_hash)'))
@@ -891,8 +880,7 @@ def resend_verification():
 
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
-@limiter.limit("5 per hour", methods=['POST'])
-@limiter.limit("30 per minute", methods=['GET'])
+@limiter.limit("5 per hour")
 def forgot_password():
     """Request a password reset link without revealing account existence."""
     if request.method == 'GET':
@@ -1027,9 +1015,6 @@ def login():
         session.clear()  # Prevent session fixation
         session['user_id'] = user.id
         session.permanent = True
-        # Update last login timestamp
-        user.last_login = now_ist()
-        db.session.commit()
         log_security_event('LOGIN_SUCCESS', f'username={username}', user_id=user.id, ip=request.remote_addr)
         flash('Successful login!', 'success')
         return redirect(url_for('dashboard'))
@@ -1069,144 +1054,6 @@ def logout():
     log_security_event('LOGOUT', '', user_id=user_id, ip=request.remote_addr)
     flash('Logout successfully!', 'success')
     return redirect(url_for('home'))
-
-
-@app.route('/profile')
-def profile():
-    """Display user profile page."""
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    user = User.query.get(session['user_id'])
-    if not user:
-        session.clear()
-        return redirect(url_for('login'))
-    
-    # Get recent history for sidebar
-    raw_history = (
-        CalculationHistory.query
-        .filter_by(user_id=session['user_id'])
-        .order_by(CalculationHistory.timestamp.desc())
-        .limit(10)
-        .all()
-    )
-    
-    processed_history = []
-    for entry in raw_history:
-        processed_history.append({
-            'calc_type': entry.calc_type.replace('_', ' '),
-            'params': format_json_data(entry.params),
-            'result': format_json_data(entry.result),
-            'timestamp': entry.timestamp
-        })
-    
-    return render_template('profile.html', user=user, history=processed_history)
-
-
-@app.route('/profile/upload-picture', methods=['POST'])
-@csrf.exempt
-@limiter.limit("10 per minute")
-def upload_profile_picture():
-    """Upload and update user profile picture."""
-    # Manual CSRF check for multipart form data
-    csrf_token = request.headers.get('X-CSRFToken') or request.form.get('csrf_token')
-    if not csrf_token:
-        return jsonify({"success": False, "error": "CSRF token missing"}), 400
-    
-    # Validate CSRF token
-    from flask_wtf.csrf import validate_csrf
-    try:
-        validate_csrf(csrf_token)
-    except Exception:
-        return jsonify({"success": False, "error": "Invalid CSRF token"}), 400
-    
-    if 'user_id' not in session:
-        return jsonify({"success": False, "error": "Authentication required"}), 401
-    
-    # Check if file was uploaded
-    if 'profile_picture' not in request.files:
-        return jsonify({"success": False, "error": "No file uploaded"}), 400
-    
-    file = request.files['profile_picture']
-    if file.filename == '':
-        return jsonify({"success": False, "error": "No file selected"}), 400
-    
-    # Validate file type
-    allowed_extensions = {'png', 'jpg', 'jpeg', 'webp'}
-    if not ('.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions):
-        return jsonify({"success": False, "error": "Invalid file type. Allowed: PNG, JPG, JPEG, WebP"}), 400
-    
-    # Validate file size (2MB max)
-    file.seek(0, 2)  # Seek to end
-    file_size = file.tell()
-    file.seek(0)  # Seek back to start
-    if file_size > 2 * 1024 * 1024:
-        return jsonify({"success": False, "error": "File too large. Maximum size: 2MB"}), 400
-    
-    # Generate secure filename
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    import uuid
-    filename = f"{uuid.uuid4().hex}.{ext}"
-    
-    # Ensure upload directory exists
-    upload_dir = os.path.join(app.static_folder, 'uploads', 'profile_pictures')
-    os.makedirs(upload_dir, exist_ok=True)
-    
-    # Save file
-    filepath = os.path.join(upload_dir, filename)
-    file.save(filepath)
-    
-    # Update user profile picture in database
-    user = User.query.get(session['user_id'])
-    if user:
-        # Delete old profile picture if exists
-        if user.profile_picture:
-            old_path = os.path.join(app.static_folder, user.profile_picture.lstrip('/'))
-            if os.path.exists(old_path):
-                try:
-                    os.remove(old_path)
-                except Exception:
-                    pass  # Ignore errors deleting old file
-        
-        user.profile_picture = f"/static/uploads/profile_pictures/{filename}"
-        db.session.commit()
-        
-        log_security_event('PROFILE_PICTURE_UPLOAD', f'user_id={user.id}', user_id=user.id, ip=request.remote_addr)
-        
-        return jsonify({
-            "success": True, 
-            "message": "Profile picture updated successfully",
-            "picture_url": user.profile_picture
-        })
-    
-    return jsonify({"success": False, "error": "User not found"}), 404
-
-
-@app.route('/profile/remove-picture', methods=['POST'])
-@limiter.limit("10 per minute")
-def remove_profile_picture():
-    """Remove user profile picture."""
-    if 'user_id' not in session:
-        return jsonify({"success": False, "error": "Authentication required"}), 401
-    
-    user = User.query.get(session['user_id'])
-    if user and user.profile_picture:
-        # Delete file from filesystem
-        old_path = os.path.join(app.static_folder, user.profile_picture.lstrip('/'))
-        if os.path.exists(old_path):
-            try:
-                os.remove(old_path)
-            except Exception:
-                pass
-        
-        user.profile_picture = None
-        db.session.commit()
-        
-        log_security_event('PROFILE_PICTURE_REMOVE', f'user_id={user.id}', user_id=user.id, ip=request.remote_addr)
-        
-        return jsonify({"success": True, "message": "Profile picture removed"})
-    
-    return jsonify({"success": False, "error": "No profile picture to remove"}), 400
 
 @app.route("/calculate", methods=["POST"])
 @csrf.exempt  # API endpoint - CSRF handled via custom header
