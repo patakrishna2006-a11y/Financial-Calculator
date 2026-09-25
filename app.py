@@ -1043,6 +1043,8 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('home'))
     
+    user = User.query.get(session['user_id'])
+    
     raw_history = (
         CalculationHistory.query
         .filter_by(user_id=session['user_id'])
@@ -1060,7 +1062,7 @@ def dashboard():
             'timestamp': entry.timestamp
         })
 
-    return render_template("index.html", history=processed_history)
+    return render_template("index.html", history=processed_history, user=user)
 
 @app.route('/logout')
 def logout():
@@ -1326,5 +1328,5 @@ def calculate():
         return jsonify({"success": False, "error": "Calculation failed"}), 500
 
 if __name__ == "__main__":
-    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    debug_mode = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
     app.run(debug=debug_mode)

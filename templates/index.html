@@ -215,8 +215,14 @@
       <!-- Account -->
       <div class="sidebar-section">
         <div class="sidebar-label">Account</div>
-        <a href="/profile" class="nav-item" style="text-decoration:none;color:inherit;">
-          <span class="icon" aria-hidden="true"><i class="fas fa-user-circle"></i></span>
+        <a href="/profile" class="nav-item profile-nav-item" style="text-decoration:none;color:inherit;">
+          <span class="icon" aria-hidden="true">
+            {% if user and user.profile_picture %}
+              <img src="{{ user.profile_picture }}" alt="Profile" class="sidebar-avatar">
+            {% else %}
+              <i class="fas fa-user-circle"></i>
+            {% endif %}
+          </span>
           Profile
         </a>
         <button class="nav-item logout-item"

@@ -300,7 +300,7 @@
             <a href="/dashboard" class="btn-secondary">
               <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
-            <a href="/logout" class="btn-danger">
+            <a href="/logout" class="btn-danger btn-oval">
               <i class="fas fa-right-from-bracket"></i> Logout
             </a>
           </div>
@@ -387,6 +387,8 @@
             profileAvatar.src = result.picture_url + '?t=' + Date.now(); // Cache bust
             profileAvatar.classList.remove('profile-avatar-initials');
             profileAvatar.alt = 'Profile picture';
+            // Also update sidebar avatar
+            updateSidebarAvatar(result.picture_url);
           }
           // Show remove button
           if (btnRemovePicture) btnRemovePicture.style.display = 'inline-flex';
@@ -429,6 +431,8 @@
             profileAvatar.textContent = '{{ user.username[0].upper() }}';
             profileAvatar.alt = 'Profile initials';
             btnRemovePicture.style.display = 'none';
+            // Also update sidebar avatar to initials
+            updateSidebarAvatar(null);
           } else {
             showToast(result.error, 'danger');
           }
@@ -436,6 +440,39 @@
           showToast('Failed to remove picture. Please try again.', 'danger');
         }
       });
+    }
+
+    // Helper to update sidebar profile avatar
+    function updateSidebarAvatar(pictureUrl) {
+      const sidebarAvatar = document.querySelector('.sidebar-avatar');
+      const profileNavItem = document.querySelector('.profile-nav-item');
+      if (!profileNavItem) return;
+      
+      let avatarImg = profileNavItem.querySelector('.sidebar-avatar');
+      
+      if (pictureUrl) {
+        // Create or update avatar image
+        if (!avatarImg) {
+          avatarImg = document.createElement('img');
+          avatarImg.className = 'sidebar-avatar';
+          avatarImg.alt = 'Profile';
+          // Insert after the icon span
+          const iconSpan = profileNavItem.querySelector('.icon');
+          if (iconSpan) {
+            iconSpan.replaceWith(avatarImg);
+          }
+        }
+        avatarImg.src = pictureUrl + '?t=' + Date.now();
+      } else {
+        // Replace with icon
+        if (avatarImg) {
+          const iconSpan = document.createElement('span');
+          iconSpan.className = 'icon';
+          iconSpan.setAttribute('aria-hidden', 'true');
+          iconSpan.innerHTML = '<i class="fas fa-user-circle"></i>';
+          avatarImg.replaceWith(iconSpan);
+        }
+      }
     }
 
     // ── Sidebar Toggle (shared with dashboard) ──
