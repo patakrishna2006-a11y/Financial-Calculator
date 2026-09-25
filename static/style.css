@@ -4503,24 +4503,3 @@ body {
     justify-content: center;
   }
 }
-
-/* Oval button style for logout (matches back button) */
-.btn-oval {
-  border-radius: var(--radius-pill) !important;
-}
-
-/* Sidebar profile avatar */
-.profile-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.sidebar-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--border-glass);
-  flex-shrink: 0;
-}
