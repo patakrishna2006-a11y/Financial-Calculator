@@ -1,7 +1,4 @@
-/* ============================================================
-   1. CSS CUSTOM PROPERTIES — THEME SYSTEM
-   ============================================================ */
-
+/* 1. CSS CUSTOM PROPERTIES — THEME SYSTEM
 /* Base fallback (Midnight Indigo) */
 :root {
   --bg-primary: #060814;
@@ -175,10 +172,7 @@ body,
     color var(--transition);
 }
 
-
-/* ============================================================
-   3. RESET
-   ============================================================ */
+/* 2. RESET */
 *,
 *::before,
 *::after {
@@ -245,10 +239,7 @@ ol {
   color: #fff;
 }
 
-
-/* ============================================================
-   4. BASE TYPOGRAPHY
-   ============================================================ */
+/* 3. BASE TYPOGRAPHY*/
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.15;
@@ -282,10 +273,7 @@ small {
   color: var(--text-muted);
 }
 
-
-/* ============================================================
-   5. BODY / BACKGROUND
-   ============================================================ */
+/* 4. BODY / BACKGROUND*/
 body {
   /* Base dark canvas with a deep radial ambient */
   background:
@@ -323,10 +311,7 @@ body::before {
                                       rgba(0, 0, 0, 0) 75%);
 }
 
-
-/* ============================================================
-   6. BACKGROUND ANIMATION LAYERS
-   ============================================================ */
+/* 5. BACKGROUND ANIMATION LAYERS*/
 /* Animated orbs (pure CSS) — pseudo-elements on body */
 body::after {
   content: "";
@@ -456,11 +441,7 @@ body::after {
   }
 }
 
-
-/* ============================================================
-   7. GLOBAL COMPONENTS
-   ============================================================ */
-
+/* 6. GLOBAL COMPONENTS*/
 /* Glass surface utility */
 .glass,
 .surface-glass {
@@ -589,11 +570,7 @@ body::after {
   animation: spin 800ms linear infinite;
 }
 
-
-/* ============================================================
-   8. NAVIGATION
-   ============================================================ */
-
+/* 7. NAVIGATION*/
 /* Shared header used by landing.html AND index.html (.header-inner) */
 .landing-header,
 header {
@@ -874,6 +851,58 @@ header::before {
   font-size: 0.78rem;
 }
 
+/* Account action buttons (Change password / Remove photo / Delete account) */
+.profile-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.8rem 1.2rem 0.5rem;
+  border-top: 1px solid var(--border-glass);
+  margin-top: 0.35rem;
+}
+
+.profile-action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-glass);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  font-size: 0.83rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition),
+    transform var(--transition-spring);
+}
+.profile-action-btn i { width: 1.1rem; text-align: center; color: var(--accent-primary); }
+.profile-action-btn:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
+  border-color: rgba(var(--accent-primary-rgb), 0.35);
+  transform: translateY(-1px);
+}
+.profile-action-btn:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+.profile-action-btn--danger i { color: var(--accent-danger); }
+.profile-action-btn--danger:hover {
+  color: var(--accent-danger);
+  border-color: rgba(var(--accent-danger-rgb), 0.45);
+  background: rgba(var(--accent-danger-rgb), 0.08);
+}
+
+/* Change-password modal — wider than the logout modal to fit the form */
+.change-password-card { max-width: 420px; }
+.change-password-card form { text-align: left; }
+.change-password-card .input-group { margin-bottom: 0.85rem; }
+.change-password-card .input-group input { font-size: 0.9rem; padding: 0.7rem 1rem 0.7rem 2.5rem; }
+
 .profile-actions { padding: 0.35rem 1.2rem 1.05rem; }
 
 .profile-logout {
@@ -964,11 +993,7 @@ header::before {
   align-items: center;
 }
 
-
-/* ============================================================
-   9. BUTTONS
-   ============================================================ */
-
+/*8. BUTTONS*/
 /* Shared tactile 3D button base */
 .btn-primary,
 .btn-secondary,
@@ -1247,10 +1272,7 @@ header::before {
   outline-offset: 3px;
 }
 
-
-/* ============================================================
-   10. CARDS
-   ============================================================ */
+/* 9. CARDS*/
 .card,
 .calc-card,
 .feature-item,
@@ -1330,10 +1352,7 @@ header::before {
   border: 1px solid rgba(108, 140, 255, 0.30);
 }
 
-
-/* ============================================================
-   11. FORMS
-   ============================================================ */
+/*10. FORMS*/
 form {
   display: flex;
   flex-direction: column;
@@ -1401,10 +1420,7 @@ select option {
   filter: grayscale(0%) drop-shadow(0 0 6px rgba(108, 140, 255, 0.6));
 }
 
-
-/* ============================================================
-   12. INPUTS
-   ============================================================ */
+/*11. INPUTS*/
 input[type="text"],
 input[type="password"],
 input[type="email"],
@@ -1486,10 +1502,7 @@ input:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out 0s;
 }
 
-
-/* ============================================================
-   13. LANDING PAGE
-   ============================================================ */
+/*12. LANDING PAGE*/
 .landing-page {
   /* Inherits body background; add per-page depth */
   position: relative;
@@ -1746,10 +1759,7 @@ input:-webkit-autofill:focus {
   color: var(--accent-secondary);
 }
 
-
-/* ============================================================
-   14. HERO
-   ============================================================ */
+/* 13. HERO*/
 .hero {
   position: relative;
   max-width: var(--max-width);
@@ -1818,10 +1828,7 @@ input:-webkit-autofill:focus {
   gap: 0.45rem;
 }
 
-
-/* ============================================================
-   15. 3D OBJECTS (Hero graphics — phone mockup + floating cards)
-   ============================================================ */
+/*14. 3D OBJECTS (Hero graphics — phone mockup + floating cards)*/
 .hero-graphics {
   position: relative;
   min-height: 520px;
@@ -2047,10 +2054,7 @@ input:-webkit-autofill:focus {
   animation: floatSlow 8s ease-in-out infinite;
 }
 
-
-/* ============================================================
-   16. LOGIN
-   ============================================================ */
+/*15. LOGIN*/
 .auth-wrapper {
   min-height: 100vh;
   display: grid;
@@ -2192,10 +2196,7 @@ input:-webkit-autofill:focus {
   z-index: 1;
 }
 
-
-/* ============================================================
-   17. REGISTER
-   ============================================================ */
+/*16. REGISTER*/
 /* Register uses the same auth-* class system; styles inherited above */
 .footer-links {
   text-align: center;
@@ -2216,10 +2217,7 @@ input:-webkit-autofill:focus {
   text-shadow: 0 0 14px rgba(108, 140, 255, 0.6);
 }
 
-
-/* ============================================================
-   18. DASHBOARD / INDEX
-   ============================================================ */
+/*17. DASHBOARD / INDEX*/
 .layout {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
@@ -2602,10 +2600,7 @@ input:-webkit-autofill:focus {
   text-shadow: 0 0 18px rgba(255, 209, 102, 0.40);
 }
 
-
-/* ============================================================
-   19. UTILITY CLASSES
-   ============================================================ */
+/*18. UTILITY CLASSES*/
 .hide { display: none !important; }
 .flex { display: flex; }
 .center { display: grid; place-items: center; }
@@ -2615,10 +2610,7 @@ input:-webkit-autofill:focus {
 .mt-3 { margin-top: 1.5rem; }
 .mt-4 { margin-top: 2rem; }
 
-
-/* ============================================================
-   20. ANIMATIONS (KEYFRAMES)
-   ============================================================ */
+/*19. ANIMATIONS (KEYFRAMES)*/
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -2689,10 +2681,7 @@ input:-webkit-autofill:focus {
   50%      { transform: rotate(2deg); }
 }
 
-
-/* ============================================================
-   21. RESPONSIVE DESIGN
-   ============================================================ */
+/*20. RESPONSIVE DESIGN*/
 
 /* 1440px and below — slight refinements */
 @media (max-width: 1440px) {
@@ -2838,10 +2827,7 @@ input:-webkit-autofill:focus {
   .phone-mockup { width: 180px; height: 340px; }
 }
 
-
-/* ============================================================
-   22. REDUCED MOTION
-   ============================================================ */
+/*21. REDUCED MOTION*/
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2867,10 +2853,7 @@ input:-webkit-autofill:focus {
   }
 }
 
-
-/* ============================================================
-   23. PRODUCTION ADDITIONS — GOOGLE-GRADE POLISH
-   ============================================================ */
+/*22. PRODUCTION ADDITIONS — GOOGLE-GRADE POLISH*/
 
 /* ── Inter font body override ── */
 body {
@@ -3348,9 +3331,7 @@ body {
   .landing-page .hero-highlight { animation: none !important; }
 }
 
-/* ============================================================
-   SEARCH COMPONENT
-   ============================================================ */
+/*SEARCH COMPONENT*/
 .sidebar-search {
     position: relative;
     padding: 0.75rem 0.5rem 0.75rem;
@@ -3520,9 +3501,7 @@ body {
   }
 }
 
-/* ============================================================
-   COLOR SCHEME TOGGLE (Light/Dark)
-   ============================================================ */
+/*COLOR SCHEME TOGGLE (Light/Dark)*/
 .color-scheme-toggle {
     display: flex;
     gap: 0.25rem;
@@ -3591,10 +3570,7 @@ body {
   }
 }
 
-/* ============================================================
-   LIGHT MODE VARIANTS FOR ALL THEMES
-   ============================================================ */
-
+/*LIGHT MODE VARIANTS FOR ALL THEMES*/
 /* Light: Midnight Indigo (default) */
 [data-color-scheme="light"] {
   --bg-primary: #f8fafc;
@@ -4400,10 +4376,7 @@ body {
                               rgba(248, 250, 252, 0.95) 70%);
 }
 
-/* ============================================================
-   CHART.JS STYLES
-   ============================================================ */
-
+/*CHART.JS STYLES*/
 .chart-wrapper {
   position: relative;
   width: 100%;
@@ -4436,10 +4409,7 @@ body {
   transition: background-color var(--transition), border-color var(--transition), color var(--transition);
 }
 
-/* ============================================================
-   PDF EXPORT BUTTON
-   ============================================================ */
-
+/*PDF EXPORT BUTTON*/
 .result-pdf-btn {
   margin-top: 0.8rem;
   margin-left: 0.5rem;

@@ -69,6 +69,78 @@
       </div>
     </div>
   </div>
+
+  <!-- Change password modal (logged-in users — no email verification needed) -->
+  <div class="logout-modal-backdrop" id="change-password-modal" role="dialog" aria-modal="true" aria-labelledby="change-password-title">
+    <div class="logout-modal change-password-card">
+      <div class="logout-modal-icon" style="background:rgba(var(--accent-primary-rgb),0.12);border-color:rgba(var(--accent-primary-rgb),0.25);color:var(--accent-primary);">
+        <i class="fas fa-key" aria-hidden="true"></i>
+      </div>
+      <h3 id="change-password-title">Change Password</h3>
+      <p>Confirm your current password, then choose a new one.</p>
+
+      <form id="change-password-form" autocomplete="off" novalidate>
+        <div class="input-group">
+          <label for="cp-current">Current password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock field-icon" aria-hidden="true"></i>
+            <input type="password" id="cp-current" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="cp-new">New password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock field-icon" aria-hidden="true"></i>
+            <input type="password" id="cp-new" name="new_password" placeholder="At least 9 chars, a number & a symbol" autocomplete="new-password" required>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="cp-confirm">Confirm new password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock field-icon" aria-hidden="true"></i>
+            <input type="password" id="cp-confirm" name="confirm_password" placeholder="Re-enter new password" autocomplete="new-password" required>
+          </div>
+        </div>
+
+        <div class="profile-error" id="change-password-error" role="alert" hidden style="margin:0 0 1rem;"></div>
+
+        <div class="logout-modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeChangePasswordModal()">Cancel</button>
+          <button type="submit" class="btn-logout-confirm" id="change-password-submit" style="background:var(--accent-primary);">
+            <i class="fas fa-check" aria-hidden="true"></i>&nbsp;Update Password
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete account modal (step 1: password check -> verification email) -->
+  <div class="logout-modal-backdrop" id="delete-account-modal" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+    <div class="logout-modal change-password-card">
+      <div class="logout-modal-icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
+      <h3 id="delete-account-title">Delete Account</h3>
+      <p>This <strong>permanently deletes</strong> your account, calculation history and profile picture. First, confirm your current password — we'll then email you a deletion link to complete the process.</p>
+
+      <form id="delete-account-form" autocomplete="off" novalidate>
+        <div class="input-group">
+          <label for="da-password">Current password</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-lock field-icon" aria-hidden="true"></i>
+            <input type="password" id="da-password" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
+          </div>
+        </div>
+
+        <div class="profile-error" id="delete-account-error" role="alert" hidden style="margin:0 0 1rem;"></div>
+
+        <div class="logout-modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeDeleteAccountModal()">Cancel</button>
+          <button type="submit" class="btn-logout-confirm" id="delete-account-submit">
+            <i class="fas fa-envelope" aria-hidden="true"></i>&nbsp;Send Verification Email
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
   <!-- ═══ HEADER ═══ -->
@@ -151,6 +223,18 @@
           </div>
 
           <div class="profile-error" id="profile-error" role="alert" hidden></div>
+
+          <div class="profile-account-actions">
+            <button type="button" class="profile-action-btn" id="change-password-btn" onclick="openChangePasswordModal()">
+              <i class="fas fa-key" aria-hidden="true"></i> Change Password
+            </button>
+            <button type="button" class="profile-action-btn" id="remove-photo-btn" {% if not profile.profile_picture %}hidden{% endif %}>
+              <i class="fas fa-image-polaroid" aria-hidden="true"></i> Remove Photo
+            </button>
+            <button type="button" class="profile-action-btn profile-action-btn--danger" id="delete-account-btn" onclick="openDeleteAccountModal()">
+              <i class="fas fa-trash-can" aria-hidden="true"></i> Delete Account
+            </button>
+          </div>
 
           <div class="profile-actions">
             <button type="button" class="profile-logout" onclick="closeProfileDropdown(); openLogoutModal();">
@@ -1667,6 +1751,7 @@
   const pictureInput     = document.getElementById('picture-input');
   const avatarUploading  = document.getElementById('avatar-uploading');
   const profileError     = document.getElementById('profile-error');
+  const removePhotoBtn   = document.getElementById('remove-photo-btn');
 
   const AVATAR_SLOTS = [
     { img: document.getElementById('header-avatar-img'),   initials: document.getElementById('header-avatar-initials') },
@@ -1703,6 +1788,8 @@
       if (url) { slot.img.src = url; slot.img.hidden = false; slot.initials.hidden = true; }
       else { slot.img.removeAttribute('src'); slot.img.hidden = true; slot.initials.hidden = false; }
     });
+    // "Remove Photo" is only meaningful while a custom picture is displayed
+    if (removePhotoBtn) removePhotoBtn.hidden = !currentAvatarUrl;
   }
 
   function showProfileError(msg) {
@@ -1763,6 +1850,7 @@
     isUploadingPicture = true;
     if (avatarUploading) avatarUploading.hidden = false;
     changePictureBtn.disabled = true;
+    if (removePhotoBtn) removePhotoBtn.disabled = true;
 
     try {
       const formData = new FormData();
@@ -1794,6 +1882,221 @@
       isUploadingPicture = false;
       if (avatarUploading) avatarUploading.hidden = true;
       changePictureBtn.disabled = false;
+      if (removePhotoBtn) removePhotoBtn.disabled = false;
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // REMOVE PROFILE PICTURE (direct action — reverts to default initials)
+  // ═══════════════════════════════════════════════════════════════════
+
+  removePhotoBtn.addEventListener('click', async () => {
+    if (isUploadingPicture || !currentAvatarUrl) return;
+    removePhotoBtn.disabled = true;
+    removePhotoBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Removing...';
+
+    try {
+      const res = await fetch('/remove-profile-picture', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token() }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include'
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        renderAvatar('');   // live revert to default alphabet initials — no page refresh
+        showProfileToast(data.message || 'Profile picture removed', 'success');
+      } else {
+        showProfileError(data.error || 'Failed to remove profile picture.');
+      }
+    } catch (err) {
+      showProfileError('Network error — please try again.');
+    } finally {
+      removePhotoBtn.disabled = false;
+      removePhotoBtn.innerHTML = '<i class="fas fa-image-polaroid" aria-hidden="true"></i> Remove Photo';
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // CHANGE PASSWORD (logged-in users — no email verification needed)
+  // ═══════════════════════════════════════════════════════════════════
+
+  const changePasswordModal  = document.getElementById('change-password-modal');
+  const changePasswordForm  = document.getElementById('change-password-form');
+  const changePasswordError = document.getElementById('change-password-error');
+  const changePasswordSubmit = document.getElementById('change-password-submit');
+
+  function openChangePasswordModal() {
+    closeProfileDropdown();
+    resetChangePasswordForm();
+    changePasswordModal.classList.add('open');
+    document.getElementById('cp-current').focus();
+  }
+  function closeChangePasswordModal() {
+    changePasswordModal.classList.remove('open');
+    resetChangePasswordForm();
+  }
+  function resetChangePasswordForm() {
+    changePasswordForm.reset();
+    if (changePasswordError) { changePasswordError.hidden = true; changePasswordError.textContent = ''; }
+    changePasswordSubmit.disabled = false;
+    changePasswordSubmit.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>&nbsp;Update Password';
+  }
+  function showChangePasswordError(msg) {
+    if (!changePasswordError) return;
+    changePasswordError.textContent = '⚠ ' + msg;
+    changePasswordError.hidden = false;
+  }
+
+  changePasswordModal.addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeChangePasswordModal();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && changePasswordModal.classList.contains('open')) closeChangePasswordModal();
+  });
+
+  changePasswordForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('cp-current').value;
+    const newPassword     = document.getElementById('cp-new').value;
+    const confirmPassword = document.getElementById('cp-confirm').value;
+
+    // Client-side pre-validation (server re-validates everything)
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showChangePasswordError('All fields are required.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showChangePasswordError('New passwords do not match.');
+      return;
+    }
+    if (newPassword.length < 9 || !/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) {
+      showChangePasswordError('New password must be at least 9 characters with a letter, a number and a symbol.');
+      return;
+    }
+    if (newPassword === currentPassword) {
+      showChangePasswordError('New password must be different from the current password.');
+      return;
+    }
+
+    if (changePasswordError) changePasswordError.hidden = true;
+    changePasswordSubmit.disabled = true;
+    changePasswordSubmit.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>&nbsp;Updating...';
+
+    try {
+      const res = await fetch('/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token() }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        closeChangePasswordModal();
+        showProfileToast(data.message || 'Password changed successfully!', 'success');
+      } else {
+        showChangePasswordError(data.error || 'Failed to change password.');
+        changePasswordSubmit.disabled = false;
+        changePasswordSubmit.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>&nbsp;Update Password';
+      }
+    } catch (err) {
+      showChangePasswordError('Network error — please try again.');
+      changePasswordSubmit.disabled = false;
+      changePasswordSubmit.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>&nbsp;Update Password';
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // DELETE ACCOUNT (step 1: current password -> verification email)
+  // ═══════════════════════════════════════════════════════════════════
+
+  const deleteAccountModal  = document.getElementById('delete-account-modal');
+  const deleteAccountForm   = document.getElementById('delete-account-form');
+  const deleteAccountError  = document.getElementById('delete-account-error');
+  const deleteAccountSubmit = document.getElementById('delete-account-submit');
+
+  function openDeleteAccountModal() {
+    closeProfileDropdown();
+    resetDeleteAccountForm();
+    deleteAccountModal.classList.add('open');
+    document.getElementById('da-password').focus();
+  }
+  function closeDeleteAccountModal() {
+    deleteAccountModal.classList.remove('open');
+    resetDeleteAccountForm();
+  }
+  function resetDeleteAccountForm() {
+    deleteAccountForm.reset();
+    if (deleteAccountError) { deleteAccountError.hidden = true; deleteAccountError.textContent = ''; }
+    deleteAccountSubmit.disabled = false;
+    deleteAccountSubmit.innerHTML = '<i class="fas fa-envelope" aria-hidden="true"></i>&nbsp;Send Verification Email';
+  }
+  function showDeleteAccountError(msg) {
+    if (!deleteAccountError) return;
+    deleteAccountError.textContent = '⚠ ' + msg;
+    deleteAccountError.hidden = false;
+  }
+
+  deleteAccountModal.addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeDeleteAccountModal();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && deleteAccountModal.classList.contains('open')) closeDeleteAccountModal();
+  });
+
+  deleteAccountForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('da-password').value;
+    if (!currentPassword) {
+      showDeleteAccountError('Please enter your current password to continue.');
+      return;
+    }
+
+    if (deleteAccountError) deleteAccountError.hidden = true;
+    deleteAccountSubmit.disabled = true;
+    deleteAccountSubmit.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>&nbsp;Sending...';
+
+    try {
+      const res = await fetch('/request-account-deletion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token() }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ current_password: currentPassword })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        closeDeleteAccountModal();
+        showProfileToast(data.message || 'Verification email sent — check your inbox to confirm deletion.', 'success');
+      } else {
+        showDeleteAccountError(data.error || 'Failed to request account deletion.');
+        deleteAccountSubmit.disabled = false;
+        deleteAccountSubmit.innerHTML = '<i class="fas fa-envelope" aria-hidden="true"></i>&nbsp;Send Verification Email';
+      }
+    } catch (err) {
+      showDeleteAccountError('Network error — please try again.');
+      deleteAccountSubmit.disabled = false;
+      deleteAccountSubmit.innerHTML = '<i class="fas fa-envelope" aria-hidden="true"></i>&nbsp;Send Verification Email';
     }
   });
 

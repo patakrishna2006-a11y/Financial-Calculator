@@ -159,6 +159,15 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
     }
+
+    .cta-button.danger {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    }
+
+    .cta-button.danger:hover {
+      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.5);
+    }
     
     /* Divider */
     .divider {
@@ -276,37 +285,59 @@
           <div class="logo-subtext">Smart Financial Calculators</div>
         </div>
       </a>
-      
+
+      {% set action_url = verify_url or reset_url or deletion_url or '' %}
+
       <!-- Content -->
-      <h1>Verify your email</h1>
-      
-      <p class="greeting">Hi {{ username }},</p>
-      
-      <p class="message">Welcome to FinCalc Pro! Thanks for creating an account. To get started with 25+ financial calculators, please verify your email address by clicking the button below.</p>
-      
+      {% if email_type == 'password_reset' %}
+        <h1>Reset your password</h1>
+        <p class="greeting">Hi {{ username }},</p>
+        <p class="message">We received a request to reset the password of your FinCalc Pro account. Click the button below to choose a new password. If this wasn't you, you can safely ignore this email — your current password will keep working.</p>
+      {% elif email_type == 'account_deletion' %}
+        <h1>Confirm account deletion</h1>
+        <p class="greeting">Hi {{ username }},</p>
+        <p class="message"><strong style="color: #f87171;">Warning:</strong> you requested to permanently delete your FinCalc Pro account. This will erase your account, your calculation history and your profile picture — this action <strong style="color: #f87171;">cannot be undone</strong>. Click the button below only if you are certain.</p>
+      {% else %}
+        <h1>Verify your email</h1>
+        <p class="greeting">Hi {{ username }},</p>
+        <p class="message">Welcome to FinCalc Pro! Thanks for creating an account. To get started with 25+ financial calculators, please verify your email address by clicking the button below.</p>
+      {% endif %}
+
       <!-- Expiry Notice -->
       <div class="expiry-notice" role="alert">
         <i class="fas fa-clock expiry-icon" aria-hidden="true"></i>
         <span>This link expires in {{ expiry_hours }} hour{% if expiry_hours != 1 %}s{% endif %}</span>
       </div>
-      
+
       <!-- CTA Button -->
       <div style="text-align: center; margin-bottom: 32px;">
-        <a href="{{ verify_url }}" class="cta-button">Verify Email</a>
+        {% if email_type == 'password_reset' %}
+          <a href="{{ action_url }}" class="cta-button">Reset Password</a>
+        {% elif email_type == 'account_deletion' %}
+          <a href="{{ action_url }}" class="cta-button danger">Confirm Deletion</a>
+        {% else %}
+          <a href="{{ action_url }}" class="cta-button">Verify Email</a>
+        {% endif %}
       </div>
-      
+
       <!-- Divider -->
       <div class="divider" aria-hidden="true"></div>
-      
+
       <!-- Fallback Link -->
       <p class="fallback">
         <strong>Button not working?</strong> Copy and paste this link into your browser:<br>
-        <a href="{{ verify_url }}">{{ verify_url }}</a>
+        <a href="{{ action_url }}">{{ action_url }}</a>
       </p>
-      
+
       <!-- Footer -->
       <div class="footer">
-        <p class="footer-text">If you didn't create an account with FinCalc Pro, you can safely ignore this email.</p>
+        {% if email_type == 'account_deletion' %}
+          <p class="footer-text">If you didn't request to delete your FinCalc Pro account, you can safely ignore this email — nothing will happen.</p>
+        {% elif email_type == 'password_reset' %}
+          <p class="footer-text">If you didn't request a password reset, you can safely ignore this email.</p>
+        {% else %}
+          <p class="footer-text">If you didn't create an account with FinCalc Pro, you can safely ignore this email.</p>
+        {% endif %}
         <div class="footer-links">
           <a href="{{ config.BASE_URL if config.BASE_URL else 'https://fincalc.pro' }}">Website</a>
           <a href="mailto:support@fincalc.pro">Support</a>

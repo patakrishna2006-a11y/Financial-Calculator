@@ -172,6 +172,23 @@ def detect_image_format(file_storage):
     return None
 
 
+def delete_profile_picture_file(user):
+    """Safely remove the user's profile picture file from disk.
+
+    The stored DB value is a path relative to /static. Only files inside
+    static/uploads can ever be deleted (guards against tampered values).
+    """
+    if not user.profile_picture:
+        return
+    try:
+        file_path = os.path.normpath(os.path.join(app.static_folder, user.profile_picture))
+        uploads_root = os.path.normpath(os.path.join(app.static_folder, 'uploads'))
+        if file_path.startswith(uploads_root + os.sep) and os.path.isfile(file_path):
+            os.remove(file_path)
+    except OSError:
+        pass  # Non-critical: orphaned file is harmless
+
+
 def send_verification_email(user, token):
     """Send verification email to user."""
     verify_url = f"{app.config['BASE_URL']}/verify-email/{token}"
@@ -201,6 +218,23 @@ def send_password_reset_email(user, token):
     )
     msg = Message(
         subject="Reset your FinCalc Pro password",
+        recipients=[user.email],
+        html=html
+    )
+    mail.send(msg)
+
+
+def send_account_deletion_email(user, token):
+    """Send a one-hour account deletion confirmation email to the user."""
+    deletion_url = f"{app.config['BASE_URL']}/confirm-account-deletion/{token}"
+    html = render_template('email/verification.html',
+        username=user.username,
+        deletion_url=deletion_url,
+        expiry_hours=1,
+        email_type='account_deletion'
+    )
+    msg = Message(
+        subject="Confirm deletion of your FinCalc Pro account",
         recipients=[user.email],
         html=html
     )
@@ -598,6 +632,9 @@ class User(db.Model):
     verification_token_expires = db.Column(db.DateTime, nullable=True)
     reset_token_hash = db.Column(db.String(100), unique=True, nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
+    # Account deletion confirmation (email-verified)
+    deletion_token_hash = db.Column(db.String(100), unique=True, nullable=True)
+    deletion_token_expires = db.Column(db.DateTime, nullable=True)
     # Profile information
     profile_picture = db.Column(db.String(255), nullable=True)  # path relative to /static
     created_at = db.Column(db.DateTime, nullable=True)
@@ -636,6 +673,10 @@ with app.app_context():
             connection.execute(text('ALTER TABLE "user" ADD COLUMN created_at TIMESTAMP'))
         if 'last_login' not in existing_columns:
             connection.execute(text('ALTER TABLE "user" ADD COLUMN last_login TIMESTAMP'))
+        if 'deletion_token_hash' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN deletion_token_hash VARCHAR(100)'))
+        if 'deletion_token_expires' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN deletion_token_expires TIMESTAMP'))
         # Create unique indexes for token hashes
         try:
             connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_verification_token_hash ON "user" (verification_token_hash)'))
@@ -643,6 +684,10 @@ with app.app_context():
             pass
         try:
             connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_reset_token_hash ON "user" (reset_token_hash)'))
+        except Exception:
+            pass
+        try:
+            connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_deletion_token_hash ON "user" (deletion_token_hash)'))
         except Exception:
             pass
 
@@ -1166,14 +1211,7 @@ def update_profile_picture():
         return jsonify({"success": False, "error": "Failed to save the image. Please try again."}), 500
 
     # Remove the previous picture (only within static/uploads, defensively)
-    if user.profile_picture:
-        try:
-            old_path = os.path.normpath(os.path.join(app.static_folder, user.profile_picture))
-            uploads_root = os.path.normpath(os.path.join(app.static_folder, 'uploads'))
-            if old_path.startswith(uploads_root + os.sep) and os.path.isfile(old_path):
-                os.remove(old_path)
-        except OSError:
-            pass  # Non-critical: orphaned file is harmless
+    delete_profile_picture_file(user)
 
     user.profile_picture = f"uploads/profiles/{filename}"
     db.session.commit()
@@ -1181,6 +1219,186 @@ def update_profile_picture():
     picture_url = f"{url_for('static', filename=user.profile_picture)}?v={int(now_ist().timestamp())}"
     log_security_event('PROFILE_PICTURE_UPDATED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
     return jsonify({"success": True, "picture_url": picture_url})
+
+
+@app.route('/change-password', methods=['POST'])
+@limiter.limit("5 per minute; 10 per hour")
+def change_password():
+    """Change the password of the logged-in user without email verification.
+
+    Being logged in with valid credentials is the proof of identity, so the
+    user only needs to confirm the CURRENT password. The logged-out email
+    flow (/forgot-password) is intentionally left untouched.
+    """
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Authentication required"}), 401
+
+    user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({"success": False, "error": "Account not found"}), 401
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "error": "Invalid request"}), 400
+
+    current_password = data.get('current_password', '')
+    new_password = data.get('new_password', '')
+    confirm_password = data.get('confirm_password', '')
+
+    if not current_password or not new_password or not confirm_password:
+        return jsonify({"success": False, "error": "All fields are required"}), 400
+
+    # The current password is the identity proof for this operation
+    if not check_password_hash(user.password, current_password):
+        log_security_event('PASSWORD_CHANGE_FAILURE', 'invalid_current_password', user_id=user.id, ip=request.remote_addr)
+        return jsonify({"success": False, "error": "Current password is incorrect"}), 400
+
+    if new_password != confirm_password:
+        return jsonify({"success": False, "error": "New passwords do not match"}), 400
+
+    # Same complexity policy as registration
+    if len(new_password) < 9 or not re.search(r'[A-Za-z]', new_password) \
+            or not re.search(r'\d', new_password) or not re.search(r'[^A-Za-z0-9]', new_password):
+        return jsonify({"success": False, "error": "Password must be at least 9 characters long and include a letter, a number, and a symbol"}), 400
+
+    if check_password_hash(user.password, new_password):
+        return jsonify({"success": False, "error": "New password must be different from the current password"}), 400
+
+    user.password = generate_password_hash(new_password)
+    # Invalidate any pending email-based reset links (security hardening)
+    user.reset_token_hash = None
+    user.reset_token = None  # Clear legacy
+    user.reset_token_expires = None
+    db.session.commit()
+
+    log_security_event('PASSWORD_CHANGED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+    return jsonify({"success": True, "message": "Password changed successfully. Use your new password next time you log in."})
+
+
+@app.route('/remove-profile-picture', methods=['POST'])
+@limiter.limit("5 per minute; 20 per hour")
+def remove_profile_picture():
+    """Remove the logged-in user's profile picture (direct action, no refresh).
+
+    The file is deleted from disk and the avatar reverts to the default
+    initials. Idempotent: succeeds even if no picture is set.
+    """
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Authentication required"}), 401
+
+    user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({"success": False, "error": "Account not found"}), 401
+
+    had_picture = bool(user.profile_picture)
+    delete_profile_picture_file(user)
+    user.profile_picture = None
+    db.session.commit()
+
+    if had_picture:
+        log_security_event('PROFILE_PICTURE_REMOVED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+    return jsonify({"success": True, "message": "Profile picture removed" if had_picture else "No profile picture to remove"})
+
+
+def find_user_by_deletion_token(token):
+    """Find the user whose pending deletion token matches (constant-time compare)."""
+    if not token:
+        return None
+    candidates = User.query.filter(
+        User.deletion_token_hash.isnot(None),
+        User.deletion_token_expires > now_ist()
+    ).all()
+
+    for candidate in candidates:
+        if verify_token(candidate.deletion_token_hash, token):
+            return candidate
+    return None
+
+
+@app.route('/request-account-deletion', methods=['POST'])
+@limiter.limit("3 per hour; 10 per day")
+def request_account_deletion():
+    """Step 1 of account deletion: verify current password, then email a confirmation link."""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Authentication required"}), 401
+
+    user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({"success": False, "error": "Account not found"}), 401
+
+    data = request.get_json(silent=True)
+    current_password = (data or {}).get('current_password', '')
+    if not current_password:
+        return jsonify({"success": False, "error": "Please enter your current password"}), 400
+
+    if not check_password_hash(user.password, current_password):
+        log_security_event('ACCOUNT_DELETION_REQUEST_FAILURE', 'invalid_password', user_id=user.id, ip=request.remote_addr)
+        return jsonify({"success": False, "error": "Current password is incorrect"}), 400
+
+    token = generate_verification_token()
+    user.deletion_token_hash = hash_token(token)
+    user.deletion_token_expires = now_ist() + timedelta(hours=1)
+    db.session.commit()
+
+    try:
+        send_account_deletion_email(user, token)
+    except Exception as e:
+        # Email is the whole confirmation mechanism — without it the user
+        # cannot proceed, so undo the token and report failure.
+        user.deletion_token_hash = None
+        user.deletion_token_expires = None
+        db.session.commit()
+        log_security_event('ACCOUNT_DELETION_EMAIL_FAILED', f'username={user.username} error={str(e)}', user_id=user.id, ip=request.remote_addr)
+        return jsonify({"success": False, "error": "Could not send the verification email. Please try again later."}), 500
+
+    log_security_event('ACCOUNT_DELETION_REQUESTED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+    return jsonify({"success": True, "message": "Verification email sent. Check your inbox to confirm account deletion — the link is valid for 1 hour."})
+
+
+@app.route('/confirm-account-deletion/<token>', methods=['GET', 'POST'])
+def confirm_account_deletion(token):
+    """Step 2 of account deletion: confirm via the emailed link and delete everything."""
+    user = find_user_by_deletion_token(token)
+
+    if not user:
+        log_security_event('ACCOUNT_DELETION_CONFIRM_FAILURE', 'invalid_token', ip=request.remote_addr)
+        flash('This account deletion link is invalid or has expired.', 'danger')
+        return redirect(url_for('home'))
+
+    token_expires = user.deletion_token_expires
+    if token_expires and token_expires.tzinfo is None:
+        token_expires = token_expires.replace(tzinfo=IST)
+    if token_expires and token_expires < now_ist():
+        user.deletion_token_hash = None
+        user.deletion_token_expires = None
+        db.session.commit()
+        flash('This account deletion link has expired. You can request a new one from your profile.', 'danger')
+        return redirect(url_for('home'))
+
+    if request.method == 'GET':
+        return render_template('confirm_deletion.html', token=token, username=user.username)
+
+    # POST — final confirmation from the dedicated page (CSRF-protected form)
+    username = user.username
+    user_id = user.id
+
+    # 1. Delete calculation history first (FK constraint on user.id)
+    CalculationHistory.query.filter_by(user_id=user_id).delete()
+
+    # 2. Delete the profile picture file from disk
+    delete_profile_picture_file(user)
+
+    # 3. Delete the account row
+    db.session.delete(user)
+    db.session.commit()
+
+    # 4. Invalidate the session (the deleted user may be the one logged in)
+    if session.get('user_id') == user_id:
+        session.clear()
+
+    log_security_event('ACCOUNT_DELETED', f'username={username}', ip=request.remote_addr)
+    flash('Your account has been permanently deleted. We are sorry to see you go!', 'info')
+    return redirect(url_for('home'))
 
 @app.route('/logout')
 def logout():
