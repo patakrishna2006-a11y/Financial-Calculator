@@ -249,7 +249,7 @@
               <i class="fas fa-key" aria-hidden="true"></i> Change Password
             </button>
             <button type="button" class="profile-action-btn" id="remove-photo-btn" {% if not profile.profile_picture %}hidden{% endif %}>
-              <i class="fas fa-image-polaroid" aria-hidden="true"></i> Remove Photo
+              <i class="fas fa-eraser" aria-hidden="true"></i> Remove Photo
             </button>
             <button type="button" class="profile-action-btn profile-action-btn--danger" id="delete-account-btn" onclick="openDeleteAccountModal()">
               <i class="fas fa-trash-can" aria-hidden="true"></i> Delete Account
@@ -1936,7 +1936,7 @@
       showProfileError('Network error — please try again.');
     } finally {
       removePhotoBtn.disabled = false;
-      removePhotoBtn.innerHTML = '<i class="fas fa-image-polaroid" aria-hidden="true"></i> Remove Photo';
+      removePhotoBtn.innerHTML = '<i class="fas fa-eraser" aria-hidden="true"></i> Remove Photo';
     }
   });
 
