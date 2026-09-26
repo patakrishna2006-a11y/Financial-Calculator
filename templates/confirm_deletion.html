@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#060814">
+  <title>Confirm Account Deletion - FinCalc Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}{% for category, message in messages %}
+    <div id="toast" class="toast-msg {{ category }}" role="alert" aria-live="assertive">{{ message }}</div>
+  {% endfor %}{% endif %}
+{% endwith %}
+<body>
+  <div class="bg-wrapper" aria-hidden="true"><div class="bg-orb bg-orb--purple"></div><div class="bg-orb bg-orb--blue"></div><div class="bg-orb bg-orb--teal"></div></div>
+  <div class="auth-wrapper"><div class="auth-container" role="main">
+    <div class="auth-form-side">
+      <a href="/" class="logo" style="display:inline-flex;margin-bottom:2rem;" aria-label="Back to home"><div class="logo-icon"><i class="fas fa-chart-simple" aria-hidden="true"></i></div><div class="logo-text-wrapper"><div class="logo-text">FinCalc Pro</div><div class="logo-subtext">Smart Financial Calculators</div></div></a>
+
+      <div style="width:60px;height:60px;display:grid;place-items:center;border-radius:18px;background:rgba(255,92,122,0.12);border:1px solid rgba(255,92,122,0.25);color:var(--accent-danger);font-size:1.4rem;margin-bottom:1.2rem;" aria-hidden="true">
+        <i class="fas fa-triangle-exclamation"></i>
+      </div>
+
+      <h2>Delete your account?</h2>
+      <p style="color:var(--text-muted);">Hi <strong>{{ username }}</strong>, you're one step away from permanently deleting your FinCalc Pro account.</p>
+
+      <div style="background:rgba(var(--accent-danger-rgb),0.08);border:1px solid rgba(var(--accent-danger-rgb),0.3);border-radius:var(--radius-md);padding:0.9rem 1.1rem;margin:1.2rem 0;color:var(--text-secondary);font-size:0.88rem;">
+        <p style="margin:0 0 0.5rem;font-weight:600;color:var(--accent-danger);"><i class="fas fa-circle-exclamation" style="margin-right:6px;" aria-hidden="true"></i>This action cannot be undone.</p>
+        <p style="margin:0 0 0.35rem;"><i class="fas fa-xmark" style="color:var(--accent-danger);margin-right:8px;" aria-hidden="true"></i>Your account and login access will be removed</p>
+        <p style="margin:0 0 0.35rem;"><i class="fas fa-xmark" style="color:var(--accent-danger);margin-right:8px;" aria-hidden="true"></i>Your entire calculation history will be erased</p>
+        <p style="margin:0;"><i class="fas fa-xmark" style="color:var(--accent-danger);margin-right:8px;" aria-hidden="true"></i>Your profile picture will be deleted</p>
+      </div>
+
+      <form action="{{ url_for('confirm_account_deletion', token=token) }}" method="POST" id="confirm-deletion-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-auth" id="confirm-deletion-btn" style="background:var(--accent-danger);width:100%;" autocomplete="off">
+          <span id="confirm-deletion-label"><i class="fas fa-trash-can" style="margin-right:6px;" aria-hidden="true"></i>Yes, Permanently Delete My Account</span>
+        </button>
+      </form>
+
+      <p style="text-align:center;margin-top:1.2rem;">
+        <a href="{{ url_for('dashboard') }}" style="color:var(--accent-primary);text-decoration:none;font-weight:600;font-size:0.9rem;">
+          <i class="fas fa-arrow-left" style="margin-right:6px;" aria-hidden="true"></i>Cancel and go back
+        </a>
+      </p>
+    </div>
+    <div class="auth-brand-side"><div style="position:relative;z-index:1;"><h1>Final<br>Step</h1><p style="color:rgba(255,255,255,0.7);margin-bottom:0;">Confirm the deletion of your account. This is irreversible.</p></div></div>
+  </div></div>
+  <script>
+    // Guard against double submission
+    document.getElementById('confirm-deletion-form').addEventListener('submit', function() {
+      const btn = document.getElementById('confirm-deletion-btn');
+      btn.disabled = true;
+      document.getElementById('confirm-deletion-label').innerHTML =
+        '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>&nbsp;Deleting your account...';
+    });
+  </script>
+</body>
+</html>
