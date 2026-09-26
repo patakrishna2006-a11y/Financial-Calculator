@@ -902,6 +902,7 @@ header::before {
 .change-password-card form { text-align: left; }
 .change-password-card .input-group { margin-bottom: 0.85rem; }
 .change-password-card .input-group input { font-size: 0.9rem; padding: 0.7rem 1rem 0.7rem 2.5rem; }
+.change-password-card .password-wrapper input { padding-right: 2.6rem; }
 
 .profile-actions { padding: 0.35rem 1.2rem 1.05rem; }
 

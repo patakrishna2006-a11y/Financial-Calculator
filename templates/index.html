@@ -84,21 +84,36 @@
           <label for="cp-current">Current password</label>
           <div class="input-icon-wrap">
             <i class="fas fa-lock field-icon" aria-hidden="true"></i>
-            <input type="password" id="cp-current" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
+            <div class="password-wrapper">
+              <input type="password" id="cp-current" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
+              <button type="button" class="toggle-password" id="toggle-cp-current" aria-label="Toggle current password visibility" aria-pressed="false">
+                <i class="fas fa-eye" id="toggle-cp-current-icon" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
         </div>
         <div class="input-group">
           <label for="cp-new">New password</label>
           <div class="input-icon-wrap">
             <i class="fas fa-lock field-icon" aria-hidden="true"></i>
-            <input type="password" id="cp-new" name="new_password" placeholder="At least 9 chars, a number & a symbol" autocomplete="new-password" required>
+            <div class="password-wrapper">
+              <input type="password" id="cp-new" name="new_password" placeholder="At least 9 chars,number & symbol" autocomplete="new-password" required>
+              <button type="button" class="toggle-password" id="toggle-cp-new" aria-label="Toggle new password visibility" aria-pressed="false">
+                <i class="fas fa-eye" id="toggle-cp-new-icon" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
         </div>
         <div class="input-group">
           <label for="cp-confirm">Confirm new password</label>
           <div class="input-icon-wrap">
             <i class="fas fa-lock field-icon" aria-hidden="true"></i>
-            <input type="password" id="cp-confirm" name="confirm_password" placeholder="Re-enter new password" autocomplete="new-password" required>
+            <div class="password-wrapper">
+              <input type="password" id="cp-confirm" name="confirm_password" placeholder="Re-enter new password" autocomplete="new-password" required>
+              <button type="button" class="toggle-password" id="toggle-cp-confirm" aria-label="Toggle confirmation visibility" aria-pressed="false">
+                <i class="fas fa-eye" id="toggle-cp-confirm-icon" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -126,7 +141,12 @@
           <label for="da-password">Current password</label>
           <div class="input-icon-wrap">
             <i class="fas fa-lock field-icon" aria-hidden="true"></i>
-            <input type="password" id="da-password" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
+            <div class="password-wrapper">
+              <input type="password" id="da-password" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
+              <button type="button" class="toggle-password" id="toggle-da-password" aria-label="Toggle password visibility" aria-pressed="false">
+                <i class="fas fa-eye" id="toggle-da-password-icon" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1929,6 +1949,33 @@
   const changePasswordError = document.getElementById('change-password-error');
   const changePasswordSubmit = document.getElementById('change-password-submit');
 
+  // ── Password visibility toggles (profile modals) ──
+  function bindPasswordToggle(inputId, btnId, iconId) {
+    const input = document.getElementById(inputId);
+    const btn   = document.getElementById(btnId);
+    const icon  = document.getElementById(iconId);
+    if (!input || !btn || !icon) return;
+    btn.addEventListener('click', () => {
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      icon.className = isHidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+      btn.setAttribute('aria-pressed', String(isHidden));
+    });
+  }
+  function resetPasswordToggle(inputId, btnId, iconId) {
+    const input = document.getElementById(inputId);
+    const btn   = document.getElementById(btnId);
+    const icon  = document.getElementById(iconId);
+    if (input) input.type = 'password';
+    if (icon)  icon.className = 'fas fa-eye';
+    if (btn)   btn.setAttribute('aria-pressed', 'false');
+  }
+
+  bindPasswordToggle('cp-current', 'toggle-cp-current', 'toggle-cp-current-icon');
+  bindPasswordToggle('cp-new', 'toggle-cp-new', 'toggle-cp-new-icon');
+  bindPasswordToggle('cp-confirm', 'toggle-cp-confirm', 'toggle-cp-confirm-icon');
+  bindPasswordToggle('da-password', 'toggle-da-password', 'toggle-da-password-icon');
+
   function openChangePasswordModal() {
     closeProfileDropdown();
     resetChangePasswordForm();
@@ -1941,6 +1988,9 @@
   }
   function resetChangePasswordForm() {
     changePasswordForm.reset();
+    resetPasswordToggle('cp-current', 'toggle-cp-current', 'toggle-cp-current-icon');
+    resetPasswordToggle('cp-new', 'toggle-cp-new', 'toggle-cp-new-icon');
+    resetPasswordToggle('cp-confirm', 'toggle-cp-confirm', 'toggle-cp-confirm-icon');
     if (changePasswordError) { changePasswordError.hidden = true; changePasswordError.textContent = ''; }
     changePasswordSubmit.disabled = false;
     changePasswordSubmit.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>&nbsp;Update Password';
@@ -2041,6 +2091,7 @@
   }
   function resetDeleteAccountForm() {
     deleteAccountForm.reset();
+    resetPasswordToggle('da-password', 'toggle-da-password', 'toggle-da-password-icon');
     if (deleteAccountError) { deleteAccountError.hidden = true; deleteAccountError.textContent = ''; }
     deleteAccountSubmit.disabled = false;
     deleteAccountSubmit.innerHTML = '<i class="fas fa-envelope" aria-hidden="true"></i>&nbsp;Send Verification Email';
