@@ -62,6 +62,11 @@ app.config['SESSION_PERMANENT'] = True
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 app.config['WTF_CSRF_SSL_STRICT'] = app.config['SESSION_COOKIE_SECURE']
 
+# Profile picture uploads (applies to any request body)
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
+MAX_PROFILE_PICTURE_BYTES = 2 * 1024 * 1024  # 2 MB per image
+ALLOWED_PROFILE_PICTURE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'gif'}
+
 db = SQLAlchemy(app)
 
 # --- Initialize Extensions ---
@@ -124,6 +129,47 @@ def verify_token(token_hash, token):
     if not token_hash or not token:
         return False
     return check_password_hash(token_hash, token)
+
+
+def format_ist(dt):
+    """Format a datetime (naive or aware) for display in IST."""
+    if not dt:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=IST)
+    return dt.astimezone(IST).strftime('%d %b %Y, %I:%M %p')
+
+
+def allowed_profile_picture(filename):
+    """Check that the uploaded file has an allowed image extension."""
+    if not filename or '.' not in filename:
+        return False
+    return filename.rsplit('.', 1)[1].lower() in ALLOWED_PROFILE_PICTURE_EXTENSIONS
+
+
+def detect_image_format(file_storage):
+    """Validate the image by magic bytes; returns the format or None.
+
+    Relying on the client-supplied extension/content-type is unsafe, so the
+    actual file header is inspected instead. SVG is intentionally not
+    supported (XSS risk when served inline).
+    """
+    try:
+        header = file_storage.stream.read(12)
+    finally:
+        file_storage.stream.seek(0)
+
+    if len(header) < 8:
+        return None
+    if header.startswith(b'\xff\xd8\xff'):
+        return 'jpg'
+    if header.startswith(b'\x89PNG\r\n\x1a\n'):
+        return 'png'
+    if header.startswith((b'GIF87a', b'GIF89a')):
+        return 'gif'
+    if header.startswith(b'RIFF') and header[8:12] == b'WEBP':
+        return 'webp'
+    return None
 
 
 def send_verification_email(user, token):
@@ -552,6 +598,10 @@ class User(db.Model):
     verification_token_expires = db.Column(db.DateTime, nullable=True)
     reset_token_hash = db.Column(db.String(100), unique=True, nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
+    # Profile information
+    profile_picture = db.Column(db.String(255), nullable=True)  # path relative to /static
+    created_at = db.Column(db.DateTime, nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)
     # Legacy plaintext columns (for migration compatibility)
     verification_token = db.Column(db.String(100), unique=True, nullable=True)
     reset_token = db.Column(db.String(100), unique=True, nullable=True)
@@ -580,6 +630,12 @@ with app.app_context():
             connection.execute(text('ALTER TABLE "user" ADD COLUMN verification_token_hash VARCHAR(100)'))
         if 'reset_token_hash' not in existing_columns:
             connection.execute(text('ALTER TABLE "user" ADD COLUMN reset_token_hash VARCHAR(100)'))
+        if 'profile_picture' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN profile_picture VARCHAR(255)'))
+        if 'created_at' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN created_at TIMESTAMP'))
+        if 'last_login' not in existing_columns:
+            connection.execute(text('ALTER TABLE "user" ADD COLUMN last_login TIMESTAMP'))
         # Create unique indexes for token hashes
         try:
             connection.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS ix_user_verification_token_hash ON "user" (verification_token_hash)'))
@@ -756,7 +812,8 @@ def register():
         email=email,
         is_verified=False,
         verification_token_hash=hash_token(token),
-        verification_token_expires=token_expires
+        verification_token_expires=token_expires,
+        created_at=now_ist()
     )
     
     try:
@@ -1015,6 +1072,8 @@ def login():
         session.clear()  # Prevent session fixation
         session['user_id'] = user.id
         session.permanent = True
+        user.last_login = now_ist()
+        db.session.commit()
         log_security_event('LOGIN_SUCCESS', f'username={username}', user_id=user.id, ip=request.remote_addr)
         flash('Successful login!', 'success')
         return redirect(url_for('dashboard'))
@@ -1027,7 +1086,22 @@ def login():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('home'))
-    
+
+    user = User.query.get(session['user_id'])
+    if not user:
+        session.clear()
+        return redirect(url_for('home'))
+
+    profile = {
+        'username': user.username,
+        'email': user.email,
+        'is_verified': bool(user.is_verified),
+        'created_at': format_ist(user.created_at),
+        'last_login': format_ist(user.last_login),
+        'profile_picture': url_for('static', filename=user.profile_picture) if user.profile_picture else None,
+        'initials': (user.username[:1] or '?').upper(),
+    }
+
     raw_history = (
         CalculationHistory.query
         .filter_by(user_id=session['user_id'])
@@ -1045,7 +1119,68 @@ def dashboard():
             'timestamp': entry.timestamp
         })
 
-    return render_template("index.html", history=processed_history)
+    return render_template("index.html", history=processed_history, profile=profile)
+
+
+@app.route('/update-profile-picture', methods=['POST'])
+@limiter.limit("5 per minute; 20 per hour")
+def update_profile_picture():
+    """Update the logged-in user's profile picture (AJAX, no page refresh)."""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Authentication required"}), 401
+
+    user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({"success": False, "error": "Account not found"}), 401
+
+    file = request.files.get('picture')
+    if file is None or file.filename == '':
+        return jsonify({"success": False, "error": "No image selected"}), 400
+
+    if not allowed_profile_picture(file.filename):
+        return jsonify({"success": False, "error": "Only JPG, PNG, WEBP or GIF images are allowed"}), 400
+
+    # Size check (stream-based; MAX_CONTENT_LENGTH guards the request itself)
+    file.stream.seek(0, os.SEEK_END)
+    size = file.stream.tell()
+    file.stream.seek(0)
+    if size == 0:
+        return jsonify({"success": False, "error": "The selected file is empty"}), 400
+    if size > MAX_PROFILE_PICTURE_BYTES:
+        return jsonify({"success": False, "error": "Image is too large — maximum size is 2 MB"}), 413
+
+    # Content validation via magic bytes (never trust the file extension)
+    fmt = detect_image_format(file)
+    if not fmt:
+        return jsonify({"success": False, "error": "Invalid or corrupted image file"}), 400
+
+    upload_dir = os.path.join(app.static_folder, 'uploads', 'profiles')
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Server-generated filename: no user input ever reaches the filesystem path
+    filename = f"user_{user.id}_{secrets.token_hex(8)}.{fmt}"
+    try:
+        file.save(os.path.join(upload_dir, filename))
+    except OSError:
+        log_security_event('PROFILE_PICTURE_SAVE_FAILED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+        return jsonify({"success": False, "error": "Failed to save the image. Please try again."}), 500
+
+    # Remove the previous picture (only within static/uploads, defensively)
+    if user.profile_picture:
+        try:
+            old_path = os.path.normpath(os.path.join(app.static_folder, user.profile_picture))
+            uploads_root = os.path.normpath(os.path.join(app.static_folder, 'uploads'))
+            if old_path.startswith(uploads_root + os.sep) and os.path.isfile(old_path):
+                os.remove(old_path)
+        except OSError:
+            pass  # Non-critical: orphaned file is harmless
+
+    user.profile_picture = f"uploads/profiles/{filename}"
+    db.session.commit()
+
+    picture_url = f"{url_for('static', filename=user.profile_picture)}?v={int(now_ist().timestamp())}"
+    log_security_event('PROFILE_PICTURE_UPDATED', f'username={user.username}', user_id=user.id, ip=request.remote_addr)
+    return jsonify({"success": True, "picture_url": picture_url})
 
 @app.route('/logout')
 def logout():

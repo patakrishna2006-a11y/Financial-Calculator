@@ -103,7 +103,62 @@
           <span class="theme-dot" style="background: #4dd0e1;"></span>
         </button>
       </div>
-      <div class="header-badge" aria-label="All calculators available">ALL CALCULATORS</div>
+
+      <!-- ═══ PROFILE (top-right) ═══ -->
+      <div class="profile-menu" id="profile-menu">
+        <button type="button" class="profile-trigger" id="profile-trigger"
+                aria-haspopup="true" aria-expanded="false" aria-controls="profile-dropdown"
+                aria-label="Open your profile" title="Your profile">
+          <span class="profile-avatar" id="header-avatar">
+            <img {% if profile.profile_picture %}src="{{ profile.profile_picture }}"{% endif %} alt="" id="header-avatar-img" {% if not profile.profile_picture %}hidden{% endif %}>
+            <span class="profile-avatar-initials" id="header-avatar-initials" {% if profile.profile_picture %}hidden{% endif %}>{{ profile.initials }}</span>
+          </span>
+        </button>
+
+        <div class="profile-dropdown" id="profile-dropdown" role="menu" aria-label="Your profile">
+          <div class="profile-card-top">
+            <div class="profile-avatar-wrap">
+              <span class="profile-avatar profile-avatar-xl" id="dropdown-avatar">
+                <img {% if profile.profile_picture %}src="{{ profile.profile_picture }}"{% endif %} alt="" id="dropdown-avatar-img" {% if not profile.profile_picture %}hidden{% endif %}>
+                <span class="profile-avatar-initials" id="dropdown-avatar-initials" {% if profile.profile_picture %}hidden{% endif %}>{{ profile.initials }}</span>
+              </span>
+              <span class="profile-avatar-uploading" id="avatar-uploading" hidden>
+                <span class="spinner" role="status" aria-label="Uploading"></span>
+              </span>
+              <button type="button" class="profile-avatar-camera" id="change-picture-btn"
+                      aria-label="Change profile picture" title="Change profile picture">
+                <i class="fas fa-camera" aria-hidden="true"></i>
+              </button>
+              <input type="file" id="picture-input" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+            </div>
+            <div class="profile-name">{{ profile.username }}</div>
+            <div class="profile-email" title="{{ profile.email }}">{{ profile.email }}</div>
+            <span class="profile-status {{ 'is-verified' if profile.is_verified else 'is-unverified' }}">
+              <i class="fas {{ 'fa-circle-check' if profile.is_verified else 'fa-circle-exclamation' }}" aria-hidden="true"></i>
+              {{ 'Email verified' if profile.is_verified else 'Email not verified' }}
+            </span>
+          </div>
+
+          <div class="profile-details">
+            <div class="profile-row">
+              <span class="profile-row-label"><i class="fas fa-cake-candles" aria-hidden="true"></i>Member since</span>
+              <span class="profile-row-value">{{ profile.created_at or '—' }}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-row-label"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>Last login</span>
+              <span class="profile-row-value">{{ profile.last_login or '—' }}</span>
+            </div>
+          </div>
+
+          <div class="profile-error" id="profile-error" role="alert" hidden></div>
+
+          <div class="profile-actions">
+            <button type="button" class="profile-logout" onclick="closeProfileDropdown(); openLogoutModal();">
+              <i class="fas fa-right-from-bracket" aria-hidden="true"></i> Logout
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -1601,6 +1656,147 @@
     if (e.target === e.currentTarget) closeLogoutModal();
   });
 
+  // ═══════════════════════════════════════════════════════════════════
+  // PROFILE MENU (dropdown) + PROFILE PICTURE LIVE UPLOAD
+  // ═══════════════════════════════════════════════════════════════════
+
+  const profileMenu      = document.getElementById('profile-menu');
+  const profileTrigger   = document.getElementById('profile-trigger');
+  const profileDropdown  = document.getElementById('profile-dropdown');
+  const changePictureBtn = document.getElementById('change-picture-btn');
+  const pictureInput     = document.getElementById('picture-input');
+  const avatarUploading  = document.getElementById('avatar-uploading');
+  const profileError     = document.getElementById('profile-error');
+
+  const AVATAR_SLOTS = [
+    { img: document.getElementById('header-avatar-img'),   initials: document.getElementById('header-avatar-initials') },
+    { img: document.getElementById('dropdown-avatar-img'), initials: document.getElementById('dropdown-avatar-initials') },
+  ];
+  let currentAvatarUrl = '{{ profile.profile_picture or "" }}';
+  let isUploadingPicture = false;
+
+  function openProfileDropdown() {
+    profileDropdown.classList.add('open');
+    profileTrigger.setAttribute('aria-expanded', 'true');
+  }
+  function closeProfileDropdown() {
+    profileDropdown.classList.remove('open');
+    profileTrigger.setAttribute('aria-expanded', 'false');
+  }
+
+  profileTrigger.addEventListener('click', e => {
+    e.stopPropagation();
+    profileDropdown.classList.contains('open') ? closeProfileDropdown() : openProfileDropdown();
+  });
+
+  document.addEventListener('click', e => {
+    if (profileMenu && !profileMenu.contains(e.target)) closeProfileDropdown();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeProfileDropdown();
+  });
+
+  function renderAvatar(url) {
+    currentAvatarUrl = url || '';
+    AVATAR_SLOTS.forEach(slot => {
+      if (url) { slot.img.src = url; slot.img.hidden = false; slot.initials.hidden = true; }
+      else { slot.img.removeAttribute('src'); slot.img.hidden = true; slot.initials.hidden = false; }
+    });
+  }
+
+  function showProfileError(msg) {
+    if (!profileError) return;
+    profileError.textContent = '⚠ ' + msg;
+    profileError.hidden = false;
+    clearTimeout(showProfileError._t);
+    showProfileError._t = setTimeout(() => { profileError.hidden = true; }, 5000);
+  }
+  function hideProfileError() {
+    if (profileError) profileError.hidden = true;
+  }
+
+  function showProfileToast(message, category) {
+    const toast = document.createElement('div');
+    toast.className = `toast-msg ${category || 'info'}`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `<i class="fas ${category === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}" style="margin-right:6px;" aria-hidden="true"></i>`;
+    toast.appendChild(document.createTextNode(message));
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 500);
+    }, 3500);
+  }
+
+  changePictureBtn.addEventListener('click', () => {
+    if (!isUploadingPicture) pictureInput.click();
+  });
+
+  pictureInput.addEventListener('change', async () => {
+    const file = pictureInput.files && pictureInput.files[0];
+    pictureInput.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+
+    // Client-side pre-validation (server validates again, strictly)
+    if (!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)) {
+      showProfileError('Only JPG, PNG, WEBP or GIF images are allowed.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showProfileError('Image is too large — maximum size is 2 MB.');
+      return;
+    }
+
+    hideProfileError();
+    const previousUrl = currentAvatarUrl;
+
+    // Instant local preview (data: URL — allowed by CSP img-src)
+    const previewUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    }).catch(() => null);
+    if (previewUrl) renderAvatar(previewUrl);
+
+    isUploadingPicture = true;
+    if (avatarUploading) avatarUploading.hidden = false;
+    changePictureBtn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('picture', file);
+      formData.append('csrf_token', '{{ csrf_token() }}');
+
+      const res = await fetch('/update-profile-picture', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token() }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        renderAvatar(data.picture_url);   // live update — no page refresh
+        showProfileToast('Profile picture updated!', 'success');
+      } else {
+        renderAvatar(previousUrl);
+        showProfileError(data.error || 'Failed to update profile picture.');
+      }
+    } catch (err) {
+      renderAvatar(previousUrl);
+      showProfileError('Network error — please try again.');
+    } finally {
+      isUploadingPicture = false;
+      if (avatarUploading) avatarUploading.hidden = true;
+      changePictureBtn.disabled = false;
+    }
+  });
+
   // ── Enter key support ──
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && activePanel && activePanel !== 'HISTORY') calculate(activePanel);
@@ -3078,4 +3274,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
   </script>
 </body>
-</html>s
+</html>

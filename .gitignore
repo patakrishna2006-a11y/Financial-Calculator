@@ -26,6 +26,10 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 
+# User-uploaded profile pictures
+static/uploads/profiles/*
+!static/uploads/profiles/.gitkeep
+
 # Logs
 *.log
 
