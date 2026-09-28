@@ -121,7 +121,6 @@ FinCalc Pro
 │   └── style.css             # Complete stylesheet with theme system
 ├── instance/
 │   ├── users.db              # SQLite database
-│   └── security.log          # Security event log (rotating)
 └── requirements.txt          # Python dependencies
 ```
 
