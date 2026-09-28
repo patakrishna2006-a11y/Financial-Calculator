@@ -37,6 +37,10 @@ See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security a
 - **Secure Registration/Login** — Password hashing with Werkzeug, complexity validation (9+ chars, letter, number, symbol)
 - **Session Management** — Flask sessions with SQLite database
 - **Calculation History** — Persistent history per user with timestamps
+- **Profile Management** — Avatar upload (JPG/PNG/WEBP/GIF, max 2MB), email verification status, account creation date, last login
+- **Change Password** — In-session password change with current password verification, complexity validation, auto-invalidates pending reset tokens
+- **Remove Profile Photo** — One-click avatar removal with instant revert to initials
+- **Delete Account** — Two-step email-verified deletion: password confirmation → email link → permanent deletion of account, history, and files
 
 ### 📊 26 Financial Calculators
 
@@ -101,23 +105,24 @@ FinCalc Pro
 │   ├── register.html         # Registration page
 │   ├── forgot_password.html  # Forgot Password page
 │   ├── reset_password.html   # Reset Password Page
-|   ├── email/
-|       ├── verification.html # Email Verification Page
-|   ├── email/
-|       ├── 400.html          # Error Handling page           
-|       ├── 401.html          # Error Handling page
-|       ├── 403.html          # Error Handling page
-|       ├── 404.html          # Error Handling page
-|       ├── 405.html          # Error Handling page
-|       ├── 413.html          # Error Handling page
-|       ├── 429.html          # Error Handling page
-|       ├── 500.html          # Error Handling page
+│   ├── confirm_deletion.html # Account Deletion Confirmation Page
+│   ├── email/
+│   │   └── verification.html # Email Verification / Password Reset / Account Deletion
+│   ├── errors/
+│   │   ├── 400.html          # Error Handling page           
+│   │   ├── 401.html          # Error Handling page
+│   │   ├── 403.html          # Error Handling page
+│   │   ├── 404.html          # Error Handling page
+│   │   ├── 405.html          # Error Handling page
+│   │   ├── 413.html          # Error Handling page
+│   │   ├── 429.html          # Error Handling page
+│   │   └── 500.html          # Error Handling page
 ├── static/
-│   └── style.css       # Complete stylesheet with theme system
+│   └── style.css             # Complete stylesheet with theme system
 ├── instance/
-│   ├── users.db        # SQLite database
-│   └── security.log    # Security event log (rotating)
-└── requirements.txt    # Python dependencies
+│   ├── users.db              # SQLite database
+│   └── security.log          # Security event log (rotating)
+└── requirements.txt          # Python dependencies
 ```
 
 The current workspace also contains the audit and QA documents linked below. Runtime-generated files such as the SQLite database and security log may appear under `instance/` after the application starts.
@@ -377,6 +382,14 @@ Complete responsive test results: [QA_REPORT.md](QA_REPORT.md)
 - ✅ All calculators functional at all screen sizes
 - ✅ Theme switching, dark/light mode, sidebar, charts, PDF export verified
 - ✅ Animation performance optimized (GPU-accelerated, 60fps target)
+
+### 🔐 Security Tests (Sept 26, 2026 - New Features)
+- ✅ Change Password: 12/12 tests pass (auth, validation, CSRF, rate limiting, session persistence)
+- ✅ Remove Photo: 8/8 tests pass (auth, file deletion, idempotency, CSRF, rate limiting)
+- ✅ Delete Account: 16/16 tests pass (auth, password gate, email verification, token expiry, full cascade delete, session invalidation)
+- ✅ Calculate Endpoint: 8/8 tests pass (auth, CSRF, validation, rate limiting)
+- ✅ Session Security: 5/5 tests pass (HttpOnly, SameSite, fixation prevention, timeout, logout)
+- ✅ Input Validation: 2/2 tests pass (XSS handling, template escaping)
 
 ---
 

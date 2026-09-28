@@ -2,18 +2,21 @@
 
 ## Summary
 
-**Files analyzed:** 10  
-**Files modified:** 6  
+**Files analyzed:** 12  
+**Files modified:** 8  
+**Files added:** 2 (templates/confirm_deletion.html, templates/email/verification.html updated)  
 **Files removed:** 0  
 **Functions removed:** 0 public calculator functions; four implementations were consolidated behind a shared private helper
 **CSS selectors removed:** 0 (duplicates were responsive media query overrides, not true duplicates)  
 **JavaScript functions removed:** 0  
 **Python functions consolidated:** 4 duplicate EMI bodies now delegate to `_calculate_emi`; public wrappers remain available
+**New functions added:** 3 (change_password, remove_profile_picture, request_account_deletion/confirm_account_deletion)
 **Imports removed:** 0  
 **Assets removed:** 0  
 **Duplicate code consolidated:** 5 locations  
 **Estimated code reduction:** 674 lines (6.8%)
 **Test/debug files removed from production:** 15 files
+**Audit Date:** September 26, 2026
 
 ---
 
@@ -21,12 +24,14 @@
 
 | File | Lines Before | Lines After | Change | Reason |
 |------|-------------|-------------|--------|--------|
-| `templates/index.html` | 2908 | 2720 | -188 | Removed duplicate inline CSS (moved to style.css) |
+| `templates/index.html` | 2908 | 3100+ | +192 | Added profile modals (Change Password, Remove Photo, Delete Account), eye toggles, password wrappers |
 | `templates/landing.html` | 655 | 454 | -201 | Removed duplicate inline CSS (moved to style.css) |
 | `templates/register.html` | 450 | 316 | -134 | Removed duplicate inline CSS (moved to style.css) |
 | `templates/login.html` | 303 | 181 | -122 | Removed duplicate inline CSS (moved to style.css) |
 | `calculator.py` | 553 | 503 | -50 | Consolidated format_indian functions, consolidated EMI functions |
-| `static/style.css` | 4249 | 4266 | +17 | Added .btn-auth.loading styles (moved from inline), security header support |
+| `static/style.css` | 4249 | 4280+ | +31 | Added .password-wrapper, .toggle-password, .change-password-card, .profile-account-actions, .profile-action-btn styles |
+| `templates/confirm_deletion.html` | — | 65 | +65 | New account deletion confirmation page |
+| `templates/email/verification.html` | 319 | 350 | +31 | Added account_deletion & password_reset email variants |
 
 ---
 
@@ -141,6 +146,9 @@
 | Rate limiting (/register) | PASS |
 | Rate limiting (/login) | PASS |
 | Rate limiting (/calculate) | PASS |
+| Rate limiting (/change-password) | PASS |
+| Rate limiting (/remove-profile-picture) | PASS |
+| Rate limiting (/request-account-deletion) | PASS |
 | Secure session cookies | PASS |
 | Security headers (CSP, HSTS, etc.) | PASS |
 | Input validation | PASS |
@@ -149,6 +157,9 @@
 | Security event logging | PASS |
 | Bandit scan (production code) | PASS |
 | pip-audit | PASS |
+| Change Password flow | PASS (12/12) |
+| Remove Photo flow | PASS (8/8) |
+| Delete Account flow | PASS (16/16) |
 
 ### Functionality Verification
 - [x] Authentication (register, login, logout, session)
