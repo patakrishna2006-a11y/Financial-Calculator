@@ -145,9 +145,9 @@ DETAILED SUMMARY
 - Chart.js, jsPDF, html2canvas via CDN
 
 ## Architecture Mapping
-- Entry point: app.py (Flask application object and route definitions)
-- Routes: /, /login, /register, /dashboard, /calculate, /logout, /verify-email, /resend-verification, /forgot-password, /reset-password
-- Database: User, CalculationHistory models
+- Entry point: app.py (Flask application factory, routes, authentication)
+- Routes: /, /login, /register, /dashboard, /calculate, /logout, /verify-email, /resend-verification, /forgot-password, /reset-password, /change-password, /remove-profile-picture, /request-account-deletion, /confirm-account-deletion/<token>, /update-profile-picture
+- Database: User, CalculationHistory models (User: added profile_picture, created_at, last_login, deletion_token_hash, deletion_token_expires)
 - Authentication: Session-based with Werkzeug password hashing
 - 26 calculators in calculator.py (including Crypto Converter)
 - Theme system: 5 themes × dark/light mode
@@ -208,6 +208,24 @@ DETAILED SUMMARY
       - Replaced real credentials with placeholders in .env
       - .env remains in .gitignore
       - Production configuration template documented
+
+### NEW FEATURES — SECURITY VERIFIED (Sep 26, 2026)
+13. **Change Password** — **VERIFIED**
+    - In-session password change with current password verification
+    - Auto-invalidates pending email reset tokens
+    - Rate limited (5/min, 10/hour), CSRF protected, security logged
+
+14. **Remove Profile Photo** — **VERIFIED**
+    - Direct action with file deletion and instant revert to initials
+    - Path-traversal guarded (static/uploads prefix check)
+    - Rate limited (5/min, 20/hour), CSRF protected, security logged
+
+15. **Delete Account** — **VERIFIED**
+    - Two-step email-verified deletion with password gate
+    - Token hashed at rest (PBKDF2/scrypt), 1-hour expiry, single-use
+    - Cascades delete: CalculationHistory → profile picture file → User
+    - Session invalidated, token cleared on use
+    - Rate limited (3/hour, 10/day), CSRF protected, security logged
 
 ### LOW (TEST FILES - REMOVED)
 - 21 hardcoded test passwords removed
@@ -298,6 +316,14 @@ DETAILED SUMMARY
 - .env credentials (SEC-012): PASS
 - Crypto converter history storage: PASS
 
+## New Feature Security Tests Verified (Sep 26)
+- Change Password: PASS (12/12 tests — auth, validation, CSRF, rate limiting, session persistence, re-login, token invalidation)
+- Remove Photo: PASS (8/8 tests — auth, file deletion, idempotency, CSRF, rate limiting)
+- Delete Account: PASS (16/16 tests — auth, password gate, email verification, token expiry, cascade delete, session invalidation, token single-use, rate limiting)
+- Calculate Endpoint: PASS (8/8 tests — auth, CSRF, validation, rate limiting)
+- Session Security: PASS (5/5 tests — HttpOnly, SameSite, fixation prevention, timeout, logout)
+- Input Validation: PASS (2/2 tests — XSS handling, template escaping)
+
 ## Error Page Verification (Sep 15)
 | Error Code | Template | Status |
 |------------|----------|--------|
@@ -338,3 +364,5 @@ All previously identified security vulnerabilities have been remediated and veri
 *Audit completed: September 10, 2026*
 *Auditor: Krishna Pata*
 *Tools: Playwright, Bandit, pip-audit, manual review, functional testing*
+
+*Last Updated: September 26, 2026 — Added Change Password, Remove Photo, Delete Account features with full security verification*

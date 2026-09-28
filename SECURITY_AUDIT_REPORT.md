@@ -34,23 +34,24 @@ FinCalc Pro
 │   ├── register.html         # Registration page
 │   ├── forgot_password.html  # Forgot Password page
 │   ├── reset_password.html   # Reset Password Page
-|   ├── email/
-|       ├── verification.html # Email Verification Page
-|   ├── email/
-|       ├── 400.html          # Error Handling page           
-|       ├── 401.html          # Error Handling page
-|       ├── 403.html          # Error Handling page
-|       ├── 404.html          # Error Handling page
-|       ├── 405.html          # Error Handling page
-|       ├── 413.html          # Error Handling page
-|       ├── 429.html          # Error Handling page
-|       ├── 500.html          # Error Handling page
+│   ├── confirm_deletion.html # Account Deletion Confirmation Page
+│   ├── email/
+│   │   └── verification.html # Email Verification / Password Reset / Account Deletion
+│   ├── errors/
+│   │   ├── 400.html          # Error Handling page           
+│   │   ├── 401.html          # Error Handling page
+│   │   ├── 403.html          # Error Handling page
+│   │   ├── 404.html          # Error Handling page
+│   │   ├── 405.html          # Error Handling page
+│   │   ├── 413.html          # Error Handling page
+│   │   ├── 429.html          # Error Handling page
+│   │   └── 500.html          # Error Handling page
 ├── static/
-│   └── style.css       # Complete stylesheet with theme system
+│   └── style.css             # Complete stylesheet with theme system
 ├── instance/
-│   ├── users.db        # SQLite database
-│   └── security.log    # Security event log (rotating)
-└── requirements.txt    # Python dependencies
+│   ├── users.db              # SQLite database
+│   └── security.log          # Security event log (rotating)
+└── requirements.txt          # Python dependencies
 ```
 
 ---
@@ -224,6 +225,40 @@ The following were in test/debug files and have been removed:
 - ✅ Generic response prevents email enumeration
 - ✅ Rate limited: 5 per hour
 
+### Change Password (Sept 26, 2026)
+- ✅ In-session password change — no email verification needed (logged-in user is identity proof)
+- ✅ Current password verification required (identity proof)
+- ✅ New password complexity: 9+ chars, letter, number, symbol (same as registration)
+- ✅ New password ≠ current password enforced
+- ✅ New password ≠ confirm password enforced
+- ✅ Auto-invalidates pending email-based reset tokens (security hardening)
+- ✅ CSRF protection via X-CSRFToken header
+- ✅ Rate limited: 5/min, 10/hour
+- ✅ Session persists after change (no forced logout)
+- ✅ Security logging: PASSWORD_CHANGED, PASSWORD_CHANGE_FAILURE
+
+### Remove Profile Photo (Sept 26, 2026)
+- ✅ Direct action — instant revert to initials (no page refresh)
+- ✅ File deleted from disk (path-traversal guarded via static/uploads prefix check)
+- ✅ Idempotent: succeeds even if no picture set
+- ✅ CSRF protection via X-CSRFToken header
+- ✅ Rate limited: 5/min, 20/hour
+- ✅ Security logging: PROFILE_PICTURE_REMOVED
+
+### Delete Account (Sept 26, 2026)
+- ✅ Two-step email-verified deletion flow
+- ✅ Step 1: Current password verification (identity proof)
+- ✅ Step 2: One-hour expiring token emailed to user
+- ✅ Token hashed at rest (PBKDF2/scrypt) — SEC-009 pattern
+- ✅ Confirmation page with clear warnings (irreversible, data loss)
+- ✅ Final POST: cascades delete — CalculationHistory → profile picture file → User
+- ✅ Session invalidated immediately after deletion
+- ✅ Token single-use (cleared on confirmation)
+- ✅ Expired/invalid tokens rejected with clear messages
+- ✅ CSRF protection on confirmation form
+- ✅ Rate limited: 3/hour, 10/day
+- ✅ Security logging: ACCOUNT_DELETION_REQUESTED, ACCOUNT_DELETION_EMAIL_FAILED, ACCOUNT_DELETED
+
 ---
 
 ## Input Validation
@@ -295,6 +330,12 @@ db.session.commit()
 | /calculate | 30/min, 100/hour | PASS |
 | /resend-verification | 1/5min, 5/hour | PASS |
 | /forgot-password | 5/hour | PASS |
+| /change-password | 5/min, 10/hour | PASS |
+| /remove-profile-picture | 5/min, 20/hour | PASS |
+| /update-profile-picture | 5/min, 20/hour | PASS |
+| /request-account-deletion | 3/hour, 10/day | PASS |
+| /api/crypto/prices | 60/min | PASS |
+| /api/usd-inr/rate | 60/min | PASS |
 | Default | 200/day, 50/hour | PASS |
 
 **Note:** Production deployment requires Redis backend for multi-worker support.
@@ -601,6 +642,12 @@ Example: 2026-09-10 19:00:10,436 - security - INFO - LOGIN_SUCCESS | ip=127.0.0.
 | Log rotation (SEC-011) | PASS |
 | .env credentials (SEC-012) | PASS |
 | Crypto converter history storage | PASS |
+| Change Password (Sept 26) | PASS (12/12) |
+| Remove Photo (Sept 26) | PASS (8/8) |
+| Delete Account (Sept 26) | PASS (16/16) |
+| Calculate Endpoint | PASS (8/8) |
+| Session Security | PASS (5/5) |
+| Input Validation | PASS (2/2) |
 
 ---
 

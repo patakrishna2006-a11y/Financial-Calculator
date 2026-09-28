@@ -6,6 +6,13 @@
 
 All 66 test cases across 19 device viewports × 3 pages pass with no horizontal overflow or layout breaks. Security regression tests also pass.
 
+**New Features (Sept 26, 2026) Responsive Verification:**
+- ✅ Change Password modal: renders correctly on all viewports (320px–1920px)
+- ✅ Remove Photo button: hidden when no picture, visible when picture exists
+- ✅ Delete Account modal: renders correctly with warning text and confirm button
+- ✅ Profile dropdown: 4 action buttons (Change Password, Remove Photo, Delete Account, Logout) in correct order
+- ✅ Eye toggle buttons: visible and functional on all password fields across all viewports
+
 ## Test Session
 
 **Date:** September 2, 2026

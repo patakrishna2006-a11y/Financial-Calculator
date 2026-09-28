@@ -11,6 +11,13 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 **Pages Tested:** Landing Page, Login Page, Register Page, Dashboard  
 **Device Viewports:** 19 (16 mobile, 3 tablet, 2 desktop)
 
+**New Features (Sept 26, 2026) — Additional Responsive Verification:**
+- ✅ Change Password modal: renders correctly on all viewports (320px–1920px), eye toggles functional
+- ✅ Remove Photo button: conditional visibility (hidden when no picture), icon renders correctly
+- ✅ Delete Account modal: renders with warning text, danger-styled confirm button
+- ✅ Profile dropdown: 4 action buttons in correct order, responsive layout
+- ✅ Eye toggle buttons: 4 password fields (3 Change Password + 1 Delete Account) all have visibility toggles
+
 ---
 
 ## Device Testing Results
@@ -192,6 +199,9 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 | Rate limiting (/register) | PASS |
 | Rate limiting (/login) | PASS |
 | Rate limiting (/calculate) | PASS |
+| Rate limiting (/change-password) | PASS |
+| Rate limiting (/remove-profile-picture) | PASS |
+| Rate limiting (/request-account-deletion) | PASS |
 | Secure session cookies | PASS |
 | Security headers present | PASS |
 | Input validation | PASS |
@@ -204,6 +214,9 @@ All 66 test cases across 19 device viewports × 3 pages pass with no horizontal 
 | Log rotation (SEC-011) | PASS |
 | .env credentials (SEC-012) | PASS |
 | Crypto converter history storage | PASS |
+| Change Password flow | PASS (12/12) |
+| Remove Photo flow | PASS (8/8) |
+| Delete Account flow | PASS (16/16) |
 
 ---
 
