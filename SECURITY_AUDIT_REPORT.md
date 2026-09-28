@@ -50,7 +50,6 @@ FinCalc Pro
 │   └── style.css             # Complete stylesheet with theme system
 ├── instance/
 │   ├── users.db              # SQLite database
-│   └── security.log          # Security event log (rotating)
 └── requirements.txt          # Python dependencies
 ```
 
@@ -733,6 +732,6 @@ For every modification:
 
 ---
 
-*Audit completed: September 10, 2026*
+*Audit completed: September 28, 2026*
 *Tools used: Bandit, pip-audit, manual code review, functional testing, Playwright responsive testing*
-*Auditor: Krishna Pata*
+*Auditor: open code*
