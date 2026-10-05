@@ -178,23 +178,6 @@
       <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
         <i class="fas fa-bars" id="sidebar-toggle-icon" aria-hidden="true"></i>
       </button>
-      <div class="theme-selector" role="group" aria-label="Choose color theme">
-        <button class="theme-btn active" data-theme="indigo" aria-label="Midnight Indigo (default)" title="Midnight Indigo">
-          <span class="theme-dot" style="background: #6c8cff;"></span>
-        </button>
-        <button class="theme-btn" data-theme="green" aria-label="Forest Green" title="Forest Green">
-          <span class="theme-dot" style="background: #2ee59d;"></span>
-        </button>
-        <button class="theme-btn" data-theme="orange" aria-label="Sunset Orange" title="Sunset Orange">
-          <span class="theme-dot" style="background: #ffb454;"></span>
-        </button>
-        <button class="theme-btn" data-theme="purple" aria-label="Royal Purple" title="Royal Purple">
-          <span class="theme-dot" style="background: #b388ff;"></span>
-        </button>
-        <button class="theme-btn" data-theme="teal" aria-label="Ocean Teal" title="Ocean Teal">
-          <span class="theme-dot" style="background: #4dd0e1;"></span>
-        </button>
-      </div>
 
       <!-- ═══ PROFILE (top-right) ═══ -->
       <div class="profile-menu" id="profile-menu">
@@ -231,6 +214,8 @@
             </span>
           </div>
 
+          <div class="profile-dropdown-content">
+
           <div class="profile-details">
             <div class="profile-row">
               <span class="profile-row-label"><i class="fas fa-cake-candles" aria-hidden="true"></i>Member since</span>
@@ -242,6 +227,48 @@
             </div>
           </div>
 
+          <!-- Theme picker (inline expandable) -->
+          <div class="profile-theme" id="profile-theme">
+            <button type="button" class="theme-menu-trigger" id="theme-menu-trigger"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="theme-submenu"
+                    aria-label="Choose color theme">
+              <i class="fas fa-palette" aria-hidden="true"></i>
+              <span class="theme-menu-label">Theme</span>
+              <span class="theme-current" id="theme-current">
+                <span class="theme-dot" id="theme-current-dot" style="background: #6c8cff;"></span>
+                <span class="theme-current-name" id="theme-current-name">Midnight Indigo</span>
+              </span>
+              <i class="fas fa-chevron-down theme-chevron" id="theme-chevron" aria-hidden="true"></i>
+            </button>
+            <div class="theme-submenu" id="theme-submenu" role="menu" aria-label="Color themes">
+              <button type="button" class="theme-option active" data-theme="indigo" role="menuitemradio" aria-checked="true">
+                <span class="theme-dot" style="background: #6c8cff;"></span>
+                <span class="theme-option-name">Midnight Indigo</span>
+                <i class="fas fa-check theme-option-check" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="theme-option" data-theme="green" role="menuitemradio" aria-checked="false">
+                <span class="theme-dot" style="background: #2ee59d;"></span>
+                <span class="theme-option-name">Forest Green</span>
+                <i class="fas fa-check theme-option-check" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="theme-option" data-theme="orange" role="menuitemradio" aria-checked="false">
+                <span class="theme-dot" style="background: #ffb454;"></span>
+                <span class="theme-option-name">Sunset Orange</span>
+                <i class="fas fa-check theme-option-check" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="theme-option" data-theme="purple" role="menuitemradio" aria-checked="false">
+                <span class="theme-dot" style="background: #b388ff;"></span>
+                <span class="theme-option-name">Royal Purple</span>
+                <i class="fas fa-check theme-option-check" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="theme-option" data-theme="teal" role="menuitemradio" aria-checked="false">
+                <span class="theme-dot" style="background: #4dd0e1;"></span>
+                <span class="theme-option-name">Ocean Teal</span>
+                <i class="fas fa-check theme-option-check" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
           <div class="profile-error" id="profile-error" role="alert" hidden></div>
 
           <div class="profile-account-actions">
@@ -249,7 +276,7 @@
               <i class="fas fa-key" aria-hidden="true"></i> Change Password
             </button>
             <button type="button" class="profile-action-btn" id="remove-photo-btn" {% if not profile.profile_picture %}hidden{% endif %}>
-              <i class="fas fa-image-polaroid" aria-hidden="true"></i> Remove Photo
+              <i class="fas fa-eraser" aria-hidden="true"></i> Remove Photo
             </button>
             <button type="button" class="profile-action-btn profile-action-btn--danger" id="delete-account-btn" onclick="openDeleteAccountModal()">
               <i class="fas fa-trash-can" aria-hidden="true"></i> Delete Account
@@ -262,6 +289,7 @@
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </header>
@@ -1234,6 +1262,13 @@
     purple: 'Royal Purple',
     teal: 'Ocean Teal'
   };
+  const THEME_DOT_COLORS = {
+    indigo: '#6c8cff',
+    green: '#2ee59d',
+    orange: '#ffb454',
+    purple: '#b388ff',
+    teal: '#4dd0e1'
+  };
 
   const THEME_COLORS_DARK = {
     indigo: '#060814',
@@ -1259,9 +1294,15 @@
     if (!THEMES.includes(name)) name = 'indigo';
     document.documentElement.dataset.theme = name;
     localStorage.setItem('fincalc-theme', name);
-    document.querySelectorAll('.theme-btn').forEach(btn => {
+    document.querySelectorAll('.theme-option').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.theme === name);
+      btn.setAttribute('aria-checked', btn.dataset.theme === name);
     });
+    // Update the trigger display
+    const currentDot = document.getElementById('theme-current-dot');
+    const currentName = document.getElementById('theme-current-name');
+    if (currentDot) currentDot.style.background = THEME_DOT_COLORS[name];
+    if (currentName) currentName.textContent = THEME_LABELS[name];
     const scheme = document.documentElement.dataset.colorScheme || 'dark';
     const colors = scheme === 'light' ? THEME_COLORS_LIGHT : THEME_COLORS_DARK;
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -3619,9 +3660,58 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initColorScheme();
     initSearch();
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+
+    // Theme submenu in profile dropdown
+    const themeTrigger = document.getElementById('theme-menu-trigger');
+    const themeSubmenu = document.getElementById('theme-submenu');
+    const themeChevron = document.getElementById('theme-chevron');
+    let themeSubmenuOpen = false;
+
+    function openThemeSubmenu() {
+      themeSubmenu.classList.add('open');
+      themeTrigger.setAttribute('aria-expanded', 'true');
+      themeChevron.style.transform = 'rotate(180deg)';
+      themeSubmenuOpen = true;
+    }
+    function closeThemeSubmenu() {
+      themeSubmenu.classList.remove('open');
+      themeTrigger.setAttribute('aria-expanded', 'false');
+      themeChevron.style.transform = 'rotate(0deg)';
+      themeSubmenuOpen = false;
+    }
+    function toggleThemeSubmenu() {
+      themeSubmenuOpen ? closeThemeSubmenu() : openThemeSubmenu();
+    }
+
+    if (themeTrigger) {
+      themeTrigger.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleThemeSubmenu();
+      });
+    }
+
+    document.querySelectorAll('.theme-option').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        setTheme(btn.dataset.theme);
+        closeThemeSubmenu(); // close submenu, keep profile dropdown open
+      });
     });
+
+    // Close theme submenu on outside click or Escape
+    document.addEventListener('click', e => {
+      if (themeSubmenuOpen && themeTrigger && themeSubmenu && !themeTrigger.contains(e.target) && !themeSubmenu.contains(e.target)) {
+        closeThemeSubmenu();
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (themeSubmenuOpen) {
+          closeThemeSubmenu();
+        }
+      }
+    });
+
     document.querySelectorAll('.scheme-btn').forEach(btn => {
         btn.addEventListener('click', () => setColorScheme(btn.dataset.scheme));
     });
