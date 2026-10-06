@@ -699,6 +699,167 @@ def format_json_data(json_str):
     except:
         return json_str
 
+# --- Calculation History panel helpers ---
+# Display name + sidebar icon for every calculator type
+CALC_META = {
+    'SIP':                   ('SIP', '📈'),
+    'LUMPSUM':               ('Lumpsum', '💰'),
+    'STEP_UP_SIP':           ('Step-Up SIP', '🚀'),
+    'SWP':                   ('SWP', '💸'),
+    'PPF':                   ('PPF', '🏛️'),
+    'EPF':                   ('EPF', '🏢'),
+    'NPS':                   ('NPS', '🎯'),
+    'NSC':                   ('NSC', '📜'),
+    'FD_SIMPLE':             ('Fixed Deposit', '🏦'),
+    'RD':                    ('Recurring Deposit', '📅'),
+    'RETIREMENT_CALCULATOR': ('Retirement', '🌅'),
+    'INFLATION':             ('Inflation', '📊'),
+    'CAGR':                  ('CAGR', '📉'),
+    'EMI':                   ('EMI', '🧮'),
+    'HOME_LOAN_EMI':         ('Home Loan', '🏠'),
+    'CAR_LOAN_EMI':          ('Car Loan', '🚗'),
+    'GOLD_LOAN_EMI':         ('Gold Loan', '🪙'),
+    'EDUCATION_LOAN_EMI':    ('Education Loan', '🎓'),
+    'FLAT_VS_REDUCING':      ('Flat vs Reducing', '⚖️'),
+    'SIMPLE_INTEREST':       ('Simple Interest', '➕'),
+    'COMPOUND_INTEREST':     ('Compound Interest', '✖️'),
+    'GST':                   ('GST', '🧾'),
+    'GRATUITY':              ('Gratuity', '🎁'),
+    'SALARY_CALCULATOR':     ('Salary', '👔'),
+    'BROKERAGE_CALCULATOR':  ('Brokerage', '📋'),
+    'CRYPTO_CONVERTER':      ('Crypto Converter', '₿'),
+    'USD_INR_CONVERTER':     ('USD ⇄ INR', '💱'),
+}
+
+def _hist_label(key):
+    """Format a stored key for display: 'from_currency' -> 'From Currency'."""
+    return str(key).replace('_', ' ').strip().title()
+
+def _hist_pretty(value):
+    """Cosmetic trim used ONLY in summary/headline captions: '12.00' -> '12', '12.50' -> '12.5'.
+    Stored inputs/results are never modified."""
+    s = str(value)
+    if re.fullmatch(r'-?[\d,]+\.\d+', s):
+        return re.sub(r'(\.\d*?)0+$', r'\1', s).rstrip('.')
+    return s
+
+def _hist_headline(calc_type, result):
+    """Return (headline, label) — the single most important result for a calculator type."""
+    specs = {
+        'SIP':                   ('Future Value', 'future value'),
+        'LUMPSUM':               ('Future Value', 'future value'),
+        'STEP_UP_SIP':           ('Future Value', 'future value'),
+        'SWP':                   ('Future Value', 'remaining value'),
+        'PPF':                   ('Maturity Value', 'maturity value'),
+        'NSC':                   ('Maturity Amount', 'maturity amount'),
+        'FD_SIMPLE':             ('Maturity Amount', 'maturity amount'),
+        'RD':                    ('Maturity Amount', 'maturity amount'),
+        'EPF':                   ('Total Corpus', 'total corpus'),
+        'NPS':                   ('Maturity Amount', 'total corpus'),
+        'RETIREMENT_CALCULATOR': ('Retirement Corpus Required', 'corpus required'),
+        'GRATUITY':              ('Gratuity Amount', 'gratuity amount'),
+        'SALARY_CALCULATOR':     ('Take Home Monthly', 'take home / month'),
+        'EMI':                   ('Monthly EMI', 'monthly EMI'),
+        'HOME_LOAN_EMI':         ('Monthly EMI', 'monthly EMI'),
+        'CAR_LOAN_EMI':          ('Monthly EMI', 'monthly EMI'),
+        'GOLD_LOAN_EMI':         ('Monthly EMI', 'monthly EMI'),
+        'EDUCATION_LOAN_EMI':    ('Monthly EMI', 'monthly EMI'),
+        'FLAT_VS_REDUCING':      ('Saves', 'saved by reducing'),
+        'SIMPLE_INTEREST':       ('Total Amount', 'total amount'),
+        'COMPOUND_INTEREST':     ('Total Amount', 'total amount'),
+        'GST':                   ('Total Amount', 'total with GST'),
+        'CAGR':                  ('CAGR %', 'annual growth'),
+        'INFLATION':             ('Future Price', 'future price'),
+        'BROKERAGE_CALCULATOR':  ('Net P&L', 'net P&L'),
+    }
+    if calc_type in ('CRYPTO_CONVERTER', 'USD_INR_CONVERTER'):
+        headline = f"{_hist_pretty(result.get('To Amount', ''))} {result.get('To Currency', '')}".strip()
+        label = f"for {_hist_pretty(result.get('From Amount', ''))} {result.get('From Currency', '')}".strip()
+        return headline, label
+    if 'Error' in result:
+        return str(result.get('Error', 'Error')), 'error'
+    key, label = specs.get(calc_type, (None, ''))
+    if key and key in result:
+        return str(result[key]), label
+    # Fallback: first value in the result dict
+    first = next(iter(result.items()), (None, ''))
+    return str(first[1]), ''
+
+def _hist_summary(calc_type, params):
+    """One-line recap of the saved inputs, e.g. '₹5,000/month · 12% · 10 years'."""
+    def g(k):
+        return _hist_pretty(params.get(k, ''))
+    builders = {
+        'SIP': lambda: f"₹{g('Monthly investment')}/month · {g('Expected return')}% · {g('Years')} years",
+        'LUMPSUM': lambda: f"₹{g('Total investment')} · {g('Expected return')}% · {g('Years')} years",
+        'STEP_UP_SIP': lambda: f"₹{g('Monthly investment')}/month · {g('Step up rate')}% step-up · {g('Expected return')}% · {g('Years')} years",
+        'SWP': lambda: f"₹{g('Total investment')} · ₹{g('Withdrawal amount')}/month withdrawal · {g('Expected rate')}% · {g('Years')} years",
+        'PPF': lambda: f"₹{g('Yearly investment')}/year · {g('Annual interest rate')}% · {g('Years')} years",
+        'EPF': lambda: f"₹{g('Basic salary')} + ₹{g('DA')} basic+DA · {g('Years of service')} years",
+        'NPS': lambda: f"₹{g('Monthly investment')}/month · age {g('Current age')}→{g('Retirement age')}",
+        'NSC': lambda: f"₹{g('Amount invested')} · {g('Interest rate')}% · {g('Years')} years",
+        'FD_SIMPLE': lambda: f"₹{g('Principal')} · {g('Interest rate')}% · {g('Years')} years",
+        'RD': lambda: f"₹{g('Monthly investment')}/month · {g('Expected rate')}% · {g('Years')} years",
+        'RETIREMENT_CALCULATOR': lambda: f"age {g('Age')}→{g('Retirement age')} · ₹{g('Monthly expense')}/month today",
+        'GRATUITY': lambda: f"₹{g('Basic salary')} + ₹{g('DA')} · {g('Years of service')} years service",
+        'SALARY_CALCULATOR': lambda: f"₹{g('CTC')} CTC",
+        'EMI': lambda: f"₹{g('Loan amount')} · {g('Interest rate')}% · {g('Years')} years",
+        'HOME_LOAN_EMI': lambda: f"₹{g('Loan amount')} · {g('Interest rate')}% · {g('Years')} years",
+        'CAR_LOAN_EMI': lambda: f"₹{g('Loan amount')} · {g('Interest rate')}% · {g('Years')} years",
+        'GOLD_LOAN_EMI': lambda: f"₹{g('Loan amount')} · {g('Interest rate')}% · {g('Years')} years",
+        'EDUCATION_LOAN_EMI': lambda: f"₹{g('Loan amount')} · {g('Interest rate')}% · {g('Years')} years",
+        'FLAT_VS_REDUCING': lambda: f"₹{g('Principal')} · {g('Annual rate')}% · {g('Years')} years",
+        'SIMPLE_INTEREST': lambda: f"₹{g('Principal amount')} · {g('Rate of interest')}% · {g('Years')} years",
+        'COMPOUND_INTEREST': lambda: f"₹{g('Principal amount')} · {g('Interest rate')}% · {g('Years')} years",
+        'GST': lambda: f"₹{g('Original price')} · {g('Gst rate')}% GST",
+        'CAGR': lambda: f"₹{g('Initial value')} → ₹{g('Final value')} · {g('Years')} years",
+        'INFLATION': lambda: f"₹{g('Current price')} · {g('Rate')}% · {g('Years')} years",
+        'BROKERAGE_CALCULATOR': lambda: f"{g('Segment')} · {g('Quantity')} qty · buy ₹{g('Buy price')} sell ₹{g('Sell price')}",
+        'CRYPTO_CONVERTER': lambda: f"{g('From Currency')} → {g('To Currency')} · {g('Amount')}",
+        'USD_INR_CONVERTER': lambda: f"{g('From Currency')} → {g('To Currency')} · {g('Amount')}",
+    }
+    builder = builders.get(calc_type)
+    if builder:
+        try:
+            return builder()
+        except Exception:
+            pass
+    # Fallback: first three params
+    return ' · '.join(f"{_hist_label(k)}: {v}" for k, v in list(params.items())[:3])
+
+def build_history_entries(raw_history):
+    """Map CalculationHistory rows to the JSON shape used by the history panel.
+    Stored params/results are passed through unmodified; only labels are formatted."""
+    entries = []
+    for entry in raw_history:
+        try:
+            params = json.loads(entry.params) if isinstance(entry.params, str) else (entry.params or {})
+        except (ValueError, TypeError):
+            params = {}
+        try:
+            result = json.loads(entry.result) if isinstance(entry.result, str) else (entry.result or {})
+        except (ValueError, TypeError):
+            result = {}
+        name, icon = CALC_META.get(entry.calc_type,
+                                   (entry.calc_type.replace('_', ' ').title(), '🧮'))
+        headline, label = _hist_headline(entry.calc_type, result)
+        entries.append({
+            'id': entry.id,
+            'calc': name,
+            'icon': icon,
+            'time': entry.timestamp.isoformat() if entry.timestamp else None,
+            'headline': headline,
+            'label': label,
+            'summary': _hist_summary(entry.calc_type, params),
+            'inputs': {str(k): v for k, v in params.items()},           
+            'results': {_hist_label(k): v for k, v in result.items()},
+            # 'type' + raw 'params' power the "Run again" action (panel + input IDs)
+            'type': entry.calc_type,
+            'params': params,
+        })
+    return entries
+
+
 def validate_calculator_input(calc_type, params):
     """Validate calculator input parameters."""
     validators = {
@@ -1164,7 +1325,35 @@ def dashboard():
             'timestamp': entry.timestamp
         })
 
-    return render_template("index.html", history=processed_history, profile=profile)
+    # `history` feeds the sidebar "Recent Activity" mini list (unchanged);
+    # `history_json` feeds the new history panel.
+    return render_template("index.html", history=processed_history,
+                           history_json=build_history_entries(raw_history),
+                           profile=profile)
+
+
+@app.route('/history/<int:entry_id>', methods=['DELETE'])
+def delete_history_entry(entry_id):
+    """Delete a single calculation history entry for the logged-in user."""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Authentication required"}), 401
+
+    # filter_by user_id guarantees users can only delete their own entries
+    entry = CalculationHistory.query.filter_by(
+        id=entry_id, user_id=session['user_id']).first()
+    if not entry:
+        return jsonify({"success": False, "error": "Entry not found"}), 404
+
+    try:
+        db.session.delete(entry)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        log_security_event('HISTORY_DELETE_FAILED', f'entry_id={entry_id}',
+                           user_id=session['user_id'], ip=request.remote_addr)
+        return jsonify({"success": False, "error": "Failed to delete entry"}), 500
+
+    return jsonify({"success": True})
 
 
 @app.route('/update-profile-picture', methods=['POST'])
