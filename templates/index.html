@@ -958,56 +958,16 @@
 
       <!-- HISTORY PANEL -->
       <div class="calc-panel" id="panel-HISTORY">
-        <div class="card">
-          <div class="card-title">
-            <i class="fas fa-clock-rotate-left" style="color:var(--accent-primary);" aria-hidden="true"></i>
-            Calculation History
-            <span class="badge">LAST 10</span>
+        <div class="card hist">
+          <div class="hist-top">
+            <h2 class="hist-title" id="hist-title">
+              <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+              Calculation History <span class="badge">LAST 10</span><small id="hist-count"></small>
+            </h2>
+            <input class="hist-search" id="hist-search" type="search" placeholder="Search calculations" aria-label="Search calculations">
           </div>
-          {% if history %}
-          <div class="history-table-wrap">
-            <table class="history-table">
-              <thead>
-                <tr>
-                  <th>Calculator</th>
-                  <th>Inputs</th>
-                  <th>Result</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for entry in history %}
-                <tr>
-                  <td><span class="history-calc-badge">{{ entry.calc_type }}</span></td>
-                  <td class="history-params">
-                      {% for param in entry.params.split(',') %}
-                          <div class="history-param">
-                              {{ param.strip() }}
-                          </div>
-                      {% endfor %}
-                  </td>
-                  <td class="history-result">
-                      {% for result in entry.result.split(', ') %}
-                          <div class="history-result-line">
-                              {{ result.strip() }}
-                          </div>
-                      {% endfor %}
-                  </td>                  
-                  <td class="history-time">
-                    {{ entry.timestamp.strftime('%d %b') }}<br>{{ entry.timestamp.strftime('%H:%M') }}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <div class="history-empty">
-            <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
-            <p>No calculations yet.</p>
-            <p style="font-size:0.85rem;">Start calculating to build your history.</p>
-          </div>
-          {% endif %}
+          <div class="hist-chips" id="hist-chips" role="group" aria-label="Filter by calculator"></div>
+          <div id="hist-list" aria-live="polite"></div>
         </div>
       </div>
 
@@ -3716,6 +3676,154 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => setColorScheme(btn.dataset.scheme));
     });
 });
+  </script>
+
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════
+     CALCULATION HISTORY PANEL (expandable rows, chips, search, actions)
+     ═══════════════════════════════════════════════════════════════════ */
+  (function () {
+    const listEl = document.getElementById('hist-list');
+    if (!listEl) return;
+
+    const data = JSON.parse(`{{ history_json|tojson|safe }}`);
+    let filter = 'All', query = '';
+
+    const ESC_MAP = { '&': '\u0026amp;', '<': '\u0026lt;', '>': '\u0026gt;', '"': '\u0026quot;' };
+    const esc = s => String(s).replace(/[&<>"]/g, c => ESC_MAP[c]);
+    const dl = o => "<dl>" + Object.entries(o || {}).map(([k, v]) =>
+      `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("") + "</dl>";
+
+    function ago(d) {
+      const m = Math.round((Date.now() - new Date(d)) / 6e4);
+      if (m < 1) return "Just now";
+      if (m < 60) return m + " min ago";
+      if (m < 1440) return Math.round(m / 60) + " hr ago";
+      return new Date(d).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function dayLabel(d) {
+      const a = new Date(d), n = new Date(), y = new Date(n - 864e5);
+      if (a.toDateString() === n.toDateString()) return "Today";
+      if (a.toDateString() === y.toDateString()) return "Yesterday";
+      return a.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+    }
+
+    function render() {
+      const names = ["All", ...new Set(data.map(d => d.calc))];
+      document.getElementById('hist-chips').innerHTML = names.map(n =>
+        `<button class="hist-chip ${n === filter ? "on" : ""}" data-f="${esc(n)}">${esc(n)}</button>`).join("");
+
+      const rows = data
+        .filter(d => (filter === "All" || d.calc === filter) && JSON.stringify(d).toLowerCase().includes(query))
+        .sort((a, b) => new Date(b.time) - new Date(a.time));
+
+      document.getElementById('hist-count').textContent = `${rows.length} of ${data.length}`;
+
+      if (!rows.length) {
+        listEl.innerHTML = '<p class="hist-empty">No calculations found. Run a calculator and it will show up here.</p>';
+        return;
+      }
+
+      let last = "", html = "";
+      rows.forEach(d => {
+        const g = dayLabel(d.time);
+        if (g !== last) { html += `<div class="hist-group">${g}</div>`; last = g; }
+        html += `<article class="hist-row" data-id="${d.id}">
+          <button class="hist-row-head" aria-expanded="false">
+            <span class="hist-ico" aria-hidden="true">${d.icon}</span>
+            <span><div class="hist-name">${esc(d.calc)}</div><div class="hist-sub">${esc(d.summary)} · ${ago(d.time)}</div></span>
+            <span class="hist-big">${esc(d.headline)}<span>${esc(d.label)}</span></span>
+            <span class="hist-arrow" aria-hidden="true">▶</span>
+          </button>
+          <div class="hist-detail">
+            <div class="hist-cols">
+              <div><h4>Inputs</h4>${dl(d.inputs)}</div>
+              <div><h4>Results</h4>${dl(d.results)}</div>
+            </div>
+            <div class="hist-actions">
+              <button class="hist-btn" data-a="rerun">Run again</button>
+              <button class="hist-btn" data-a="copy">Copy result</button>
+              <button class="hist-btn hist-btn--del" data-a="del">Delete</button>
+            </div>
+          </div></article>`;
+      });
+      listEl.innerHTML = html;
+    }
+
+    function prefillCalculator(type, params) {
+      // Reuses the existing input-ID convention: #<TYPE>-<param key>,
+      // and the existing rawValue/format-on-blur convention for numeric inputs.
+      Object.entries(params || {}).forEach(([key, value]) => {
+        const el = document.getElementById(type + '-' + key);
+        if (!el) return;
+        if (el.tagName === 'SELECT' || el.inputMode !== 'numeric') {
+          el.value = value;
+        } else {
+          const raw = parseFloat(String(value).replace(/[₹,]/g, ''));
+          if (!isNaN(raw)) {
+            const dec = (typeof PARAM_DECIMALS !== 'undefined' && PARAM_DECIMALS[key] !== undefined)
+              ? PARAM_DECIMALS[key] : 2;
+            el.dataset.rawValue = raw;
+            el.value = (typeof formatIndianRaw === 'function')
+              ? formatIndianRaw(raw, dec) : String(value);
+          }
+        }
+      });
+    }
+
+    document.getElementById('hist-chips').addEventListener('click', e => {
+      const b = e.target.closest('.hist-chip');
+      if (b) { filter = b.dataset.f; render(); }
+    });
+
+    document.getElementById('hist-search').addEventListener('input', e => {
+      query = e.target.value.toLowerCase();
+      render();
+    });
+
+    listEl.addEventListener('click', async e => {
+      const row = e.target.closest('.hist-row');
+      if (!row) return;
+      const item = data.find(d => d.id == row.dataset.id);
+      if (!item) return;
+      const action = e.target.dataset.a;
+
+      if (e.target.closest('.hist-row-head')) {
+        const open = row.classList.toggle('open');
+        row.querySelector('.hist-row-head').setAttribute('aria-expanded', open);
+      } else if (action === 'del') {
+        try {
+          const res = await fetch('/history/' + item.id, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token() }}',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+          });
+          const out = await res.json();
+          if (res.ok && out.success) {
+            const idx = data.indexOf(item);
+            if (idx > -1) data.splice(idx, 1);
+            render();
+          }
+        } catch (err) { /* network error — keep the row */ }
+      } else if (action === 'copy') {
+        const text = Object.entries(item.results).map(([k, v]) => `${k}: ${v}`).join('\n');
+        navigator.clipboard.writeText(text);
+        e.target.textContent = 'Copied';
+        setTimeout(() => { e.target.textContent = 'Copy result'; }, 1500);
+      } else if (action === 'rerun') {
+        if (typeof show === 'function' && item.type) {
+          show(item.type);                       // open the calculator panel (existing SPA switcher)
+          prefillCalculator(item.type, item.params);
+        }
+      }
+    });
+
+    render();
+  })();
   </script>
 </body>
 </html>
