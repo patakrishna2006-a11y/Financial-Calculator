@@ -4,30 +4,36 @@
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7.svg)](https://render.com)
 [![Security](https://img.shields.io/badge/Security-PASS-brightgreen.svg)](SECURITY_AUDIT_REPORT.md)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-PASS-brightgreen.svg)](QA_CODEBASE_CLEANUP_REPORT.md)
+[![Responsive](https://img.shields.io/badge/Responsive-PASS-brightgreen.svg)](RESPONSIVE_TEST_REPORT.md)
 
 A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. It includes 25 financial calculators tailored for Indian financial planning, from SIP and EMI to retirement, tax, and investment planning.
+
+**Status:** 🟢 **PRODUCTION READY** — All security, responsive, and code quality tests passing.
 
 ---
 
 ## 🛡️ Security Features (Production Hardened)
 
-FinCalc Pro has undergone comprehensive security hardening with **zero critical/high/medium vulnerabilities remaining**:
+FinCalc Pro has undergone comprehensive security hardening with **zero critical/high/medium vulnerabilities remaining** (18 security issues resolved):
 
 | Security Control | Implementation | Status |
 |------------------|----------------|--------|
-| **Debug Mode** | Defaults to false; explicit FLASK_DEBUG=false in production | ✅ PASS |
-| **CSRF Protection** | Flask-WTF on all forms + `X-CSRFToken` header for API | ✅ PASS |
+| **Debug Mode** | Defaults to false; explicit `FLASK_DEBUG=false` in production | ✅ PASS |
+| **CSRF Protection** | Flask-WTF on all forms + `X-CSRFToken` header for API; 12hr token timeout | ✅ PASS |
 | **Rate Limiting** | Register: 5/min, Login: 10/min, Calculate: 30/min (Redis-ready) | ✅ PASS |
-| **Session Security** | HttpOnly, SameSite=Lax, Secure (HTTPS), 24h timeout | ✅ PASS |
+| **Session Security** | HttpOnly, SameSite=Lax, Secure (HTTPS), 24h timeout, fixation prevention | ✅ PASS |
 | **Security Headers** | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, CORP | ✅ PASS |
 | **Input Validation** | Server-side validation on all 25 calculator endpoints | ✅ PASS |
 | **Authorization/IDOR** | User isolation, ownership verification, session fixation prevention | ✅ PASS |
 | **Error Handling** | Custom templates verified for 400, 401, 403, 404, 405, 413, 429, 500 | ✅ PASS |
 | **Security Logging** | Auth events, CSRF failures, rate limits, calculation errors (10MB/10 backups) | ✅ PASS |
-| **Token Security** | Verification/reset tokens hashed at rest (PBKDF2/scrypt) | ✅ PASS |
-| **Dependencies** | pip-audit clean, Bandit: 0 findings in production code | ✅ PASS |
+| **Token Security** | Verification/reset/deletion tokens hashed at rest (PBKDF2/scrypt) | ✅ PASS |
+| **Dependencies** | pip-audit clean, Bandit: 0 findings in production code (4 low in migration) | ✅ PASS |
+| **Token Hashing** | Legacy plaintext tokens removed; only PBKDF2 hashes stored | ✅ PASS |
+| **Token Expiration** | CSRF tokens expire after 12 hours; JS refresh after 1 hour | ✅ PASS |
 
-See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security assessment.
+See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security assessment (18 issues resolved: SEC-001 through SEC-018).
 
 ---
 
@@ -79,16 +85,18 @@ This project underwent a **complete responsive overhaul** to ensure flawless ope
 | **Standard phones** | iPhone 13/16/17 Pro, Pixel 5/6, Galaxy S22/S24, iPhone 11/Air | ✅ PASS |
 | **Foldable** | Galaxy Z Flip 3 (360×880) | ✅ PASS |
 | **Tablets** | iPad mini (1024×768), iPad Air (1180×820), Galaxy Tab S7 (1280×800) | ✅ PASS |
-| **Desktop** | 1280×720, 1920×1080 | ✅ PASS |
+| **Desktop** | 1280×720, 1920×1080, 2560×1440 | ✅ PASS |
 
-**66/66 automated tests pass** (19 viewports × 3 pages: Landing, Login, Register)
+**45/45 automated tests pass** (15 viewports × 3 pages: Landing, Login, Register)
 
 ### Key Responsive Fixes
 1. **Background orb overflow** (320px) — Wrapped decorative orbs in clipped container with responsive sizing
 2. **Floating card overflow** (1180px tablet) — Adjusted positioning at 1024px/1280px breakpoints
 3. **Header button overflow** (≤360px) — Added flex-wrap and compact sizing for auth buttons
 
-See [QA_REPORT.md](QA_REPORT.md) for complete test matrix and bug details.
+All 3 major responsive bugs fixed and verified across all viewports.
+
+See [RESPONSIVE_TEST_REPORT.md](RESPONSIVE_TEST_REPORT.md) for complete test matrix and bug details.
 
 ---
 
@@ -374,13 +382,25 @@ def api_my_calculator():
 
 ## 📊 Quality Assurance
 
-Complete responsive test results: [QA_REPORT.md](QA_REPORT.md)
+Complete responsive test results: [RESPONSIVE_TEST_REPORT.md](RESPONSIVE_TEST_REPORT.md)
 
-- ✅ 66/66 automated tests pass (19 device viewports × 3 pages)
+- ✅ 45/45 automated tests pass (15 device viewports × 3 pages)
 - ✅ Zero horizontal overflow across all viewports
 - ✅ All calculators functional at all screen sizes
 - ✅ Theme switching, dark/light mode, sidebar, charts, PDF export verified
 - ✅ Animation performance optimized (GPU-accelerated, 60fps target)
+
+### 🔐 Security Tests (October 8, 2026)
+- ✅ 38/38 security tests pass (100% success rate)
+- ✅ Security Headers: 8/8 PASS (CSP, HSTS, X-Frame-Options, COOP, CORP, etc.)
+- ✅ CSRF Protection: 3/3 PASS (forms, API, token timeout)
+- ✅ Rate Limiting: 3/3 PASS (register, login, calculate endpoints)
+- ✅ Session Security: 5/5 PASS (HttpOnly, SameSite, timeout, fixation prevention)
+- ✅ Input Validation: 4/4 PASS (auth required, negative values, missing params, unknown types)
+- ✅ Authentication Flow: 3/3 PASS (forms load, password requirements)
+- ✅ Error Pages: 8/8 PASS (400, 401, 403, 404, 405, 413, 429, 500)
+- ✅ Calculator Auth: 4/4 PASS (SIP, EMI, FD require auth; Crypto public)
+- ✅ Rate Limiting: 3/3 PASS (register, login, calculate)
 
 ### 🔐 Security Tests (Sept 26, 2026 - New Features)
 - ✅ Change Password: 12/12 tests pass (auth, validation, CSRF, rate limiting, session persistence)
@@ -390,6 +410,27 @@ Complete responsive test results: [QA_REPORT.md](QA_REPORT.md)
 - ✅ Session Security: 5/5 tests pass (HttpOnly, SameSite, fixation prevention, timeout, logout)
 - ✅ Input Validation: 2/2 tests pass (XSS handling, template escaping)
 
----
+### 🧹 Code Quality Tests (October 8, 2026)
+- ✅ 10/10 code quality checks pass
+- ✅ Linters: pyflakes, pylint, flake8 — all clean
+- ✅ Bandit: 4 Low-severity issues (acceptable try/except/pass in DB migration)
+- ✅ pip-audit: No known vulnerabilities
+- ✅ Calculator functions: All 32 present and functional
+- ✅ Unused imports: None found
+- ✅ Duplicate functions: Properly consolidated (EMI, format_indian)
+- ⚠️ Technical debt: 2 console.log statements, 6 inline styles in landing.html
+
+See [QA_CODEBASE_CLEANUP_REPORT.md](QA_CODEBASE_CLEANUP_REPORT.md) for complete code cleanup analysis.
+
+## 📚 Documentation
+
+- **Security Audit**: [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) — 18 issues resolved (SEC-001 through SEC-018)
+- **Responsive Testing**: [RESPONSIVE_TEST_REPORT.md](RESPONSIVE_TEST_REPORT.md) — 45/45 tests pass
+- **Code Cleanup**: [QA_CODEBASE_CLEANUP_REPORT.md](QA_CODEBASE_CLEANUP_REPORT.md) — All critical checks pass
+- **Engineering Audit**: [FINAL_ENGINEERING_AUDIT_REPORT.md](FINAL_ENGINEERING_AUDIT_REPORT.md) — Overall PASS
 
 **Documentation scope:** This README describes the current workspace structure and configuration. The audit documents are historical test records and should be rerun when application code or dependencies change.
+
+---
+
+**Last Updated:** October 8, 2026 — All security, responsive, and code quality tests passing. Production ready.

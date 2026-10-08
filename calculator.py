@@ -319,8 +319,8 @@ def GRATUITY(basic_salary, DA, years_of_service):
 
 
 # SALARY CALCULATOR
-def SALARY_CALCULATOR(ctc, bonus, proffesional_tax, employer_pf, employee_pf, other_deductions):
-    total_monthly_deduction = bonus + proffesional_tax + employer_pf + employee_pf + other_deductions
+def SALARY_CALCULATOR(ctc, bonus, professional_tax, employer_pf, employee_pf, other_deductions):
+    total_monthly_deduction = bonus + professional_tax + employer_pf + employee_pf + other_deductions
     annual_deduction = total_monthly_deduction * 12
     take_home_annual = ctc - annual_deduction
     take_home_monthly = take_home_annual / 12

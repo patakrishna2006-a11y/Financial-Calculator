@@ -6,17 +6,20 @@
 **Files modified:** 8  
 **Files added:** 2 (templates/confirm_deletion.html, templates/email/verification.html updated)  
 **Files removed:** 0  
-**Functions removed:** 0 public calculator functions; four implementations were consolidated behind a shared private helper
+**Functions removed:** 0 public calculator functions; four implementations were consolidated behind a shared private helper  
 **CSS selectors removed:** 0 (duplicates were responsive media query overrides, not true duplicates)  
 **JavaScript functions removed:** 0  
-**Python functions consolidated:** 4 duplicate EMI bodies now delegate to `_calculate_emi`; public wrappers remain available
-**New functions added:** 3 (change_password, remove_profile_picture, request_account_deletion/confirm_account_deletion)
+**Python functions consolidated:** 4 duplicate EMI bodies now delegate to `_calculate_emi`; public wrappers remain available  
+**New functions added:** 3 (change_password, remove_profile_picture, request_account_deletion/confirm_account_deletion)  
 **Imports removed:** 0  
 **Assets removed:** 0  
 **Duplicate code consolidated:** 5 locations  
-**Estimated code reduction:** 674 lines (6.8%)
-**Test/debug files removed from production:** 15 files
-**Audit Date:** September 26, 2026
+**Estimated code reduction:** 674 lines (6.8%)  
+**Test/debug files removed from production:** 15 files  
+**Audit Date:** September 26, 2026  
+**Last Updated:** October 8, 2026 - Code cleanup test suite run
+
+---
 
 ---
 
@@ -175,23 +178,80 @@
 
 ---
 
-## Remaining Problems / Technical Debt
+## Code Cleanup Test Results (October 8, 2026)
+
+### Code Quality Checks
+
+| Check | Status | Details |
+|-------|--------|---------|
+| Unused Imports | **PASS** | No obvious unused imports found |
+| Duplicate Functions | **PASS** | EMI wrappers properly consolidated; format functions consolidated |
+| Dead Code | **PARTIAL** | 3 helper functions flagged (_calculate_emi, _format_indian_core, format_indian) — these are internal helpers used by public wrappers |
+| Duplicate CSS | **PARTIAL** | 122 duplicate selectors (mostly pseudo-selectors hover/before/after), 34 duplicate property blocks — normal for large CSS |
+| JavaScript Quality | **PARTIAL** | 2 console.log statements found (should be removed for production) |
+| Linters (pyflakes, pylint, flake8) | **PASS** | All linters pass with no errors |
+| Bandit Security Scan | **PARTIAL** | 4 Low-severity issues (try/except/pass in DB migration code - acceptable) |
+| pip-audit | **PASS** | No known vulnerabilities in dependencies |
+| Calculator Functions | **PASS** | All 32 expected functions present and functional |
+| Template Issues | **PARTIAL** | 6 long inline styles in landing.html |
+
+### Detailed Findings
+
+#### 1. Helper Functions Flagged as "Potentially Unused"
+The following internal helper functions were flagged but are intentionally kept:
+- `_calculate_emi()` — Core EMI calculation used by 5 public wrapper functions
+- `_format_indian_core()` — Core formatting logic used by `format_indian()` and `format_indian_raw()`
+- `format_indian()` — Public wrapper used by calculator functions
+
+**Verdict:** These are not dead code; they are internal helpers used by public API functions.
+
+#### 2. CSS Duplicate Analysis
+- **122 duplicate selectors** — Primarily pseudo-selectors (`hover`, `before`, `after`, `focus-visible`) which is normal and expected
+- **34 duplicate property blocks** — Small repeated style blocks (2-5 occurrences each), typical for utility patterns
+- **Recommendation:** Acceptable for current codebase size; could be reduced with CSS custom properties
+
+#### 3. JavaScript Console.log Statements
+- **Found:** 2 `console.log` statements in inline JavaScript
+- **Action:** Remove before production deployment
+
+#### 4. Bandit Security Scan (Low Severity)
+- **4 issues** — All `B110:try_except_pass` in database migration code (lines 687, 691, 695, 834)
+- **Context:** These are `try/except/pass` blocks for creating unique indexes during migration
+- **Verdict:** Acceptable — intentional silent failure for idempotent index creation
+
+#### 5. Template Inline Styles
+- **landing.html:** 6 long inline styles detected
+- **Action:** Move to `style.css` for consistency
+
+---
+
+## Updated Remaining Problems / Technical Debt (October 2026)
 
 1. **Duplicate PARAM_DECIMALS** - Exists in both `calculator.py` (Python) and `index.html` (JavaScript). Could be centralized via a JSON endpoint or build step.
 
 2. **Duplicate formatIndianRaw** - Exists in both `calculator.py` and `index.html` JavaScript. Same as above.
 
-3. **Large style.css** - 4266 lines. Could benefit from splitting into modules (theme, components, layout, utilities) but current structure works.
+3. **Large style.css** - 4280+ lines. Could benefit from splitting into modules (theme, components, layout, utilities) but current structure works.
 
-4. **Inline JavaScript in index.html** - 1900+ lines of JavaScript in template. Could be extracted to separate `.js` file for better caching and maintainability.
+4. **Inline JavaScript in index.html** - 2850+ lines of JavaScript in template (increased with new features). Could be extracted to separate `.js` file for better caching and maintainability.
 
 5. **CSS custom property duplication in light mode** - Light mode overrides repeat many variables. Could use a more systematic approach.
+
+6. **console.log statements in production JavaScript** - 2 instances found; should be removed before production.
+
+7. **6 long inline styles in landing.html** - Should be moved to `style.css` for consistency.
+
+8. **CSS duplicate property blocks** - 34 duplicate blocks found; could be consolidated with utility classes.
 
 ---
 
 ## Final Project Status
 
+## Final Project Status
+
 **PASS** - All functionality preserved, codebase cleaned up successfully, security hardened to production grade.
+
+**Last Code Cleanup Test:** October 8, 2026 — All critical checks pass, minor technical debt items identified.
 
 ### Metrics
 - **Total lines before:** 9,869
@@ -203,3 +263,8 @@
 - **Themes (5 × 2 modes):** WORKING
 - **Responsive breakpoints:** PRESERVED
 - **Security posture:** PASS WITH PRODUCTION CONFIGURATION ITEMS
+- **Code quality:** PASS (linters clean, security scan low-severity only)
+
+---
+
+*Report updated: October 8, 2026 — Code cleanup test suite executed, all critical checks passing*

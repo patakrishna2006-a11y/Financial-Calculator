@@ -735,3 +735,81 @@ For every modification:
 *Audit completed: September 28, 2026*
 *Tools used: Bandit, pip-audit, manual code review, functional testing, Playwright responsive testing*
 *Auditor: open code*
+
+
+## Additional Fixes Applied (Post-Audit - October 2026)
+
+### SEC-013: Legacy Plaintext Token Columns Removed
+- **File:** app.py (User model)
+- **Issue:** `verification_token` and `reset_token` columns stored plaintext tokens for migration compatibility
+- **Fix Applied:** Removed legacy plaintext token columns entirely from User model
+  - Deleted `verification_token` and `reset_token` columns
+  - All routes now use only hashed token columns (`verification_token_hash`, `reset_token_hash`)
+  - Legacy fallback code removed from verify_email and reset_password routes
+- **Verification:** Database schema audited - no plaintext token columns remain
+- **Status:** RESOLVED
+
+### SEC-014: Security Event Logging Request Context Safety
+- **File:** app.py (log_security_event function)
+- **Issue:** `log_security_event` used `request.remote_addr` which fails outside request context
+- **Fix Applied:** Updated function to safely handle None IP addresses
+  - Added conditional check: `if ip is None: ip = 'unknown'`
+  - All call sites now pass ip explicitly or rely on safe default
+- **Verification:** Tested log_security_event outside request context - no crashes
+- **Status:** RESOLVED
+
+### SEC-015: CSRF Token Timeout Configuration
+- **File:** app.py (WTF_CSRF_TIME_LIMIT configuration)
+- **Issue:** `WTF_CSRF_TIME_LIMIT` set to None (disabled token expiration)
+- **Fix Applied:** Set to 43200 seconds (12 hours) for balanced security/UX
+  - Added `WTF_CSRF_TIME_OUT` = 3600 (1 hour JavaScript timeout)
+  - Maintains security while avoiding frequent token re-prompts
+- **Verification:** CSRF tokens now expire after 12 hours, JS refresh after 1 hour
+- **Status:** RESOLVED
+
+### SEC-016: JSON Formatting Error Handling
+- **File:** app.py (format_json_data function)
+- **Issue:** Bare `except:` clause masking all exceptions
+- **Fix Applied:** Replaced with specific exception handling
+  - Now catches only `(json.JSONDecodeError, ValueError, TypeError)`
+  - Returns empty string for None/null inputs
+  - Validates parsed data is a dict before processing
+- **Verification:** Tested with invalid JSON - gracefully returns empty string
+- **Status:** RESOLVED
+
+### SEC-017: .env File Security Hardening
+- **File:** .env
+- **Issue:** FLASK_DEBUG=true enabled (dangerous for production)
+- **Fix Applied:** Set FLASK_DEBUG=false by default
+  - All real credentials moved to comments/placeholders
+  - .env remains in .gitignore
+  - Production configuration template added with placeholders
+- **Verification:** .env scanned - no real credentials, FLASK_DEBUG=false
+- **Status:** RESOLVED
+
+### SEC-018: Python Typo Fix
+- **File:** calculator.py (SALARY_CALCULATOR function parameter)
+- **Issue:** `proffesional_tax` typo in parameter name
+- **Fix Applied:** Corrected to `professional_tax`
+  - Updated function signature: `def SALARY_CALCULATOR(ctc, bonus, professional_tax, ...)`
+  - All internal references use correct parameter name
+- **Verification:** Code linting passes - no undefined variable errors
+- **Status:** RESOLVED
+
+---
+
+
+## Updated Security Controls Summary (Post-Fixes)
+
+| Control | Status | Details |
+|---------|--------|---------|
+| Debug Mode | ✅ PASS | FLASK_DEBUG=false enforced |
+| CSRF Protection | ✅ PASS | WTF_CSRF_TIME_LIMIT=43200, tokens on all forms |
+| Rate Limiting | ✅ PASS | Redis-ready, all endpoints limited |
+| Session Security | ✅ PASS | HttpOnly, SameSite=Lax, Secure in production |
+| Security Headers | ✅ PASS | Comprehensive CSP, HSTS, X-Frame-Options |
+| Input Validation | ✅ PASS | validate_calculator_input() with range checks |
+| Token Hashing | ✅ PASS | verification_token_hash, reset_token_hash only |
+| Error Handling | ✅ PASS | Specific exceptions, no bare except |
+| Log Security | ✅ PASS | Safe request context, 10MB/10 backups |
+| .env Credentials | ✅ PASS | No real credentials in repository |

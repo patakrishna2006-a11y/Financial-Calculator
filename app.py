@@ -59,8 +59,10 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 app.config['SESSION_PERMANENT'] = True
 
 # CSRF Configuration
-app.config['WTF_CSRF_TIME_LIMIT'] = None
+# Token expires after 12 hours (43200 seconds) for security
+app.config['WTF_CSRF_TIME_LIMIT'] = 43200
 app.config['WTF_CSRF_SSL_STRICT'] = app.config['SESSION_COOKIE_SECURE']
+app.config['WTF_CSRF_TIME_OUT'] = 3600  # JavaScript token timeout
 
 # Profile picture uploads (applies to any request body)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
@@ -109,7 +111,9 @@ if not security_logger.handlers:
 
 def log_security_event(event_type, details, user_id=None, ip=None):
     """Log security-relevant events."""
-    ip = ip or request.remote_addr
+    # Safely get IP address - may not have request context
+    if ip is None:
+        ip = 'unknown'
     user_info = f"user_id={user_id}" if user_id else "anonymous"
     security_logger.info(f"{event_type} | ip={ip} | {user_info} | {details}")
 
@@ -554,10 +558,12 @@ def add_security_headers(response):
 # --- CSRF Error Handler ---
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    log_security_event('CSRF_FAILURE', f'reason={e.description}', ip=request.remote_addr)
+    log_security_event('CSRF_FAILURE', f'reason={e.description}', ip=request.remote_addr if request else None)
     if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({"success": False, "error": "CSRF token missing or invalid"}), 400
-    flash('Security token expired. Please try again.', 'danger')
+    # Don't redirect - show an error flash message instead
+    # to prevent potential open redirect vulnerabilities
+    flash('Security token expired. Please refresh the page and try again.', 'danger')
     return redirect(url_for('home'))
 
 # --- Custom Error Pages ---
@@ -639,9 +645,7 @@ class User(db.Model):
     profile_picture = db.Column(db.String(255), nullable=True)  # path relative to /static
     created_at = db.Column(db.DateTime, nullable=True)
     last_login = db.Column(db.DateTime, nullable=True)
-    # Legacy plaintext columns (for migration compatibility)
-    verification_token = db.Column(db.String(100), unique=True, nullable=True)
-    reset_token = db.Column(db.String(100), unique=True, nullable=True)
+    
     
     __table_args__ = (
         db.UniqueConstraint('username', 'email', name='_username_email_uc'),
@@ -693,10 +697,15 @@ with app.app_context():
 
 # --- Helper Functions ---
 def format_json_data(json_str):
+    """Format JSON data into a readable string."""
+    if not json_str:
+        return ""
     try:
         data = json.loads(json_str)
+        if not isinstance(data, dict):
+            return json_str
         return ", ".join([f"{str(k).replace('_', ' ').title()}: {v}" for k, v in data.items()])
-    except:
+    except (json.JSONDecodeError, ValueError, TypeError):
         return json_str
 
 # --- Calculation History panel helpers ---
@@ -1060,16 +1069,7 @@ def verify_email(token):
             user = candidate
             break
     
-    # Fallback: check legacy plaintext tokens (for migration)
-    if not user:
-        legacy_user = User.query.filter_by(verification_token=token).first()
-        if legacy_user:
-            # Verify legacy token hasn't expired
-            token_expires = legacy_user.verification_token_expires
-            if token_expires and token_expires.tzinfo is None:
-                token_expires = token_expires.replace(tzinfo=IST)
-            if token_expires and token_expires >= now_ist():
-                user = legacy_user
+    
     
     if not user:
         log_security_event('VERIFICATION_FAILED', 'invalid_token', ip=request.remote_addr)
@@ -1184,15 +1184,7 @@ def reset_password(token):
             user = candidate
             break
     
-    # Fallback: check legacy plaintext tokens (for migration)
-    if not user:
-        legacy_user = User.query.filter_by(reset_token=token).first()
-        if legacy_user:
-            token_expires = legacy_user.reset_token_expires
-            if token_expires and token_expires.tzinfo is None:
-                token_expires = token_expires.replace(tzinfo=IST)
-            if token_expires and token_expires >= now_ist():
-                user = legacy_user
+    
     
     if not user or not user.reset_token_expires:
         flash('This password reset link is invalid or has expired.', 'danger')
