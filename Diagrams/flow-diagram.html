@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinCalc Pro — Continuous Flow</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#060814;--accent:#6c8cff;--accent2:#b388ff;--teal:#4dd0e1;
+--green:#2ee59d;--gold:#ffd166;--pink:#ff7ab8;--danger:#ff5c7a;--warn:#ffb454;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:#f5f7ff;min-height:100vh;overflow-x:hidden;padding:30px 16px 50px}
+body::before{content:'';position:fixed;inset:0;background:
+radial-gradient(ellipse 80% 60% at 20% 10%,rgba(108,140,255,.15) 0%,transparent 55%),
+radial-gradient(ellipse 70% 50% at 90% 30%,rgba(179,136,255,.12) 0%,transparent 55%),
+radial-gradient(ellipse 60% 50% at 50% 100%,rgba(77,208,225,.08) 0%,transparent 60%);
+pointer-events:none;z-index:0}
+.wrap{max-width:1400px;margin:0 auto;position:relative;z-index:1}
+h1{text-align:center;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;letter-spacing:-.02em;margin-bottom:6px;
+background:linear-gradient(135deg,#6c8cff,#b388ff,#ff7ab8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{text-align:center;color:rgba(245,247,255,.5);font-size:.82rem;margin-bottom:6px}
+.live{display:flex;align-items:center;justify-content:center;gap:8px;font-size:.7rem;color:var(--green);margin-bottom:30px}
+.live .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(46,229,157,.5)}50%{box-shadow:0 0 0 10px rgba(46,229,157,0)}}
+
+/* ===== SINGLE CONTINUOUS LINE ===== */
+.canvas{position:relative;padding:20px 0}
+svg.wire{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.wire path{fill:none;stroke:rgba(255,255,255,.08);stroke-width:2}
+.wire .glowpath{stroke:url(#wireGrad);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:200;stroke-dashoffset:200;
+filter:drop-shadow(0 0 6px rgba(108,140,255,.6));animation:dash 3s linear infinite}
+@keyframes dash{to{stroke-dashoffset:0}}
+
+/* ===== NODES ===== */
+.node{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;
+transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.node .box{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;font-size:1.8rem;
+background:rgba(255,255,255,.04);border:2.5px solid rgba(255,255,255,.10);
+backdrop-filter:blur(10px);transition:all .4s cubic-bezier(.34,1.56,.64,1);position:relative;cursor:default}
+.node .box::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid transparent;
+transition:border-color .3s,box-shadow .3s}
+.node:hover .box{transform:scale(1.1)}
+.node.hot .box{border-color:var(--c);box-shadow:0 0 30px var(--g),0 0 60px var(--g),inset 0 0 16px rgba(255,255,255,.06);transform:scale(1.15)}
+.node.hot .box::before{border-color:var(--g);animation:ripple 1.4s infinite}
+@keyframes ripple{0%{transform:scale(1);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.node.past .box{border-color:var(--c);opacity:.7;box-shadow:0 0 12px var(--g)}
+.node .nlbl{font-size:.75rem;font-weight:700;color:rgba(245,247,255,.85);text-align:center;line-height:1.2}
+.node .nsub{font-size:.62rem;color:rgba(245,247,255,.4);text-align:center;line-height:1.2;max-width:100px}
+
+/* ===== CONNECTING LINES (animated particles) ===== */
+.link{position:relative;z-index:1;display:flex;align-items:center}
+.link .track{width:64px;height:2px;background:rgba(255,255,255,.06);position:relative;overflow:visible;border-radius:2px}
+.link .particle{position:absolute;top:-3px;left:0;width:8px;height:8px;border-radius:50%;
+background:#fff;box-shadow:0 0 10px var(--c,#6c8cff),0 0 20px var(--c,#6c8cff),0 0 40px var(--c,#6c8cff);
+opacity:0;transform:translateX(-10px)}
+.link.hot .particle{opacity:1;animation:travel 1s linear forwards}
+@keyframes travel{from{left:0;opacity:1}to{left:calc(100% - 8px);opacity:1}}
+.link::after{content:'';position:absolute;right:-2px;top:-4px;border:5px solid transparent;border-left:7px solid rgba(255,255,255,.12)}
+
+/* ===== PHASE BANDS ===== */
+.phase{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em;
+color:rgba(245,247,255,.3);text-align:center;margin:20px 0 14px;position:relative;z-index:2}
+.phase span{background:rgba(255,255,255,.04);padding:4px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.06)}
+
+/* ===== LAYOUT ROWS ===== */
+.row{display:flex;align-items:flex-start;justify-content:center;flex-wrap:nowrap;gap:0;padding:6px 12px;overflow-x:auto;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+
+/* ===== VERTICAL WRAP (row break) ===== */
+.vlink{display:flex;justify-content:center;padding:4px 0;position:relative;z-index:1}
+.vlink .track{width:2px;height:40px;background:rgba(255,255,255,.06);position:relative}
+.vlink .particle{position:absolute;left:-3px;top:0;width:8px;height:8px;border-radius:50%;
+background:#fff;box-shadow:0 0 10px var(--c,#6c8cff),0 0 20px var(--c,#6c8cff);opacity:0}
+.vlink.hot .particle{opacity:1;animation:travelV 1s linear forwards}
+@keyframes travelV{from{top:0;opacity:1}to{top:calc(100% - 8px);opacity:1}}
+
+/* ===== SUB-FLOW BUBBLES ===== */
+.bubbles{display:flex;justify-content:center;gap:14px;margin-top:10px;position:relative;z-index:2}
+.bub{display:flex;align-items:center;gap:6px;font-size:.65rem;color:rgba(245,247,255,.45);
+background:rgba(255,255,255,.03);padding:6px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.06);transition:all .3s}
+.bub .bi{font-size:.7rem}
+.bub.hot{border-color:var(--c);color:#fff;box-shadow:0 0 14px var(--g)}
+
+/* ===== PROGRESS ===== */
+.pbar{position:fixed;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.04);z-index:100}
+.pbar .fill{height:100%;width:0;background:linear-gradient(90deg,#6c8cff,#b388ff,#4dd0e1,#2ee59d);
+transition:width .5s ease;box-shadow:0 0 10px rgba(108,140,255,.5)}
+
+.loop{position:fixed;top:14px;right:18px;font-size:.65rem;color:rgba(245,247,255,.4);
+background:rgba(255,255,255,.05);padding:5px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.07);
+backdrop-filter:blur(8px);z-index:100}
+.loop b{color:var(--teal)}
+
+/* ===== STATS ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:24px}
+.stat{text-align:center;padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
+.stat .n{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#6c8cff,#b388ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{font-size:.58rem;color:rgba(245,247,255,.4);text-transform:uppercase;letter-spacing:.05em}
+
+@media(max-width:900px){
+.row{flex-direction:column;align-items:center;gap:0}
+.link{transform:rotate(90deg);margin:18px 0}
+.link::after{bottom:-4px;right:50%;transform:translateX(50%) rotate(90deg);top:auto;border-left:none;border-top:7px solid rgba(255,255,255,.12)}
+}
+</style>
+</head>
+<body>
+<div class="loop">Loop <b id="lc">1</b></div>
+<div class="pbar"><div class="fill" id="pb"></div></div>
+
+<div class="wrap">
+<h1>FinCalc Pro</h1>
+<p class="sub">Continuous flow — particles travel between cards, looping until you close this tab</p>
+<div class="live"><span class="pulse"></span> LIVE</div>
+
+<!-- ROW 1: Onboarding -->
+<div class="phase"><span>Phase 1 · Onboarding</span></div>
+<div class="row" id="r1">
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n1">
+<div class="box">🌐</div><div class="nlbl">Landing</div><div class="nsub">GET /</div>
+</div>
+<div class="link" data-c="#6c8cff" id="l1"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n2">
+<div class="box">📝</div><div class="nlbl">Register</div><div class="nsub">9+ chars</div>
+</div>
+<div class="link" data-c="#b388ff" id="l2"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#b388ff" data-g="rgba(179,136,255,.5)" id="n3">
+<div class="box">📧</div><div class="nlbl">Email</div><div class="nsub">1-hr token</div>
+</div>
+<div class="link" data-c="#4dd0e1" id="l3"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#4dd0e1" data-g="rgba(77,208,225,.5)" id="n4">
+<div class="box">✅</div><div class="nlbl">Verify</div><div class="nsub">click link</div>
+</div>
+<div class="link" data-c="#6c8cff" id="l4"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n5">
+<div class="box">🔐</div><div class="nlbl">Login</div><div class="nsub">3 fields</div>
+</div>
+<div class="link" data-c="#2ee59d" id="l5"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#2ee59d" data-g="rgba(46,229,157,.5)" id="n6">
+<div class="box">📊</div><div class="nlbl">Dashboard</div><div class="nsub">26 panels</div>
+</div>
+</div>
+
+<!-- VERTICAL BREAK -->
+<div class="vlink" data-c="#6c8cff" id="v1"><div class="track"><div class="particle"></div></div></div>
+
+<!-- ROW 2: Calculation -->
+<div class="phase"><span>Phase 2 · Calculation Loop</span></div>
+<div class="row" id="r2">
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n7">
+<div class="box">🔍</div><div class="nlbl">Select</div><div class="nsub">sidebar</div>
+</div>
+<div class="link" data-c="#6c8cff" id="l6"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n8">
+<div class="box">⌨️</div><div class="nlbl">Inputs</div><div class="nsub">₹ format</div>
+</div>
+<div class="link" data-c="#4dd0e1" id="l7"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#4dd0e1" data-g="rgba(77,208,225,.5)" id="n9">
+<div class="box">⚡</div><div class="nlbl">Calculate</div><div class="nsub">POST</div>
+</div>
+<div class="link" data-c="#b388ff" id="l8"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#b388ff" data-g="rgba(179,136,255,.5)" id="n10">
+<div class="box">⚙️</div><div class="nlbl">Execute</div><div class="nsub">27 fns</div>
+</div>
+<div class="link" data-c="#2ee59d" id="l9"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#2ee59d" data-g="rgba(46,229,157,.5)" id="n11">
+<div class="box">📈</div><div class="nlbl">Results</div><div class="nsub">grid + chart</div>
+</div>
+<div class="link" data-c="#ffd166" id="l10"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#ffd166" data-g="rgba(255,209,102,.5)" id="n12">
+<div class="box">📤</div><div class="nlbl">Export</div><div class="nsub">PDF / Copy</div>
+</div>
+</div>
+<div class="bubbles">
+<div class="bub" data-c="#ff7ab8" id="b1"><span class="bi">🕐</span> Auto-save</div>
+<div class="bub" data-c="#ff7ab8" id="b2"><span class="bi">↻</span> Re-run</div>
+<div class="bub" data-c="#ff5c7a" id="b3"><span class="bi">🗑</span> Delete</div>
+</div>
+
+<div class="vlink" data-c="#6c8cff" id="v2"><div class="track"><div class="particle"></div></div></div>
+
+<!-- ROW 3: Account -->
+<div class="phase"><span>Phase 3 · Account Management</span></div>
+<div class="row" id="r3">
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n13">
+<div class="box">🎨</div><div class="nlbl">Themes</div><div class="nsub">5 × 2 modes</div>
+</div>
+<div class="link" data-c="#6c8cff" id="l11"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n14">
+<div class="box">📷</div><div class="nlbl">Avatar</div><div class="nsub">≤2MB</div>
+</div>
+<div class="link" data-c="#6c8cff" id="l12"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#6c8cff" data-g="rgba(108,140,255,.5)" id="n15">
+<div class="box">🔑</div><div class="nlbl">Change Pwd</div><div class="nsub">in-session</div>
+</div>
+<div class="link" data-c="#ffb454" id="l13"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#ffb454" data-g="rgba(255,180,84,.5)" id="n16">
+<div class="box">⚠️</div><div class="nlbl">Delete 1</div><div class="nsub">pwd gate</div>
+</div>
+<div class="link" data-c="#ff5c7a" id="l14"><div class="track"><div class="particle"></div></div></div>
+<div class="node" data-c="#ff5c7a" data-g="rgba(255,92,122,.5)" id="n17">
+<div class="box">🗑</div><div class="nlbl">Delete 2</div><div class="nsub">cascade</div>
+</div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+<div class="stat"><div class="n">27</div><div class="l">Backend</div></div>
+<div class="stat"><div class="n">26</div><div class="l">UI Panels</div></div>
+<div class="stat"><div class="n">18</div><div class="l">Routes</div></div>
+<div class="stat"><div class="n">5</div><div class="l">Themes</div></div>
+<div class="stat"><div class="n">18/18</div><div class="l">Security</div></div>
+<div class="stat"><div class="n">45/45</div><div class="l">Responsive</div></div>
+</div>
+</div>
+
+<script>
+(function(){
+  const NODES = ['n1','n2','n3','n4','n5','n6','n7','n8','n9','n10','n11','n12','n13','n14','n15','n16','n17'];
+  const LINKS = {
+    n1:'l1', n2:'l2', n3:'l3', n4:'l4', n5:'l5',
+    n6:'v1', // vertical to row 2
+    n7:'l6', n8:'l7', n9:'l8', n10:'l9', n11:'l10',
+    n12:'v2', // vertical to row 3
+    n13:'l11', n14:'l12', n15:'l13', n16:'l14', n17:null
+  };
+  const BUBS = { n11:['b1'], n12:['b2','b3'] };
+  const STEP_MS = 750;
+  let i = 0, loop = 0, paused = false;
+
+  const pb = document.getElementById('pb');
+  const lc = document.getElementById('lc');
+
+  function setVar(el, name, val) { if (el) el.style.setProperty(name, val); }
+
+  function reset() {
+    NODES.forEach(id => {
+      const n = document.getElementById(id);
+      n.classList.remove('hot','past');
+      setVar(n, '--c', n.dataset.c);
+      setVar(n, '--g', n.dataset.g);
+    });
+    Object.entries(LINKS).forEach(([nid, lid]) => {
+      if (!lid) return;
+      const l = document.getElementById(lid);
+      if (l) { l.classList.remove('hot'); setVar(l,'--c', l.dataset.c); }
+    });
+    Object.values(BUBS).flat().forEach(bid => {
+      const b = document.getElementById(bid);
+      if (b) { b.classList.remove('hot'); setVar(b,'--c', b.dataset.c); setVar(b,'--g', b.dataset.c.replace(')', ',.4)').replace('#','rgba(')); }
+    });
+    pb.style.width = '0%';
+  }
+
+  function step() {
+    if (paused) return;
+    if (i >= NODES.length) {
+      loop++;
+      lc.textContent = loop;
+      reset();
+      i = 0;
+      setTimeout(step, 400);
+      return;
+    }
+
+    const nid = NODES[i];
+    const n = document.getElementById(nid);
+
+    // Previous node -> past
+    if (i > 0) {
+      const p = document.getElementById(NODES[i-1]);
+      p.classList.remove('hot');
+      p.classList.add('past');
+    }
+
+    // Current node -> hot
+    n.classList.add('hot');
+
+    // Sub bubbles
+    if (BUBS[nid]) {
+      BUBS[nid].forEach(bid => {
+        const b = document.getElementById(bid);
+        if (b) { setVar(b,'--c', b.dataset.c); b.classList.add('hot'); }
+      });
+    }
+
+    // Fire link particle to next node
+    const lid = LINKS[nid];
+    if (lid) {
+      const l = document.getElementById(lid);
+      if (l) {
+        setVar(l,'--c', l.dataset.c);
+        l.classList.add('hot');
+        // Reset particle animation
+        const p = l.querySelector('.particle');
+        if (p) { p.style.animation='none'; void p.offsetWidth; p.style.animation=''; }
+      }
+    }
+
+    // Progress
+    pb.style.width = ((i+1)/NODES.length*100) + '%';
+
+    i++;
+    setTimeout(step, STEP_MS);
+  }
+
+  // Pause on hover
+  document.querySelectorAll('.node,.bub').forEach(el => {
+    el.addEventListener('mouseenter', () => { paused = true; });
+    el.addEventListener('mouseleave', () => {
+      paused = false;
+      if (i < NODES.length) setTimeout(step, 100);
+    });
+  });
+
+  // Pause when tab hidden
+  document.addEventListener('visibilitychange', () => {
+    paused = document.hidden;
+    if (!document.hidden && i < NODES.length) setTimeout(step, 200);
+  });
+
+  // Start
+  setTimeout(step, 600);
+})();
+</script>
+</body>
+</html>
