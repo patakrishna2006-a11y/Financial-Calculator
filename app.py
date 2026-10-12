@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, session, g
+from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, flash, session, g, stream_with_context
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
@@ -7,6 +7,8 @@ import os
 from dotenv import load_dotenv
 import json
 import re
+from html.parser import HTMLParser
+from urllib.parse import parse_qs, urlparse
 import logging
 import secrets
 import requests
@@ -510,6 +512,162 @@ def crypto_prices():
         "usd_inr_rate": usd_inr_rate,
         "cached_at": _crypto_cache["timestamp"]
     })
+
+
+@app.route('/api/assistant/chat', methods=['POST'])
+@limiter.limit("10 per minute; 100 per day")
+def assistant_chat():
+    """Stream DuckDuckGo search results to authenticated dashboard users."""
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Please sign in to chat with Finny."}), 401
+
+    if not request.is_json:
+        return jsonify({"success": False, "error": "A JSON request is required."}), 400
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"success": False, "error": "The chat request is invalid."}), 400
+
+    messages = data.get('messages')
+    if not isinstance(messages, list) or not messages or len(messages) > 20:
+        return jsonify({"success": False, "error": "Send between 1 and 20 recent messages."}), 400
+
+    safe_messages = []
+    total_chars = 0
+    for message in messages:
+        if not isinstance(message, dict) or message.get('role') not in {'user', 'assistant'}:
+            return jsonify({"success": False, "error": "A chat message has an invalid format."}), 400
+        content = message.get('content')
+        if not isinstance(content, str) or not content.strip() or len(content) > 4000:
+            return jsonify({"success": False, "error": "Each message must contain 1 to 4,000 characters."}), 400
+        total_chars += len(content)
+        safe_messages.append({"role": message['role'], "content": content.strip()})
+
+    if total_chars > 12000 or safe_messages[-1]['role'] != 'user':
+        return jsonify({"success": False, "error": "The chat is too long or does not end with a user message."}), 400
+
+    search_query = safe_messages[-1]['content'][:500]
+    try:
+        search_response = requests.get(
+            'https://html.duckduckgo.com/html/',
+            params={"q": search_query},
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; FinCalcPro/1.0; web search)",
+                "Accept": "text/html",
+            },
+            timeout=(5, 12),
+        )
+        search_response.raise_for_status()
+    except requests.RequestException:
+        app.logger.warning("Finny web search failed")
+        return jsonify({
+            "success": False,
+            "error": "Finny could not reach DuckDuckGo right now. Please try again."
+        }), 502
+
+    class DuckDuckGoResultsParser(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.results = []
+            self.capture_tag = None
+            self.capture_kind = None
+            self.capture_text = []
+            self.current_result = None
+
+        def handle_starttag(self, tag, attrs):
+            attributes = dict(attrs)
+            classes = attributes.get("class", "").split()
+            if tag == "a" and "result__a" in classes:
+                self.capture_tag = tag
+                self.capture_kind = "title"
+                self.capture_text = []
+                self.current_result = {
+                    "title": "",
+                    "url": attributes.get("href", ""),
+                    "snippet": "",
+                }
+            elif "result__snippet" in classes:
+                self.capture_tag = tag
+                self.capture_kind = "snippet"
+                self.capture_text = []
+
+        def handle_endtag(self, tag):
+            if tag != self.capture_tag:
+                return
+            text = re.sub(r'\s+', ' ', ''.join(self.capture_text)).strip()
+            if self.capture_kind == "title" and self.current_result is not None:
+                self.current_result["title"] = text
+                self.results.append(self.current_result)
+                self.current_result = None
+            elif self.capture_kind == "snippet" and self.results:
+                self.results[-1]["snippet"] = text
+            self.capture_tag = None
+            self.capture_kind = None
+            self.capture_text = []
+
+        def handle_data(self, data):
+            if self.capture_tag:
+                self.capture_text.append(data)
+
+    results_parser = DuckDuckGoResultsParser()
+    results_parser.feed(search_response.text)
+
+    def make_snippet_easy_to_scan(text):
+        snippet = re.sub(r'\s+', ' ', text).strip()
+        snippet = re.split(r'(?<=[.!?])\s+', snippet, maxsplit=1)[0]
+        if len(snippet) > 150:
+            snippet = snippet[:147].rsplit(' ', 1)[0].rstrip(' ,;:') + "..."
+        return snippet
+
+    search_results = []
+    for result in results_parser.results:
+        snippet = make_snippet_easy_to_scan(result["snippet"])
+        if len(snippet) < 30 or len(snippet.split()) < 5:
+            continue
+        link = result["url"].strip()
+        parsed_url = urlparse(link)
+        if parsed_url.netloc.endswith("duckduckgo.com") and parsed_url.path.startswith("/l/"):
+            link = parse_qs(parsed_url.query).get("uddg", [""])[0]
+            parsed_url = urlparse(link)
+        if parsed_url.scheme != 'https' or not parsed_url.netloc:
+            continue
+        search_results.append({
+            "title": result["title"][:200],
+            "url": link[:2000],
+            "snippet": snippet,
+        })
+        if len(search_results) == 2:
+            break
+
+    if not search_results:
+        return jsonify({
+            "success": False,
+            "error": "DuckDuckGo returned no usable results. Try again or rephrase your search."
+        }), 502
+
+    answer_intro = "Here’s a short answer from DuckDuckGo:"
+
+    def stream_reply():
+        sources = [
+            {"url": result["url"], "title": result["title"]}
+            for result in search_results
+        ]
+        yield f"event: sources\ndata: {json.dumps({'sources': sources})}\n\n"
+        yield f"event: delta\ndata: {json.dumps({'text': answer_intro})}\n\n"
+        for result in search_results:
+            title = result["title"] or urlparse(result["url"]).netloc
+            snippet = result["snippet"] or "Open the source to read more."
+            text = f"\n\n- **{title}** — {snippet}"
+            yield f"event: delta\ndata: {json.dumps({'text': text})}\n\n"
+
+    return Response(
+        stream_with_context(stream_reply()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache, no-transform',
+            'X-Accel-Buffering': 'no',
+        },
+    )
 
 
 # --- Security Headers Middleware ---
