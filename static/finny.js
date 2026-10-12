@@ -186,10 +186,22 @@ const panelNames = Object.fromEntries(
 
 const panel = document.getElementById('finny-panel');
 const launcher = document.getElementById('finny-launcher');
+const launcherPositionKey = 'fincalc-finny-launcher-position';
 const messages = document.getElementById('finny-messages');
 const contextText = document.getElementById('finny-context-text');
-const stageFallback = document.getElementById('finny-stage-fallback');
 let currentType = document.querySelector('.calc-panel.active')?.id.replace('panel-', '') || null;
+let launcherPointer = null;
+let suppressLauncherClick = false;
+
+function closeFinnyChat({ returnFocus = false } = {}) {
+  if (panel.hidden) return;
+  panel.hidden = true;
+  launcher.hidden = false;
+  restoreLauncherPosition();
+  launcher.setAttribute('aria-expanded', 'false');
+  resizeFinnyView();
+  if (returnFocus) launcher.focus();
+}
 
 function titleFor(type) {
   return panelNames[type] || (type === 'HISTORY' ? 'Calculation History' : type);
@@ -509,17 +521,115 @@ async function sendToAssistant(question) {
 }
 
 document.getElementById('finny-close').addEventListener('click', () => {
-  panel.hidden = true;
-  launcher.hidden = false;
-  launcher.setAttribute('aria-expanded', 'false');
-  launcher.focus();
+  closeFinnyChat({ returnFocus: true });
 });
 
 launcher.addEventListener('click', () => {
+  if (suppressLauncherClick) {
+    suppressLauncherClick = false;
+    return;
+  }
+  if (robot) robot.scale.setScalar(1);
   panel.hidden = false;
   launcher.hidden = true;
+  resizeFinnyView();
   launcher.setAttribute('aria-expanded', 'true');
   document.getElementById('finny-input').focus();
+});
+
+document.addEventListener('click', event => {
+  if (!panel.hidden && !panel.contains(event.target) && !launcher.contains(event.target)) {
+    closeFinnyChat();
+  }
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !panel.hidden) {
+    closeFinnyChat({ returnFocus: true });
+  }
+});
+
+function clampLauncherPosition(left, top) {
+  const margin = 8;
+  return {
+    left: Math.max(margin, Math.min(left, window.innerWidth - launcher.offsetWidth - margin)),
+    top: Math.max(margin, Math.min(top, window.innerHeight - launcher.offsetHeight - margin))
+  };
+}
+
+function setLauncherPosition(left, top) {
+  const position = clampLauncherPosition(left, top);
+  launcher.style.left = `${position.left}px`;
+  launcher.style.top = `${position.top}px`;
+  launcher.style.right = 'auto';
+  launcher.style.bottom = 'auto';
+  return position;
+}
+
+function restoreLauncherPosition() {
+  try {
+    const savedPosition = JSON.parse(localStorage.getItem(launcherPositionKey) || 'null');
+    if (Number.isFinite(savedPosition?.left) && Number.isFinite(savedPosition?.top)) {
+      setLauncherPosition(savedPosition.left, savedPosition.top);
+    }
+  } catch (error) {
+    console.warn('Finny launcher position could not be restored:', error);
+  }
+}
+
+launcher.addEventListener('pointerdown', event => {
+  if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  const rect = launcher.getBoundingClientRect();
+  launcherPointer = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    left: rect.left,
+    top: rect.top,
+    moved: false
+  };
+  launcher.setPointerCapture(event.pointerId);
+});
+
+launcher.addEventListener('pointermove', event => {
+  if (!launcherPointer || launcherPointer.pointerId !== event.pointerId) return;
+  const deltaX = event.clientX - launcherPointer.startX;
+  const deltaY = event.clientY - launcherPointer.startY;
+  if (!launcherPointer.moved && Math.hypot(deltaX, deltaY) < 6) return;
+  launcherPointer.moved = true;
+  event.preventDefault();
+  setLauncherPosition(launcherPointer.left + deltaX, launcherPointer.top + deltaY);
+});
+
+function finishLauncherDrag(event) {
+  if (!launcherPointer || launcherPointer.pointerId !== event.pointerId) return;
+  if (launcherPointer.moved && event.type === 'pointerup') {
+    const position = setLauncherPosition(
+      launcherPointer.left + event.clientX - launcherPointer.startX,
+      launcherPointer.top + event.clientY - launcherPointer.startY
+    );
+    try {
+      localStorage.setItem(launcherPositionKey, JSON.stringify(position));
+    } catch (error) {
+      console.warn('Finny launcher position could not be saved:', error);
+    }
+    suppressLauncherClick = true;
+  }
+  launcherPointer = null;
+}
+
+launcher.addEventListener('pointerup', finishLauncherDrag);
+launcher.addEventListener('pointercancel', finishLauncherDrag);
+restoreLauncherPosition();
+
+window.addEventListener('resize', () => {
+  if (!launcher.hidden && launcher.style.left && launcher.style.top) {
+    const position = clampLauncherPosition(
+      Number.parseFloat(launcher.style.left),
+      Number.parseFloat(launcher.style.top)
+    );
+    setLauncherPosition(position.left, position.top);
+  }
 });
 
 document.getElementById('finny-form').addEventListener('submit', event => {
@@ -571,7 +681,7 @@ if (currentType) {
   contextText.textContent = `I’m here to help with ${titleFor(currentType)}.`;
   addMessage(`I see ${titleFor(currentType)} is open. ${calculatorInfo[currentType]?.description || 'Ask me about this panel or choose a goal for a recommendation.'}`);
 } else {
-  addMessage('Hi! I’m Finny. I can explain a calculator and its inputs, or help you find one for a goal like retirement, a home loan, or regular investing.');
+  addMessage('Hi! I’m Finny. I can explain a calculator and its inputs, and answer your questions..');
 }
 
 let robot = null;
@@ -579,6 +689,7 @@ let renderer = null;
 let resizeObserver = null;
 let animationFrame = 0;
 let THREE = null;
+let resizeFinnyView = () => {};
 
 function material(color, extra = {}) {
   return new THREE.MeshStandardMaterial({ color, roughness: 0.34, metalness: 0.22, ...extra });
@@ -695,7 +806,7 @@ async function initFinny3d() {
   try {
     THREE = await import('https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js');
     const canvas = document.getElementById('finny-canvas');
-    const stage = document.getElementById('finny-stage');
+    launcher.append(canvas);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 50);
     camera.position.set(0, 0.15, 6.3);
@@ -717,18 +828,22 @@ async function initFinny3d() {
     scene.add(rimLight);
 
     robot = buildRobot(THREE);
+    robot.scale.setScalar(0.82);
     scene.add(robot);
 
-    const resize = () => {
-      const { width, height } = stage.getBoundingClientRect();
+    resizeFinnyView = () => {
+      const { width, height } = launcher.getBoundingClientRect();
       if (!width || !height) return;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
+      camera.fov = 42;
+      camera.position.set(0, 0.15, 4.8);
+      camera.lookAt(0, 0.15, 0);
       camera.updateProjectionMatrix();
     };
-    resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(stage);
-    resize();
+    resizeObserver = new ResizeObserver(resizeFinnyView);
+    resizeObserver.observe(launcher);
+    resizeFinnyView();
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const blink = { next: performance.now() + 1800, until: 0 };
@@ -772,7 +887,6 @@ async function initFinny3d() {
     animationFrame = requestAnimationFrame(animate);
   } catch (error) {
     console.error('Finny 3D initialization failed:', error);
-    stageFallback.hidden = false;
   }
 }
 
