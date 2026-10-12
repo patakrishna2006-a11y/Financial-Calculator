@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#060814">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>FinCalc Pro — Your Financial Dashboard</title>
   <meta name="description" content="Access 25+ financial calculators on your personalized FinCalc Pro dashboard.">
 
@@ -974,6 +975,59 @@
     </main>
   </div>
 
+  <aside class="finny-widget" id="finny-widget" aria-label="Finny financial assistant">
+    <section class="finny-panel" id="finny-panel" aria-labelledby="finny-title">
+      <header class="finny-header">
+        <div class="finny-identity">
+          <span class="finny-status-dot" aria-hidden="true"></span>
+          <div>
+            <h2 id="finny-title">Finny</h2>
+            <p>AI chat · web search</p>
+          </div>
+        </div>
+        <button class="finny-close" id="finny-close" type="button" aria-label="Close Finny assistant" title="Close assistant">
+          <i class="fas fa-xmark" aria-hidden="true"></i>
+        </button>
+      </header>
+
+      <div class="finny-stage" id="finny-stage">
+        <canvas id="finny-canvas" aria-label="Animated 3D robot assistant Finny"></canvas>
+        <p class="finny-stage-fallback" id="finny-stage-fallback" hidden>3D view unavailable. Finny's help is still ready.</p>
+        <span class="finny-stage-caption" aria-hidden="true">READY TO HELP</span>
+      </div>
+
+      <div class="finny-context" id="finny-context" aria-live="polite">
+        <span class="finny-context-icon" aria-hidden="true"><i class="fas fa-sparkles"></i></span>
+        <span id="finny-context-text">Pick a calculator or tell me what you want to plan.</span>
+      </div>
+
+      <div class="finny-messages" id="finny-messages" role="log" aria-label="Conversation with Finny" aria-live="polite" aria-relevant="additions"></div>
+
+      <div class="finny-prompts" aria-label="Suggested questions">
+        <button type="button" data-finny-prompt="Explain this calculator">Explain this calculator</button>
+        <button type="button" data-finny-prompt="What do the inputs mean?">Explain the inputs</button>
+        <button type="button" data-finny-prompt="I want to save for retirement">Plan for retirement</button>
+      </div>
+
+      <form class="finny-compose" id="finny-form">
+        <label class="finny-visually-hidden" for="finny-input">Ask Finny a question</label>
+        <textarea id="finny-input" rows="1" maxlength="2000" placeholder="Ask anything…" autocomplete="off"></textarea>
+        <button class="finny-stop" id="finny-stop" type="button" aria-label="Stop response" title="Stop response" hidden>
+          <i class="fas fa-stop" aria-hidden="true"></i>
+        </button>
+        <button id="finny-send" type="submit" aria-label="Send message to Finny" title="Send">
+          <i class="fas fa-arrow-up" aria-hidden="true"></i>
+        </button>
+      </form>
+      <p class="finny-privacy-note">Calculator help comes from Finny’s built-in guide; other questions search DuckDuckGo.</p>
+    </section>
+    <button class="finny-launcher" id="finny-launcher" type="button" aria-label="Open Finny assistant" aria-expanded="false" hidden>
+      <span class="finny-launcher-robot" aria-hidden="true"><i class="fas fa-robot"></i></span>
+      <span>Ask Finny</span>
+      <span class="finny-status-dot" aria-hidden="true"></span>
+    </button>
+  </aside>
+
   <script>
   // ── Panel metadata ──
   const META = {
@@ -1336,6 +1390,7 @@
     });
 
     activePanel = type;
+    window.dispatchEvent(new CustomEvent('finny:panel-change', { detail: { type } }));
     closeSidebar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -3825,5 +3880,6 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   })();
   </script>
+  <script type="module" src="{{ url_for('static', filename='finny.js') }}?v=5"></script>
 </body>
 </html>

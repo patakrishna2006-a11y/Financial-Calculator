@@ -62,6 +62,8 @@ See [SECURITY_AUDIT_REPORT.md](SECURITY_AUDIT_REPORT.md) for complete security a
 - **Dark/Light Theme** — 5 color themes (Indigo, Green, Orange, Purple, Teal) with glassmorphism effects
 - **Responsive Design** — Mobile-first, tested across 19 device viewports (320px–1920px)
 - **Sidebar Navigation** — Collapsible category-based navigation with search & history preview
+- **Finny 3D Assistant** — Animated Three.js robot with contextual calculator guidance, input explanations, and goal-based recommendations
+- **Finny Web Search** — Search the web with DuckDuckGo and browse clickable results; no AI API key required
 - **Real-time Results** — Instant calculations with formatted Indian Rupee (₹) output
 - **Copy to Clipboard** — One-click result copying
 - **PDF Export** — Export calculator results to PDF
