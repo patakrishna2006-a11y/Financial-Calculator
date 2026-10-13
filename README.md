@@ -105,33 +105,51 @@ See [RESPONSIVE_TEST_REPORT.md](RESPONSIVE_TEST_REPORT.md) for complete test mat
 ## 📁 Project Structure
 
 ```
-FinCalc Pro
-├── app.py                    # Flask application factory, routes, authentication
-├── calculator.py             # 25 public financial calculation functions
-├── templates/
-│   ├── index.html            # Dashboard SPA with all calculators
-│   ├── landing.html          # Public landing page
-│   ├── login.html            # Login page
-│   ├── register.html         # Registration page
-│   ├── forgot_password.html  # Forgot Password page
-│   ├── reset_password.html   # Reset Password Page
-│   ├── confirm_deletion.html # Account Deletion Confirmation Page
-│   ├── email/
-│   │   └── verification.html # Email Verification / Password Reset / Account Deletion
-│   ├── errors/
-│   │   ├── 400.html          # Error Handling page           
-│   │   ├── 401.html          # Error Handling page
-│   │   ├── 403.html          # Error Handling page
-│   │   ├── 404.html          # Error Handling page
-│   │   ├── 405.html          # Error Handling page
-│   │   ├── 413.html          # Error Handling page
-│   │   ├── 429.html          # Error Handling page
-│   │   └── 500.html          # Error Handling page
-├── static/
-│   └── style.css             # Complete stylesheet with theme system
+Financial Calculator/
+├── app.py                    # Flask application (routes, auth, security, assistant endpoint)
+├── calculator.py             # 27 pure calculation functions
+├── requirements.txt          # Python dependencies
+├── README.md                 # Project overview
+├── security.log              # Security event log (runtime)
+├── users.db                  # SQLite database (runtime)
 ├── instance/
-│   ├── users.db              # SQLite database
-└── requirements.txt          # Python dependencies
+│   └── users.db              # Flask-SQLAlchemy instance DB
+├── templates/                # Jinja2 templates
+│   ├── index.html            # Dashboard SPA (26 calculator panels + Finny widget)
+│   ├── landing.html          # Public landing page
+│   ├── login.html            # Login
+│   ├── register.html         # Registration
+│   ├── forgot_password.html   # Password reset request
+│   ├── reset_password.html   # Password reset
+│   ├── confirm_deletion.html # Account deletion confirmation
+│   └── errors/               # Error pages (400, 401, 403, 404, 405, 413, 429, 500)
+├── static/
+│   ├── style.css             # Global styles + Finny widget styles
+│   ├── finny.js              # Finny assistant (ES module)
+│   ├── img/
+│   │   └── finny.png         # Finny character artwork
+│   └── uploads/
+│       └── profiles/         # User profile pictures
+├── docs/                     # Documentation
+│   ├── prd.md
+│   ├── srs.md
+│   ├── trd.md
+│   ├── api-documentation.md
+│   ├── finny-assistant.md
+│   ├── ux-wireframes.md
+│   ├── ui-mockups-prototypes.md
+│   ├── user-story-map-backlog.md
+│   └── ui-design-color-spec.md
+└── Diagrams/                 # Archify HTML diagrams
+    ├── architecture-diagram.html
+    ├── erd-diagram.html
+    ├── flow-diagram.html
+    ├── lifecycle-diagram.html
+    ├── sequence-calculation.html
+    ├── sequence-registration.html
+    ├── usecase-diagram.html
+    ├── workflow-diagram.html
+    └── finny-sequence.html         # Python dependencies
 ```
 
 The current workspace also contains the audit and QA documents linked below. Runtime-generated files such as the SQLite database and security log may appear under `instance/` after the application starts.
