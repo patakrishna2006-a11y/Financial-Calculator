@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 3.0.1">
   <meta name="archify-reader-contract" content="declared-wide-v1">
-  <title>FinCalc Pro — System Architecture Diagram</title>
+  <title>Finny Assistant — Question Routing &amp; Streaming Answer Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -2226,8 +2226,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       font-size: 0.5rem;
       line-height: 1.35;
       -webkit-box-orient: vertical;
-      line-clamp: 2;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
     }
     .diagram-guide kbd {
       align-self: start;
@@ -4979,18 +4979,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
            data-preset-badge-blueprint="BLUEPRINT / REV 01"
            data-preset-badge-editorial="EDITORIAL / FIELD NOTE">
         <div class="pulse-dot"></div>
-        <h1>FinCalc Pro — System Architecture</h1>
+        <h1>Finny Assistant — Question Routing &amp; Streaming Answer</h1>
       </div>
     </div>
 
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/patakrishna2006-a11y/Financial-Calculator","revision":"6a6b20a93afc016677331d20cc027fcc9b37ef84","shortRevision":"6a6b20a","label":"patakrishna2006-a11y/Financial-Calculator","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/tree/6a6b20a93afc016677331d20cc027fcc9b37ef84"},"referenceCount":18,"nodes":{"browser":[{"path":"templates/index.html","line":1,"endLine":18,"label":"Loads Chart.js, jsPDF, html2canvas via CDN","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/templates/index.html#L1-L18"}],"landing":[{"path":"app.py","line":934,"endLine":936,"label":"GET / renders landing.html","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L934-L936"}],"auth-pages":[{"path":"app.py","line":938,"endLine":1281,"label":"8 auth routes render Jinja2 templates","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L938-L1281"}],"dashboard":[{"path":"templates/index.html","line":445,"endLine":972,"label":"26 calculator panels + history panel","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/templates/index.html#L445-L972"}],"chartjs":[{"path":"templates/index.html","line":16,"label":"script src chart.umd.min.js","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/templates/index.html#L16"}],"jspdf":[{"path":"templates/index.html","line":2886,"label":"exportPDF function","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/templates/index.html#L2886"}],"sec-headers":[{"path":"app.py","line":516,"endLine":556,"label":"Adds CSP, HSTS, X-Frame-Options headers","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L516-L556"}],"csrf":[{"path":"app.py","line":63,"endLine":65,"label":"WTF_CSRF_TIME_LIMIT=43200","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L63-L65"}],"rate-limiter":[{"path":"app.py","line":84,"endLine":89,"label":"Limiter(get_remote_address)","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L84-L89"}],"flask":[{"path":"app.py","line":38,"endLine":100,"label":"Flask init, config, extensions","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L38-L100"}],"calc-engine":[{"path":"calculator.py","line":1,"endLine":577,"label":"27 pure functions, Indian formatting","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/calculator.py#L1-L577"}],"sec-log":[{"path":"app.py","line":102,"endLine":110,"label":"RotatingFileHandler security.log","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L102-L110"}],"redis":[{"path":"app.py","line":78,"endLine":82,"label":"REDIS_URL or memory:// fallback","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L78-L82"}],"db":[{"path":"app.py","line":631,"endLine":660,"label":"User + CalculationHistory models","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L631-L660"}],"coingecko":[{"path":"app.py","line":280,"endLine":291,"label":"fetch_crypto_prices from CoinGecko","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L280-L291"}],"currencyapi":[{"path":"app.py","line":416,"endLine":451,"label":"fetch_usd_inr_rate via CURRENCY_API_KEY","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L416-L451"}],"smtp":[{"path":"app.py","line":196,"endLine":245,"label":"send verification/reset/deletion emails","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L196-L245"}],"uploads":[{"path":"app.py","line":1351,"endLine":1402,"label":"avatar upload with magic bytes","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6a6b20a93afc016677331d20cc027fcc9b37ef84/app.py#L1351-L1402"}]}}</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/patakrishna2006-a11y/Financial-Calculator","revision":"6762986282d7559568ef1a69ee576bfd3c622177","shortRevision":"6762986","label":"patakrishna2006-a11y/Financial-Calculator","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/tree/6762986282d7559568ef1a69ee576bfd3c622177"},"referenceCount":10,"nodes":{"user":[{"path":"templates/index.html","line":978,"endLine":1021,"label":"Finny widget + launcher","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/templates/index.html#L978-L1021"}],"ui":[{"path":"static/finny.js","line":288,"endLine":367,"label":"addMessage + renderAnswer","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/static/finny.js#L288-L367"},{"path":"static/finny.js","line":403,"endLine":521,"label":"sendToAssistant stream","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/static/finny.js#L403-L521"}],"kb":[{"path":"static/finny.js","line":1,"endLine":181,"label":"calculatorInfo + parameterHelp","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/static/finny.js#L1-L181"},{"path":"static/finny.js","line":214,"endLine":286,"label":"alias match + field reader","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/static/finny.js#L214-L286"}],"api":[{"path":"app.py","line":517,"endLine":547,"label":"route + validation","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/app.py#L517-L547"},{"path":"app.py","line":622,"endLine":670,"label":"filter + SSE stream","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/app.py#L622-L670"}],"guard":[{"path":"app.py","line":517,"endLine":522,"label":"session + rate limit","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/app.py#L517-L522"},{"path":"app.py","line":75,"endLine":75,"label":"CSRFProtect(app)","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/app.py#L75"}],"ddg":[{"path":"app.py","line":549,"endLine":613,"label":"DDG search + HTMLParser","href":"https://github.com/patakrishna2006-a11y/Financial-Calculator/blob/6762986282d7559568ef1a69ee576bfd3c622177/app.py#L549-L613"}]}}</script>
     <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"to cycle","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.svg.auto":"SVG · Auto","viewer.export.svg.auto.hint":"Matches host theme","viewer.export.svg.light":"SVG · Light","viewer.export.svg.light.hint":"Always light","viewer.export.svg.dark":"SVG · Dark","viewer.export.svg.dark.hint":"Always dark","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Path: {source} → {target} · {count} step","viewer.export.card.routeSummary.other":"Path: {source} → {target} · {count} steps","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guide.title":"Explore this system","viewer.focus.selectedNodes":"{count} selected nodes","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.facts":"{nodes} · {relationships}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.open":"Open diagram guide","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.verificationScope":"Verified against local Git at the pinned revision. Remote access has not been checked.","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.move":"Move semantic passport. Drag, use arrow keys, or press Home to reset.","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.sourceMarker":"SRC","viewer.passport.beacon.one":"{count} verified source; focus this node to inspect","viewer.passport.beacon.other":"{count} verified sources; focus this node to inspect","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Path","viewer.route.start":"Click where the path starts","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Path","viewer.route.pickTwo":"Click two nodes on the diagram","viewer.route.pickOne":"Click a node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Click a start, then an end. Paths follow the arrows.","viewer.route.destination":"Where does the path from {label} end?","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"Pick two different nodes.","viewer.route.unreachable":"Cannot reach {label} from here","viewer.route.unreachable.detail":"{target} cannot be reached from {source} along the arrows. Pick a highlighted node.","viewer.route.start.instructions":"Next, pick the end. Only nodes you can reach will light up.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest path","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} step","viewer.route.overview.hop.other":"{count} steps","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} reachable node is highlighted. Click it.","viewer.route.destination.count.other":"{count} reachable nodes are highlighted. Click one.","viewer.route.noOutgoing":"No arrows lead out of this node. Clear it and pick another start.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"PATH","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.outline.title":"Node index","viewer.rail.show":"Notes \u0026 index","viewer.rail.controls":"Side panel","viewer.rail.collapse":"Collapse side panel","viewer.rail.bottom":"Move panel below the diagram","viewer.rail.right":"Move panel beside the diagram","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 1090 788" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
-        <title id="archify-diagram-title">FinCalc Pro — System Architecture</title>
-        <desc id="archify-diagram-description">An architecture diagram generated by Archify.</desc>
+      <svg viewBox="0 0 920 760" data-sequence-column-fit="spread" data-reader-fit="intrinsic-height" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="archify-diagram-title">Finny Assistant — Question Routing &amp; Streaming Answer</title>
+        <desc id="archify-diagram-description">A sequence diagram generated by Archify.</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -5013,396 +5013,285 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <!-- Background Grid -->
         <rect width="100%" height="100%" fill="url(#grid)" />
 
-        <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="0" data-composition-frame-label="Flask Application (app.py)" x="450" y="30" width="210" height="600" rx="8" class="c-security-group" stroke-width="1"/>
+        <!-- Time Segments -->
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="segment" data-composition-frame-id="0" x="48" y="158" width="824" height="117" rx="10" class="c-lane" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Client Layer (Jinja2 + Vanilla JS)" x="210" y="70" width="200" height="500" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="segment" data-composition-frame-id="1" x="48" y="285" width="824" height="180" rx="10" class="c-lane" stroke-width="1"/>
 
-        <!-- Connection paths (before components for correct z-order) -->
-        <g data-graph-role="automatic-crossover" style="--step:0">
-          <path data-graph-role="automatic-crossover-underlay" d="M 110 300 L 110 135 Q 110 127 118 127 L 240 127" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="browser" data-edge-to="landing" data-edge-label="GET /" data-edge-key="0" data-edge-id="browser-landing" data-composition-points="110,300;110,127;240,127" data-composition-crossover="halo" data-composition-independent="true" d="M 110 300 L 110 135 Q 110 127 118 127 L 240 127" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="segment" data-composition-frame-id="2" x="48" y="473" width="824" height="72" rx="10" class="c-lane" stroke-width="1"/>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="segment" data-composition-frame-id="3" x="48" y="555" width="824" height="90" rx="10" class="c-lane" stroke-width="1"/>
+
+        <!-- Lifelines -->
+        <path d="M 116.5 142 L 116.5 664" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 258.3 142 L 258.3 664" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 400.1 142 L 400.1 664" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 541.9000000000001 142 L 541.9000000000001 664" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 683.7 142 L 683.7 664" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 825.5 142 L 825.5 664" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+
+        <!-- Activations -->
+        <rect x="253.3" y="172" width="10" height="460" rx="3" class="c-mask"/>
+        <rect x="253.3" y="172" width="10" height="460" rx="3" class="c-frontend" stroke-width="1"/>
+        <rect x="395.1" y="202" width="10" height="34" rx="3" class="c-mask"/>
+        <rect x="395.1" y="202" width="10" height="34" rx="3" class="c-frontend" stroke-width="1"/>
+        <rect x="536.9000000000001" y="330" width="10" height="182" rx="3" class="c-mask"/>
+        <rect x="536.9000000000001" y="330" width="10" height="182" rx="3" class="c-backend" stroke-width="1"/>
+        <rect x="678.7" y="360" width="10" height="32" rx="3" class="c-mask"/>
+        <rect x="678.7" y="360" width="10" height="32" rx="3" class="c-security" stroke-width="1"/>
+        <rect x="820.5" y="418" width="10" height="32" rx="3" class="c-mask"/>
+        <rect x="820.5" y="418" width="10" height="32" rx="3" class="c-external" stroke-width="1"/>
+
+        <!-- Messages -->
+        <g data-edge-from="user" data-edge-to="ui" data-edge-label="type a question" data-edge-key="0" data-edge-id="ask">
+          <path data-composition-edge-from="user" data-composition-edge-to="ui" data-composition-edge-id="ask" data-composition-points="123.5,170;251.3,170" d="M 123.5 170 L 251.3 170" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="131.9" y="150" width="111" height="18" rx="3" class="c-mask"/>
+          <text x="187.4" y="160" class="t-muted" font-size="11" text-anchor="middle">type a question</text>
         </g>
-        <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 180 323 L 208 323 Q 216 323 216 315 L 216 215 Q 216 207 224 207 L 240 207" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="browser" data-edge-to="auth-pages" data-edge-label="GET/POST" data-edge-key="1" data-edge-id="browser-auth" data-composition-points="180,323;216,323;216,207;240,207" data-composition-crossover="halo" data-composition-independent="true" d="M 180 323 L 208 323 Q 216 323 216 315 L 216 215 Q 216 207 224 207 L 240 207" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 180 338.05 L 240 338.05" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="browser" data-edge-to="dashboard" data-edge-label="GET /dashboard" data-edge-key="2" data-edge-id="browser-dashboard" data-composition-points="180,338.05;240,338.05" data-composition-crossover="halo" data-composition-independent="true" d="M 180 338.05 L 240 338.05" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 303 360 L 303 400" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="dashboard" data-edge-to="chartjs" data-edge-label="render" data-edge-key="3" data-edge-id="dashboard-chartjs" data-composition-points="303,360;303,400" data-composition-crossover="halo" data-composition-independent="true" d="M 303 360 L 303 400" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 310 500 L 310 461 Q 310 453 318 453 L 375 453 Q 383 453 383 445 L 383 392 Q 383 384 375 384 L 325 384 Q 317 384 317 376 L 317 360" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="jspdf" data-edge-to="dashboard" data-edge-label="export PDF" data-edge-key="4" data-edge-id="dashboard-jspdf" data-composition-points="310,500;310,453;383,453;383,384;317,384;317,360" data-composition-crossover="halo" data-composition-independent="true" d="M 310 500 L 310 461 Q 310 453 318 453 L 375 453 Q 383 453 383 445 L 383 392 Q 383 384 375 384 L 325 384 Q 317 384 317 376 L 317 360" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 380 330 L 422 330 Q 430 330 430 338 L 430 369 Q 430 377 438 377 L 480 377" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="dashboard" data-edge-to="flask" data-edge-label="POST /calculate" data-edge-key="5" data-edge-id="dashboard-flask" data-composition-points="380,330;430,330;430,377;480,377" data-composition-crossover="halo" data-composition-independent="true" d="M 380 330 L 422 330 Q 430 330 430 338 L 430 369 Q 430 377 438 377 L 480 377" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 310 234 L 310 279 Q 310 287 318 287 L 561 287 Q 569 287 569 295 L 569 340" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="auth-pages" data-edge-to="flask" data-edge-label="form POST" data-edge-key="6" data-edge-id="auth-flask" data-composition-points="310,234;310,287;569,287;569,340" data-composition-crossover="halo" data-composition-independent="true" d="M 310 234 L 310 279 Q 310 287 318 287 L 561 287 Q 569 287 569 295 L 569 340" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:7">
-          <path data-graph-role="automatic-crossover-underlay" d="M 539.95 400 L 539.95 460" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="flask" data-edge-to="calc-engine" data-edge-label="call function" data-edge-key="7" data-edge-id="flask-calc" data-composition-points="539.95,400;539.95,460" data-composition-crossover="halo" data-composition-independent="true" d="M 539.95 400 L 539.95 460" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:8">
-          <path data-graph-role="automatic-crossover-underlay" d="M 630 363 L 720 363" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="flask" data-edge-to="db" data-edge-label="SQLAlchemy" data-edge-key="8" data-edge-id="flask-db" data-composition-points="630,363;720,363" data-composition-crossover="halo" data-composition-independent="true" d="M 630 363 L 720 363" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:9">
-          <path data-graph-role="automatic-crossover-underlay" d="M 630 255 L 720 255" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="rate-limiter" data-edge-to="redis" data-edge-label="INCR + TTL" data-edge-key="9" data-edge-id="rate-limiter-redis" data-composition-points="630,255;720,255" data-composition-crossover="halo" data-composition-independent="true" d="M 630 255 L 720 255" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:10">
-          <path data-graph-role="automatic-crossover-underlay" d="M 555 340 L 555 324 Q 555 316 563 316 L 625 316 Q 633 316 633 324 L 633 528 Q 633 536 625 536 L 563 536 Q 555 536 555 544 L 555 560" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="flask" data-edge-to="sec-log" data-edge-label="log" data-edge-key="10" data-edge-id="flask-seclog" data-composition-points="555,340;555,316;633,316;633,536;555,536;555,560" data-composition-crossover="halo" data-composition-independent="true" d="M 555 340 L 555 324 Q 555 316 563 316 L 625 316 Q 633 316 633 324 L 633 528 Q 633 536 625 536 L 563 536 Q 555 536 555 544 L 555 560" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:11">
-          <path data-graph-role="automatic-crossover-underlay" d="M 630 480 L 900 480" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="calc-engine" data-edge-to="coingecko" data-edge-label="GET prices" data-edge-key="11" data-edge-id="calc-coingecko" data-composition-points="630,480;900,480" data-composition-crossover="halo" data-composition-independent="true" d="M 630 480 L 900 480" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:12">
-          <path data-graph-role="automatic-crossover-underlay" d="M 555 514 L 555 530 Q 555 538 563 538 L 868 538 Q 876 538 876 546 L 876 579 Q 876 587 884 587 L 900 587" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="calc-engine" data-edge-to="currencyapi" data-edge-label="GET USD/INR" data-edge-key="12" data-edge-id="calc-currencyapi" data-composition-points="555,514;555,538;876,538;876,587;900,587" data-composition-crossover="halo" data-composition-independent="true" d="M 555 514 L 555 530 Q 555 538 563 538 L 868 538 Q 876 538 876 546 L 876 579 Q 876 587 884 587 L 900 587" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:13">
-          <path data-graph-role="automatic-crossover-underlay" d="M 630 377 L 701 377 Q 709 377 709 385 L 709 677 Q 709 685 717 685 L 900 685" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="flask" data-edge-to="smtp" data-edge-label="send email" data-edge-key="13" data-edge-id="flask-smtp" data-composition-points="630,377;709,377;709,685;900,685" data-composition-crossover="halo" data-composition-independent="true" d="M 630 377 L 701 377 Q 709 377 709 385 L 709 677 Q 709 685 717 685 L 900 685" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:14">
-          <path data-graph-role="automatic-crossover-underlay" d="M 541 340 L 541 324 Q 541 316 533 316 L 484 316 Q 476 316 476 324 L 476 638 Q 476 646 484 646 L 547 646 Q 555 646 555 654 L 555 670" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="flask" data-edge-to="uploads" data-edge-label="save avatar" data-edge-key="14" data-edge-id="flask-uploads" data-composition-points="541,340;541,316;476,316;476,646;555,646;555,670" data-composition-crossover="halo" data-composition-independent="true" d="M 541 340 L 541 324 Q 541 316 533 316 L 484 316 Q 476 316 476 324 L 476 638 Q 476 646 484 646 L 547 646 Q 555 646 555 654 L 555 670" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
 
-        <!-- Components -->
-        <g id="node-browser" data-node-id="browser" data-node-label="Browser" tabindex="0" role="button" aria-label="Focus Browser, Chrome / Firefox / Safari, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="Chrome / Firefox / Safari" data-node-context="Architecture component">
-          <title>Browser · Chrome / Firefox / Safari · Architecture component</title>
-          <rect x="40" y="300" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="40" y="300" width="140" height="60" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="person" class="semantic-sigil s-external" transform="translate(46 306) scale(0.6875)">
-            <circle cx="8" cy="4.5" r="2.5"/><path d="M3 14v-2a5 5 0 0 1 10 0v2"/>
+        <g data-edge-from="ui" data-edge-to="kb" data-edge-label="match aliases + live panel fields" data-edge-key="1" data-edge-id="match">
+          <path data-composition-edge-from="ui" data-composition-edge-to="kb" data-composition-edge-id="match" data-composition-points="265.3,202;393.1,202" d="M 265.3 202 L 393.1 202" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="214.30000000000007" y="182" width="229.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="329.20000000000005" y="192" class="t-muted" font-size="11" text-anchor="middle">match aliases + live panel fields</text>
+        </g>
+        <text data-detail="fine" x="277.3" y="220" class="t-dim" font-size="7">Longest normalized alias wins; intent detected on the client</text>
+        </g>
+
+        <g data-edge-from="kb" data-edge-to="ui" data-edge-label="instant markdown answer" data-edge-key="2" data-edge-id="instant">
+          <path data-composition-edge-from="kb" data-composition-edge-to="ui" data-composition-edge-id="instant" data-composition-points="393.1,232;265.3,232" d="M 393.1 232 L 265.3 232" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="247.30000000000007" y="212" width="163.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="329.20000000000005" y="222" class="t-muted" font-size="11" text-anchor="middle">instant markdown answer</text>
+        </g>
+        <text data-detail="fine" x="277.3" y="250" class="t-dim" font-size="7">No network call for calculator questions</text>
+        </g>
+
+        <g data-edge-from="ui" data-edge-to="user" data-edge-label="render answer + Open actions" data-edge-key="3" data-edge-id="render-local">
+          <path data-composition-edge-from="ui" data-composition-edge-to="user" data-composition-edge-id="render-local" data-composition-points="251.3,260;123.5,260" d="M 251.3 260 L 123.5 260" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="89.00000000000001" y="240" width="196.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="187.4" y="250" class="t-muted" font-size="11" text-anchor="middle">render answer + Open actions</text>
+        </g>
+        </g>
+
+        <g data-edge-from="user" data-edge-to="ui" data-edge-label="general question (no match)" data-edge-key="4" data-edge-id="general">
+          <path data-composition-edge-from="user" data-composition-edge-to="ui" data-composition-edge-id="general" data-composition-points="123.5,300;251.3,300" d="M 123.5 300 L 251.3 300" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="92.30000000000001" y="280" width="190.2" height="18" rx="3" class="c-mask"/>
+          <text x="187.4" y="290" class="t-muted" font-size="11" text-anchor="middle">general question (no match)</text>
+        </g>
+        </g>
+
+        <g data-edge-from="ui" data-edge-to="api" data-edge-label="POST /api/assistant/chat" data-edge-key="5" data-edge-id="post">
+          <path data-composition-edge-from="ui" data-composition-edge-to="api" data-composition-edge-id="post" data-composition-points="265.3,330;534.9000000000001,330" d="M 265.3 330 L 534.9000000000001 330" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <g data-detail="context">
+          <rect x="314.90000000000003" y="310" width="170.39999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="400.1" y="320" class="t-edge-emphasis" font-size="11" text-anchor="middle">POST /api/assistant/chat</text>
+        </g>
+        <text data-detail="fine" x="277.3" y="348" class="t-dim" font-size="7">CSRF header + last 16 chat messages</text>
+        </g>
+
+        <g data-edge-from="api" data-edge-to="guard" data-edge-label="session · CSRF · 10/min · 100/day" data-edge-key="6" data-edge-id="check">
+          <path data-composition-edge-from="api" data-composition-edge-to="guard" data-composition-edge-id="check" data-composition-points="548.9000000000001,360;676.7,360" d="M 548.9000000000001 360 L 676.7 360" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
+        <g data-detail="context">
+          <rect x="497.9000000000001" y="340" width="229.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="612.8000000000001" y="350" class="t-edge-security" font-size="11" text-anchor="middle">session · CSRF · 10/min · 100/day</text>
+        </g>
+        </g>
+
+        <g data-edge-from="guard" data-edge-to="api" data-edge-label="allowed" data-edge-key="7" data-edge-id="allowed">
+          <path data-composition-edge-from="guard" data-composition-edge-to="api" data-composition-edge-id="allowed" data-composition-points="676.7,388;548.9000000000001,388" d="M 676.7 388 L 548.9000000000001 388" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="583.7" y="368" width="58.199999999999996" height="18" rx="3" class="c-mask"/>
+          <text x="612.8000000000001" y="378" class="t-muted" font-size="11" text-anchor="middle">allowed</text>
+        </g>
+        </g>
+
+        <g data-edge-from="api" data-edge-to="ddg" data-edge-label="GET /html?q= message (≤500 chars)" data-edge-key="8" data-edge-id="search">
+          <path data-composition-edge-from="api" data-composition-edge-to="ddg" data-composition-edge-id="search" data-composition-points="548.9000000000001,418;818.5,418" d="M 548.9000000000001 418 L 818.5 418" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <g data-detail="context">
+          <rect x="568.8000000000001" y="398" width="229.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="683.7" y="408" class="t-edge-emphasis" font-size="11" text-anchor="middle">GET /html?q= message (≤500 chars)</text>
+        </g>
+        </g>
+
+        <g data-edge-from="ddg" data-edge-to="api" data-edge-label="HTML results" data-edge-key="9" data-edge-id="results">
+          <path data-composition-edge-from="ddg" data-composition-edge-to="api" data-composition-edge-id="results" data-composition-points="818.5,446;548.9000000000001,446" d="M 818.5 446 L 548.9000000000001 446" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="638.1" y="426" width="91.19999999999999" height="18" rx="3" class="c-mask"/>
+          <text x="683.7" y="436" class="t-muted" font-size="11" text-anchor="middle">HTML results</text>
+        </g>
+        <text data-detail="fine" x="560.9000000000001" y="464" class="t-dim" font-size="7">HTMLParser extracts titles + snippets; https-only, top 2 kept</text>
+        </g>
+
+        <g data-edge-from="api" data-edge-to="ui" data-edge-label="event: sources" data-edge-key="10" data-edge-id="sources">
+          <path data-composition-edge-from="api" data-composition-edge-to="ui" data-composition-edge-id="sources" data-composition-points="534.9000000000001,478;265.3,478" d="M 534.9000000000001 478 L 265.3 478" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+        <g data-detail="context">
+          <rect x="347.90000000000003" y="458" width="104.39999999999999" height="18" rx="3" class="c-mask"/>
+          <text x="400.1" y="468" class="t-edge-dashed" font-size="11" text-anchor="middle">event: sources</text>
+        </g>
+        </g>
+
+        <g data-edge-from="api" data-edge-to="ui" data-edge-label="event: delta {text} × n" data-edge-key="11" data-edge-id="delta">
+          <path data-composition-edge-from="api" data-composition-edge-to="ui" data-composition-edge-id="delta" data-composition-points="534.9000000000001,506;265.3,506" d="M 534.9000000000001 506 L 265.3 506" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+        <g data-detail="context">
+          <rect x="318.20000000000005" y="486" width="163.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="400.1" y="496" class="t-edge-dashed" font-size="11" text-anchor="middle">event: delta {text} × n</text>
+        </g>
+        <text data-detail="fine" x="277.3" y="524" class="t-dim" font-size="7">Rendered live as markdown; robot waves on each delta</text>
+        </g>
+
+        <g data-edge-from="ui" data-edge-to="user" data-edge-label="answer + source links" data-edge-key="12" data-edge-id="done">
+          <path data-composition-edge-from="ui" data-composition-edge-to="user" data-composition-edge-id="done" data-composition-points="251.3,534;123.5,534" d="M 251.3 534 L 123.5 534" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="112.10000000000001" y="514" width="150.6" height="18" rx="3" class="c-mask"/>
+          <text x="187.4" y="524" class="t-muted" font-size="11" text-anchor="middle">answer + source links</text>
+        </g>
+        </g>
+
+        <g data-edge-from="user" data-edge-to="ui" data-edge-label="click Stop" data-edge-key="13" data-edge-id="stop-click">
+          <path data-composition-edge-from="user" data-composition-edge-to="ui" data-composition-edge-id="stop-click" data-composition-points="123.5,572;251.3,572" d="M 123.5 572 L 251.3 572" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="148.4" y="552" width="78" height="18" rx="3" class="c-mask"/>
+          <text x="187.4" y="562" class="t-muted" font-size="11" text-anchor="middle">click Stop</text>
+        </g>
+        </g>
+
+        <g data-edge-from="ui" data-edge-to="api" data-edge-label="AbortController.abort()" data-edge-key="14" data-edge-id="abort">
+          <path data-composition-edge-from="ui" data-composition-edge-to="api" data-composition-edge-id="abort" data-composition-points="265.3,600;534.9000000000001,600" d="M 265.3 600 L 534.9000000000001 600" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+        <g data-detail="context">
+          <rect x="318.20000000000005" y="580" width="163.79999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="400.1" y="590" class="t-edge-dashed" font-size="11" text-anchor="middle">AbortController.abort()</text>
+        </g>
+        </g>
+
+        <g data-edge-from="ui" data-edge-to="user" data-edge-label="stopped; partial text kept" data-edge-key="15" data-edge-id="stopped">
+          <path data-composition-edge-from="ui" data-composition-edge-to="user" data-composition-edge-id="stopped" data-composition-points="251.3,628;123.5,628" d="M 251.3 628 L 123.5 628" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="95.60000000000001" y="608" width="183.6" height="18" rx="3" class="c-mask"/>
+          <text x="187.4" y="618" class="t-muted" font-size="11" text-anchor="middle">stopped; partial text kept</text>
+        </g>
+        </g>
+
+        <!-- Segment Labels -->
+        <g data-graph-role="segment-label" data-segment-id="0">
+          <rect x="56" y="136" width="71.2" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="149" class="t-dim" font-size="9" font-weight="600">Ask locally</text>
+        </g>
+        <g data-graph-role="segment-label" data-segment-id="1">
+          <rect x="56" y="219" width="118" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="232" class="t-dim" font-size="9" font-weight="600">Guarded web fallback</text>
+        </g>
+        <g data-graph-role="segment-label" data-segment-id="2">
+          <rect x="56" y="451" width="102.4" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="464" class="t-dim" font-size="9" font-weight="600">Stream the answer</text>
+        </g>
+        <g data-graph-role="segment-label" data-segment-id="3">
+          <rect x="56" y="489" width="86.8" height="18" rx="3" class="c-mask"/>
+          <text x="62" y="502" class="t-dim" font-size="9" font-weight="600">Stop on demand</text>
+        </g>
+
+        <!-- Participants -->
+        <g id="node-user" data-node-id="user" data-node-label="User" tabindex="0" role="button" aria-label="Focus User, dashboard session, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="dashboard session" data-node-context="Sequence participant">
+          <title>User · dashboard session · Sequence participant</title>
+          <rect x="62" y="72" width="109" height="60" rx="6" class="c-mask"/>
+          <rect x="62" y="72" width="109" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(68 78) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="110" y="328" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Browser</text>
-        <text data-detail="context" x="110" y="344" class="t-muted" font-size="8.8" text-anchor="middle">Chrome / Firefox / Safari</text>
+          <text data-node-label="" data-detail-anchor="" x="116.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">User</text>
+          <text data-detail="context" x="116.5" y="122" class="t-muted" font-size="7" text-anchor="middle">dashboard session</text>
         </g>
 
-        <g id="node-landing" data-node-id="landing" data-node-label="Landing Page" tabindex="0" role="button" aria-label="Focus Landing Page, landing.html, Client Layer (Jinja2 + Vanilla JS)" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="landing.html" data-node-context="Client Layer (Jinja2 + Vanilla JS)">
-          <title>Landing Page · landing.html · Client Layer (Jinja2 + Vanilla JS)</title>
-          <rect x="240" y="100" width="140" height="54" rx="6" class="c-mask"/>
-          <rect x="240" y="100" width="140" height="54" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(246 106) scale(0.6875)">
+        <g id="node-ui" data-node-id="ui" data-node-label="Finny Panel" tabindex="0" role="button" aria-label="Focus Finny Panel, chat + markdown render, Sequence participant" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="chat + markdown render" data-node-context="Sequence participant">
+          <title>Finny Panel · chat + markdown render · Sequence participant</title>
+          <rect x="203.8" y="72" width="109" height="60" rx="6" class="c-mask"/>
+          <rect x="203.8" y="72" width="109" height="60" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(209.8 78) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="310" y="125" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Landing Page</text>
-        <text data-detail="context" x="310" y="141" class="t-muted" font-size="9" text-anchor="middle">landing.html</text>
+          <text data-node-label="" data-detail-anchor="" x="258.3" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Finny Panel</text>
+          <text data-detail="context" x="258.3" y="122" class="t-muted" font-size="7" text-anchor="middle">chat + markdown render</text>
         </g>
 
-        <g id="node-auth-pages" data-node-id="auth-pages" data-node-label="Auth Pages" tabindex="0" role="button" aria-label="Focus Auth Pages, login / register / reset, Client Layer (Jinja2 + Vanilla JS)" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="login / register / reset" data-node-context="Client Layer (Jinja2 + Vanilla JS)">
-          <title>Auth Pages · login / register / reset · Client Layer (Jinja2 + Vanilla JS)</title>
-          <rect x="240" y="180" width="140" height="54" rx="6" class="c-mask"/>
-          <rect x="240" y="180" width="140" height="54" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(246 186) scale(0.6875)">
+        <g id="node-kb" data-node-id="kb" data-node-label="Local Knowledge" tabindex="0" role="button" aria-label="Focus Local Knowledge, 26 calcs · 47 params, Sequence participant" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="26 calcs · 47 params" data-node-context="Sequence participant">
+          <title>Local Knowledge · 26 calcs · 47 params · Sequence participant</title>
+          <rect x="345.6" y="72" width="109" height="60" rx="6" class="c-mask"/>
+          <rect x="345.6" y="72" width="109" height="60" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(351.6 78) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="310" y="205" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Auth Pages</text>
-        <text data-detail="context" x="310" y="221" class="t-muted" font-size="9" text-anchor="middle">login / register / reset</text>
+          <text data-node-label="" data-detail-anchor="" x="400.1" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Local Knowledge</text>
+          <text data-detail="context" x="400.1" y="122" class="t-muted" font-size="7" text-anchor="middle">26 calcs · 47 params</text>
         </g>
 
-        <g id="node-dashboard" data-node-id="dashboard" data-node-label="Dashboard SPA" tabindex="0" role="button" aria-label="Focus Dashboard SPA, index.html · 26 panels, Client Layer (Jinja2 + Vanilla JS)" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="index.html · 26 panels" data-node-tag="~3800 lines JS" data-node-context="Client Layer (Jinja2 + Vanilla JS)">
-          <title>Dashboard SPA · index.html · 26 panels · Client Layer (Jinja2 + Vanilla JS) · ~3800 lines JS</title>
-          <rect x="240" y="300" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="240" y="300" width="140" height="60" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(246 306) scale(0.6875)">
-            <rect x="2" y="3" width="12" height="10" rx="2"/>
-            <path d="M2 6.5h12"/>
-            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
-            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="310" y="328" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Dashboard SPA</text>
-        <text data-detail="context" x="310" y="344" class="t-muted" font-size="9" text-anchor="middle">index.html · 26 panels</text>
-        <text data-detail="fine" x="310" y="352" class="t-frontend" font-size="7" text-anchor="middle">~3800 lines JS</text>
-        </g>
-
-        <g id="node-chartjs" data-node-id="chartjs" data-node-label="Chart.js 4.4.1" tabindex="0" role="button" aria-label="Focus Chart.js 4.4.1, CDN jsDelivr, Client Layer (Jinja2 + Vanilla JS)" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="CDN jsDelivr" data-node-tag="~17 panels" data-node-context="Client Layer (Jinja2 + Vanilla JS)">
-          <title>Chart.js 4.4.1 · CDN jsDelivr · Client Layer (Jinja2 + Vanilla JS) · ~17 panels</title>
-          <rect x="240" y="400" width="140" height="50" rx="6" class="c-mask"/>
-          <rect x="240" y="400" width="140" height="50" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(246 406) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="310" y="423" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Chart.js 4.4.1</text>
-        <text data-detail="context" x="310" y="439" class="t-muted" font-size="9" text-anchor="middle">CDN jsDelivr</text>
-        <text data-detail="fine" x="310" y="442" class="t-cloud" font-size="7" text-anchor="middle">~17 panels</text>
-        </g>
-
-        <g id="node-jspdf" data-node-id="jspdf" data-node-label="jsPDF + html2canvas" tabindex="0" role="button" aria-label="Focus jsPDF + html2canvas, PDF export, Client Layer (Jinja2 + Vanilla JS)" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="PDF export" data-node-context="Client Layer (Jinja2 + Vanilla JS)">
-          <title>jsPDF + html2canvas · PDF export · Client Layer (Jinja2 + Vanilla JS)</title>
-          <rect x="240" y="500" width="140" height="50" rx="6" class="c-mask"/>
-          <rect x="240" y="500" width="140" height="50" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(246 506) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="310" y="523" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">jsPDF + html2canvas</text>
-        <text data-detail="context" x="310" y="539" class="t-muted" font-size="9" text-anchor="middle">PDF export</text>
-        </g>
-
-        <g id="node-sec-headers" data-node-id="sec-headers" data-node-label="Security Headers" tabindex="0" role="button" aria-label="Focus Security Headers, CSP · HSTS · COOP · CORP, Flask Application (app.py)" aria-pressed="false" data-node-kind="security" data-node-sublabel="CSP · HSTS · COOP · CORP" data-node-context="Flask Application (app.py)">
-          <title>Security Headers · CSP · HSTS · COOP · CORP · Flask Application (app.py)</title>
-          <rect x="480" y="60" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="480" y="60" width="150" height="50" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(486 66) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="83" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Security Headers</text>
-        <text data-detail="context" x="555" y="99" class="t-muted" font-size="9" text-anchor="middle">CSP · HSTS · COOP · CORP</text>
-        </g>
-
-        <g id="node-csrf" data-node-id="csrf" data-node-label="Flask-WTF CSRF" tabindex="0" role="button" aria-label="Focus Flask-WTF CSRF, global · 12hr tokens, Flask Application (app.py)" aria-pressed="false" data-node-kind="security" data-node-sublabel="global · 12hr tokens" data-node-context="Flask Application (app.py)">
-          <title>Flask-WTF CSRF · global · 12hr tokens · Flask Application (app.py)</title>
-          <rect x="480" y="140" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="480" y="140" width="150" height="50" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(486 146) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="163" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Flask-WTF CSRF</text>
-        <text data-detail="context" x="555" y="179" class="t-muted" font-size="9" text-anchor="middle">global · 12hr tokens</text>
-        </g>
-
-        <g id="node-rate-limiter" data-node-id="rate-limiter" data-node-label="Flask-Limiter" tabindex="0" role="button" aria-label="Focus Flask-Limiter, per-IP · 12 limits, Flask Application (app.py)" aria-pressed="false" data-node-kind="security" data-node-sublabel="per-IP · 12 limits" data-node-context="Flask Application (app.py)">
-          <title>Flask-Limiter · per-IP · 12 limits · Flask Application (app.py)</title>
-          <rect x="480" y="230" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="480" y="230" width="150" height="50" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(486 236) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="253" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Flask-Limiter</text>
-        <text data-detail="context" x="555" y="269" class="t-muted" font-size="9" text-anchor="middle">per-IP · 12 limits</text>
-        </g>
-
-        <g id="node-flask" data-node-id="flask" data-node-label="Flask App" tabindex="0" role="button" aria-label="Focus Flask App, app.py · 18 routes, Flask Application (app.py)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="app.py · 18 routes" data-node-tag="Gunicorn (prod)" data-node-context="Flask Application (app.py)">
-          <title>Flask App · app.py · 18 routes · Flask Application (app.py) · Gunicorn (prod)</title>
-          <rect x="480" y="340" width="150" height="60" rx="6" class="c-mask"/>
-          <rect x="480" y="340" width="150" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(486 346) scale(0.6875)">
+        <g id="node-api" data-node-id="api" data-node-label="Flask API" tabindex="0" role="button" aria-label="Focus Flask API, POST /api/assistant/chat, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="POST /api/assistant/chat" data-node-context="Sequence participant">
+          <title>Flask API · POST /api/assistant/chat · Sequence participant</title>
+          <rect x="487.4000000000001" y="72" width="109" height="60" rx="6" class="c-mask"/>
+          <rect x="487.4000000000001" y="72" width="109" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(493.4000000000001 78) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="368" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Flask App</text>
-        <text data-detail="context" x="555" y="384" class="t-muted" font-size="9" text-anchor="middle">app.py · 18 routes</text>
-        <text data-detail="fine" x="555" y="392" class="t-backend" font-size="7" text-anchor="middle">Gunicorn (prod)</text>
+          <text data-node-label="" data-detail-anchor="" x="541.9000000000001" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Flask API</text>
+          <text data-detail="context" x="541.9000000000001" y="122" class="t-muted" font-size="7" text-anchor="middle">POST /api/assistant/chat</text>
         </g>
 
-        <g id="node-calc-engine" data-node-id="calc-engine" data-node-label="Calculator Engine" tabindex="0" role="button" aria-label="Focus Calculator Engine, calculator.py · 27 functions, Flask Application (app.py)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="calculator.py · 27 functions" data-node-tag="zero dependencies" data-node-context="Flask Application (app.py)">
-          <title>Calculator Engine · calculator.py · 27 functions · Flask Application (app.py) · zero dependencies</title>
-          <rect x="480" y="460" width="150" height="54" rx="6" class="c-mask"/>
-          <rect x="480" y="460" width="150" height="54" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(486 466) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-guard" data-node-id="guard" data-node-label="Request Guard" tabindex="0" role="button" aria-label="Focus Request Guard, session · CSRF · limits, Sequence participant" aria-pressed="false" data-node-kind="security" data-node-sublabel="session · CSRF · limits" data-node-context="Sequence participant">
+          <title>Request Guard · session · CSRF · limits · Sequence participant</title>
+          <rect x="629.2" y="72" width="109" height="60" rx="6" class="c-mask"/>
+          <rect x="629.2" y="72" width="109" height="60" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(635.2 78) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="485" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Calculator Engine</text>
-        <text data-detail="context" x="555" y="501" class="t-muted" font-size="8.4" text-anchor="middle">calculator.py · 27 functions</text>
-        <text data-detail="fine" x="555" y="506" class="t-backend" font-size="7" text-anchor="middle">zero dependencies</text>
+          <text data-node-label="" data-detail-anchor="" x="683.7" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Request Guard</text>
+          <text data-detail="context" x="683.7" y="122" class="t-muted" font-size="7" text-anchor="middle">session · CSRF · limits</text>
         </g>
 
-        <g id="node-sec-log" data-node-id="sec-log" data-node-label="security.log" tabindex="0" role="button" aria-label="Focus security.log, 10MB rotation × 10, Flask Application (app.py)" aria-pressed="false" data-node-kind="database" data-node-sublabel="10MB rotation × 10" data-node-context="Flask Application (app.py)">
-          <title>security.log · 10MB rotation × 10 · Flask Application (app.py)</title>
-          <rect x="480" y="560" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="480" y="560" width="150" height="50" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(486 566) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="583" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">security.log</text>
-        <text data-detail="context" x="555" y="599" class="t-muted" font-size="9" text-anchor="middle">10MB rotation × 10</text>
-        </g>
-
-        <g id="node-redis" data-node-id="redis" data-node-label="Redis" tabindex="0" role="button" aria-label="Focus Redis, rate-limit store (prod), Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="rate-limit store (prod)" data-node-context="Architecture component">
-          <title>Redis · rate-limit store (prod) · Architecture component</title>
-          <rect x="720" y="230" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="720" y="230" width="150" height="50" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(726 236) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="795" y="253" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Redis</text>
-        <text data-detail="context" x="795" y="269" class="t-muted" font-size="9" text-anchor="middle">rate-limit store (prod)</text>
-        </g>
-
-        <g id="node-db" data-node-id="db" data-node-label="Database" tabindex="0" role="button" aria-label="Focus Database, SQLite / PostgreSQL, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="SQLite / PostgreSQL" data-node-tag="SQLAlchemy ORM" data-node-context="Architecture component">
-          <title>Database · SQLite / PostgreSQL · Architecture component · SQLAlchemy ORM</title>
-          <rect x="720" y="340" width="150" height="54" rx="6" class="c-mask"/>
-          <rect x="720" y="340" width="150" height="54" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(726 346) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="795" y="365" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Database</text>
-        <text data-detail="context" x="795" y="381" class="t-muted" font-size="9" text-anchor="middle">SQLite / PostgreSQL</text>
-        <text data-detail="fine" x="795" y="386" class="t-database" font-size="7" text-anchor="middle">SQLAlchemy ORM</text>
-        </g>
-
-        <g id="node-coingecko" data-node-id="coingecko" data-node-label="CoinGecko API" tabindex="0" role="button" aria-label="Focus CoinGecko API, 100 coins · 30s cache, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="100 coins · 30s cache" data-node-context="Architecture component">
-          <title>CoinGecko API · 100 coins · 30s cache · Architecture component</title>
-          <rect x="900" y="460" width="150" height="54" rx="6" class="c-mask"/>
-          <rect x="900" y="460" width="150" height="54" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(906 466) scale(0.6875)">
+        <g id="node-ddg" data-node-id="ddg" data-node-label="DuckDuckGo" tabindex="0" role="button" aria-label="Focus DuckDuckGo, html.duckduckgo.com/html, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="html.duckduckgo.com/html" data-node-context="Sequence participant">
+          <title>DuckDuckGo · html.duckduckgo.com/html · Sequence participant</title>
+          <rect x="771" y="72" width="109" height="60" rx="6" class="c-mask"/>
+          <rect x="771" y="72" width="109" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(777 78) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="975" y="485" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CoinGecko API</text>
-        <text data-detail="context" x="975" y="501" class="t-muted" font-size="9" text-anchor="middle">100 coins · 30s cache</text>
-        </g>
-
-        <g id="node-currencyapi" data-node-id="currencyapi" data-node-label="CurrencyAPI" tabindex="0" role="button" aria-label="Focus CurrencyAPI, USD/INR · 60s cache, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="USD/INR · 60s cache" data-node-context="Architecture component">
-          <title>CurrencyAPI · USD/INR · 60s cache · Architecture component</title>
-          <rect x="900" y="560" width="150" height="54" rx="6" class="c-mask"/>
-          <rect x="900" y="560" width="150" height="54" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(906 566) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="975" y="585" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CurrencyAPI</text>
-        <text data-detail="context" x="975" y="601" class="t-muted" font-size="9" text-anchor="middle">USD/INR · 60s cache</text>
-        </g>
-
-        <g id="node-smtp" data-node-id="smtp" data-node-label="SMTP Server" tabindex="0" role="button" aria-label="Focus SMTP Server, Flask-Mail · TLS, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="Flask-Mail · TLS" data-node-context="Architecture component">
-          <title>SMTP Server · Flask-Mail · TLS · Architecture component</title>
-          <rect x="900" y="660" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="900" y="660" width="150" height="50" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(906 666) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="975" y="683" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SMTP Server</text>
-        <text data-detail="context" x="975" y="699" class="t-muted" font-size="9" text-anchor="middle">Flask-Mail · TLS</text>
-        </g>
-
-        <g id="node-uploads" data-node-id="uploads" data-node-label="File Storage" tabindex="0" role="button" aria-label="Focus File Storage, uploads/profiles/, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="uploads/profiles/" data-node-tag="magic-byte validated" data-node-context="Architecture component">
-          <title>File Storage · uploads/profiles/ · Architecture component · magic-byte validated</title>
-          <rect x="480" y="670" width="150" height="50" rx="6" class="c-mask"/>
-          <rect x="480" y="670" width="150" height="50" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(486 676) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555" y="693" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">File Storage</text>
-        <text data-detail="context" x="555" y="709" class="t-muted" font-size="9" text-anchor="middle">uploads/profiles/</text>
-        <text data-detail="fine" x="555" y="712" class="t-database" font-size="7" text-anchor="middle">magic-byte validated</text>
-        </g>
-
-        <!-- Connection labels -->
-        <g data-detail="context" data-edge-from="browser" data-edge-to="landing" data-edge-label="GET /" data-edge-key="0" data-edge-id="browser-landing">
-          <rect x="158" y="107" width="34" height="14" rx="3" class="c-mask"/>
-          <text x="175" y="117" class="t-edge-default" font-size="8" text-anchor="middle">GET /</text>
-        </g>
-        <g data-detail="context" data-edge-from="browser" data-edge-to="auth-pages" data-edge-label="GET/POST" data-edge-key="1" data-edge-id="browser-auth">
-          <rect x="191.8" y="245" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="216" y="255" class="t-edge-default" font-size="8" text-anchor="middle">GET/POST</text>
-        </g>
-        <g data-detail="context" data-edge-from="browser" data-edge-to="dashboard" data-edge-label="GET /dashboard" data-edge-key="2" data-edge-id="browser-dashboard">
-          <rect x="171.4" y="366.05" width="77.2" height="14" rx="3" class="c-mask"/>
-          <text x="210" y="376.05" class="t-edge-emphasis" font-size="8" text-anchor="middle">GET /dashboard</text>
-        </g>
-        <g data-detail="context" data-edge-from="dashboard" data-edge-to="chartjs" data-edge-label="render" data-edge-key="3" data-edge-id="dashboard-chartjs">
-          <rect x="258.20000000000005" y="373" width="38.8" height="14" rx="3" class="c-mask"/>
-          <text x="277.6" y="383" class="t-edge-dashed" font-size="8" text-anchor="middle">render</text>
-        </g>
-        <g data-detail="context" data-edge-from="jspdf" data-edge-to="dashboard" data-edge-label="export PDF" data-edge-key="4" data-edge-id="dashboard-jspdf">
-          <rect x="246" y="469.5" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="275" y="479.5" class="t-edge-dashed" font-size="8" text-anchor="middle">export PDF</text>
-        </g>
-        <g data-detail="context" data-edge-from="dashboard" data-edge-to="flask" data-edge-label="POST /calculate" data-edge-key="5" data-edge-id="dashboard-flask">
-          <rect x="389" y="365.5" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="430" y="375.5" class="t-edge-emphasis" font-size="8" text-anchor="middle">POST /calculate</text>
-        </g>
-        <g data-detail="context" data-edge-from="auth-pages" data-edge-to="flask" data-edge-label="form POST" data-edge-key="6" data-edge-id="auth-flask">
-          <rect x="412.9" y="267" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
-          <text x="439.5" y="277" class="t-edge-default" font-size="8" text-anchor="middle">form POST</text>
-        </g>
-        <g data-detail="context" data-edge-from="flask" data-edge-to="calc-engine" data-edge-label="call function" data-edge-key="7" data-edge-id="flask-calc">
-          <rect x="503.75000000000006" y="404" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="539.95" y="414" class="t-edge-emphasis" font-size="8" text-anchor="middle">call function</text>
-        </g>
-        <g data-detail="context" data-edge-from="flask" data-edge-to="db" data-edge-label="SQLAlchemy" data-edge-key="8" data-edge-id="flask-db">
-          <rect x="646" y="343" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="675" y="353" class="t-edge-default" font-size="8" text-anchor="middle">SQLAlchemy</text>
-        </g>
-        <g data-detail="context" data-edge-from="rate-limiter" data-edge-to="redis" data-edge-label="INCR + TTL" data-edge-key="9" data-edge-id="rate-limiter-redis">
-          <rect x="646" y="235" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="675" y="245" class="t-edge-default" font-size="8" text-anchor="middle">INCR + TTL</text>
-        </g>
-        <g data-detail="context" data-edge-from="flask" data-edge-to="sec-log" data-edge-label="log" data-edge-key="10" data-edge-id="flask-seclog">
-          <rect x="579" y="296" width="30" height="14" rx="3" class="c-mask"/>
-          <text x="594" y="306" class="t-edge-dashed" font-size="8" text-anchor="middle">log</text>
-        </g>
-        <g data-detail="context" data-edge-from="calc-engine" data-edge-to="coingecko" data-edge-label="GET prices" data-edge-key="11" data-edge-id="calc-coingecko">
-          <rect x="736" y="460" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="765" y="470" class="t-edge-dashed" font-size="8" text-anchor="middle">GET prices</text>
-        </g>
-        <g data-detail="context" data-edge-from="calc-engine" data-edge-to="currencyapi" data-edge-label="GET USD/INR" data-edge-key="12" data-edge-id="calc-currencyapi">
-          <rect x="764.35" y="518" width="62.8" height="14" rx="3" class="c-mask"/>
-          <text x="795.75" y="528" class="t-edge-dashed" font-size="8" text-anchor="middle">GET USD/INR</text>
-        </g>
-        <g data-detail="context" data-edge-from="flask" data-edge-to="smtp" data-edge-label="send email" data-edge-key="13" data-edge-id="flask-smtp">
-          <rect x="680" y="511" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="709" y="521" class="t-edge-dashed" font-size="8" text-anchor="middle">send email</text>
-        </g>
-        <g data-detail="context" data-edge-from="flask" data-edge-to="uploads" data-edge-label="save avatar" data-edge-key="14" data-edge-id="flask-uploads">
-          <rect x="477.1" y="296" width="62.8" height="14" rx="3" class="c-mask"/>
-          <text x="508.5" y="306" class="t-edge-default" font-size="8" text-anchor="middle">save avatar</text>
-        </g>
-
-        <!-- Boundary labels (foreground masks keep routes out of titles) -->
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="security-group" data-composition-frame-label="Flask Application (app.py)">
-          <rect data-graph-role="structural-frame-label-mask" x="454" y="40" width="150.4" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="458" y="53" class="t-security" font-size="9" font-weight="600">Flask Application (app.py)</text>
-        </g>
-
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Client Layer (Jinja2 + Vanilla JS)">
-          <rect data-graph-role="structural-frame-label-mask" x="214" y="80" width="192" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="218" y="92.92156862745098" class="t-cloud" font-size="8.92156862745098" font-weight="600">Client Layer (Jinja2 + Vanilla JS)</text>
+          <text data-node-label="" data-detail-anchor="" x="825.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">DuckDuckGo</text>
+          <text data-detail="context" x="825.5" y="122" class="t-muted" font-size="7" text-anchor="middle">html.duckduckgo.com/html</text>
         </g>
 
         <!-- Legend -->
-        <g data-legend="" data-legend-bridge="">
-          <text x="40" y="752" class="t-primary" font-size="12" font-weight="650">Legend</text>
-          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="772" data-legend-width="83">
-            <rect x="40" y="763" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
-            <text x="62" y="772" class="t-muted" font-size="10" font-weight="500">Frontend</text>
+        <g data-legend="">
+          <text x="40" y="686" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="emphasis" data-legend-x="40" data-legend-baseline="706" data-legend-width="103">
+            <path d="M 40 703 L 74 703" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+            <text x="83" y="706" class="t-muted" font-size="10" font-weight="500">main request</text>
           </g>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="145" data-legend-baseline="772" data-legend-width="78">
-            <rect x="145" y="763" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
-            <text x="167" y="772" class="t-muted" font-size="10" font-weight="500">Backend</text>
+          <g data-legend-semantic-kind="return" data-legend-x="165" data-legend-baseline="706" data-legend-width="73">
+            <path d="M 165 703 L 199 703" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+            <text x="208" y="706" class="t-muted" font-size="10" font-weight="500">return</text>
           </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="245" data-legend-baseline="772" data-legend-width="83">
-            <rect x="245" y="763" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
-            <text x="267" y="772" class="t-muted" font-size="10" font-weight="500">Database</text>
+          <g data-legend-semantic-kind="security" data-legend-x="260" data-legend-baseline="706" data-legend-width="83">
+            <path d="M 260 703 L 294 703" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
+            <text x="303" y="706" class="t-muted" font-size="10" font-weight="500">security</text>
           </g>
-          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="Cloud" data-legend-x="350" data-legend-baseline="772" data-legend-width="68">
-            <rect x="350" y="763" width="16" height="10" rx="2.5" class="c-cloud" stroke-width="1"/>
-            <text x="372" y="772" class="t-muted" font-size="10" font-weight="500">Cloud</text>
+          <g data-legend-semantic-kind="dashed" data-legend-x="365" data-legend-baseline="706" data-legend-width="98">
+            <path d="M 365 703 L 399 703" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
+            <text x="408" y="706" class="t-muted" font-size="10" font-weight="500">async trace</text>
           </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="440" data-legend-baseline="772" data-legend-width="83">
-            <rect x="440" y="763" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
-            <text x="462" y="772" class="t-muted" font-size="10" font-weight="500">Security</text>
-          </g>
-          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="545" data-legend-baseline="772" data-legend-width="83">
-            <rect x="545" y="763" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
-            <text x="567" y="772" class="t-muted" font-size="10" font-weight="500">External</text>
+          <g data-legend-semantic-kind="default" data-legend-x="485" data-legend-baseline="706" data-legend-width="78">
+            <path d="M 485 703 L 519 703" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+            <text x="528" y="706" class="t-muted" font-size="10" font-weight="500">message</text>
           </g>
         </g>
       </svg>
@@ -5583,53 +5472,37 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     <div class="cards">
       <div class="card">
         <div class="card-header">
-          <div class="card-dot cyan"></div>
-          <h3>Client Layer</h3>
-        </div>
-        <ul>
-          <li>Landing + auth pages: server-rendered Jinja2 (no JS required)</li>
-          <li>Dashboard SPA: 26 calculator panels with ~3800 lines inline JS</li>
-          <li>Chart.js on ~17 panels, jsPDF export on 25 (crypto is copy-only)</li>
-          <li>Indian number formatting (₹ lakh/crore) in inputs and outputs</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>Application Layer</h3>
+          <h3>Instant Local Answers</h3>
         </div>
         <ul>
-          <li>Flask monolith: 18 routes in app.py (~1700 lines)</li>
-          <li>Calculator engine: 27 pure functions, zero dependencies</li>
-          <li>Session auth (HttpOnly, SameSite=Lax, 24hr) + Flask-WTF CSRF</li>
-          <li>Per-IP rate limiting via Flask-Limiter (12 endpoint limits)</li>
+          <li>Calculator questions are matched and answered entirely in the browser</li>
+          <li>Aliases plus live panel DOM labels drive the match, so new calculators inherit help</li>
+          <li>Markdown renders after escapeHtml, keeping user-entered text inert</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-dot rose"></div>
-          <h3>Security (18/18 PASS)</h3>
+          <div class="card-dot violet"></div>
+          <h3>Guarded Fallback</h3>
         </div>
         <ul>
-          <li>CSP, HSTS, X-Frame-Options DENY, COOP, CORP, nosniff headers</li>
-          <li>All email tokens: PBKDF2-hashed, 1-hour expiry, single-use</li>
-          <li>File uploads: magic-byte validation, 2MB limit, SVG rejected</li>
-          <li>IDOR-safe: history queries filtered by user_id</li>
+          <li>Only unmatched general questions reach the Flask backend</li>
+          <li>Session auth, CSRF token and 10/min · 100/day limits gate the endpoint</li>
+          <li>Request shape is clamped to 1–20 messages and ≤12,000 total characters</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-dot amber"></div>
-          <h3>Data Layer</h3>
+          <div class="card-dot orange"></div>
+          <h3>Streaming &amp; Control</h3>
         </div>
         <ul>
-          <li>SQLite (dev) / PostgreSQL (prod) via DATABASE_URL env</li>
-          <li>Redis for rate limiting (prod), in-memory fallback (dev)</li>
-          <li>File storage: static/uploads/profiles/ (server-generated names)</li>
-          <li>Rotating security.log: 10MB × 10 backups, no secrets</li>
+          <li>Answers arrive as SSE-style events and render chunk-by-chunk</li>
+          <li>Sources are https-only after unwrapping DuckDuckGo redirect links</li>
+          <li>Stop aborts the fetch, and already-rendered text stays on screen</li>
         </ul>
       </div>
     </div>

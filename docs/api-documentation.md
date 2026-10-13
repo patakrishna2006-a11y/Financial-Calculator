@@ -2,8 +2,8 @@
 
 ## FinCalc Pro patakrishna2006-a11y Smart Financial Calculators for India
 
-**Version:** 2.1
-**Date:** October 9, 2026
+**Version:** 2.2
+**Date:** October 13, 2026
 **Status:** Active
 **Base URL:** `https://<your-deployment>` (dev: `http://localhost:5000`)
 **Source of truth:** `app.py`, `calculator.py`, `templates/index.html`
@@ -21,16 +21,17 @@
 7. [Calculator Type Reference (27 Types)](#7-calculator-type-reference)
 8. [History Endpoints](#8-history-endpoints)
 9. [Profile & Account Endpoints](#9-profile--account-endpoints)
-10. [Public Market Data Endpoints](#10-public-market-data-endpoints)
-11. [Error Catalog](#11-error-catalog)
-12. [Security Reference](#12-security-reference)
-13. [Changelog](#13-changelog)
+10. [Assistant Chat Endpoint](#10-assistant-chat-endpoint)
+11. [Public Market Data Endpoints](#11-public-market-data-endpoints)
+12. [Error Catalog](#12-error-catalog)
+13. [Security Reference](#13-security-reference)
+14. [Changelog](#14-changelog)
 
 ---
 
 ## 1. Overview
 
-FinCalc Pro exposes a JSON API consumed by its own server-rendered frontend (Jinja2 + vanilla JS). All calculator and account endpoints require an authenticated session. Two market-data endpoints are public.
+FinCalc Pro exposes a JSON API consumed by its own server-rendered frontend (Jinja2 + vanilla JS). All calculator and account endpoints require an authenticated session. Two market-data endpoints are public. One authenticated endpoint streams web-search answers for the in-app Finny assistant.
 
 | Attribute | Value |
 |-----------|-------|
@@ -103,6 +104,7 @@ All limits are enforced **per IP address** (`get_remote_address`). Production us
 | `POST /update-profile-picture` | 5/min, 20/hour |
 | `POST /remove-profile-picture` | 5/min, 20/hour |
 | `POST /request-account-deletion` | 3/hour, 10/day |
+| `POST /api/assistant/chat` | 10/min, 100/day |
 | `GET /api/crypto/prices` | 60/min |
 | `GET /api/usd-inr/rate` | 60/min |
 
@@ -557,9 +559,79 @@ This route is unauthenticated by design patakrishna2006-a11y the emailed link is
 
 ---
 
-## 10. Public Market Data Endpoints
+## 10. Assistant Chat Endpoint
 
-### 10.1 Crypto Prices
+Streams DuckDuckGo search results to authenticated dashboard users — the Finny assistant's general-question fallback. Calculator explanations are answered **client-side** and never reach this endpoint (see `docs/finny-assistant.md`).
+
+### 10.1 Chat
+
+```
+POST /api/assistant/chat
+Auth: session required · CSRF token required (X-CSRFToken)
+Rate limit: 10/min, 100/day
+Content-Type: application/json
+```
+
+**Request:**
+
+```json
+{
+  "messages": [
+    { "role": "user", "content": "What is indexation in debt funds?" },
+    { "role": "assistant", "content": "…" },
+    { "role": "user", "content": "And in equity?" }
+  ]
+}
+```
+
+**Validation (violations → 400):**
+
+| Rule | Limit |
+|------|-------|
+| Message count | 1–20 |
+| `role` | `user` or `assistant` only |
+| `content` per message | 1–4,000 chars, non-empty after strip |
+| Total characters | ≤ 12,000 |
+| Last message | must have role `user` |
+
+**Behavior:**
+
+1. The last user message (first 500 chars) is searched on `https://html.duckduckgo.com/html` (connect timeout 5 s, read timeout 12 s). The upstream host is hard-coded — user input is never used as a URL (SSRF-safe).
+2. Results are parsed with a strict `HTMLParser`: snippets are reduced to the first sentence and capped at 150 chars; entries under 30 chars / 5 words are dropped; DuckDuckGo `/l/` redirect links are unwrapped to their real target; **only `https:` URLs survive**; the top 2 results are kept.
+3. The response is an **SSE-style stream** (`text/event-stream`, `Cache-Control: no-cache, no-transform`, `X-Accel-Buffering: no`):
+
+```
+event: sources
+data: {"sources": [{"url": "https://…", "title": "…"}, …]}
+
+event: delta
+data: {"text": "Here's a short answer from DuckDuckGo:"}
+
+event: delta
+data: {"text": "\n\n- **Title** — snippet"}
+
+event: delta
+data: {"text": "\n\n- **Title** — snippet"}
+```
+
+The client may abort the fetch mid-stream (Finny's Stop button uses `AbortController`); already-rendered text stays on screen.
+
+**Errors:**
+
+| Status | Body |
+|--------|------|
+| 400 | `"A JSON request is required."` / `"The chat request is invalid."` / validation messages |
+| 401 | `{"success": false, "error": "Please sign in to chat with Finny."}` |
+| 429 | standard rate-limit body (+`Retry-After`) |
+| 502 | `"Finny could not reach DuckDuckGo right now. Please try again."` / `"DuckDuckGo returned no usable results. Try again or rephrase your search."` |
+
+> **Stateless by design** — the chat history lives in the browser (rolling 16 messages) and is never stored server-side.
+
+---
+
+## 11. Public Market Data Endpoints
+
+### 11.1 Crypto Prices
 
 ```
 GET /api/crypto/prices
@@ -593,7 +665,7 @@ Rate limit: 60/min · Auth: none
 { "success": false, "error": "Live market rates are temporarily unavailable" }
 ```
 
-### 10.2 USD/INR Rate
+### 11.2 USD/INR Rate
 
 ```
 GET /api/usd-inr/rate
@@ -622,24 +694,25 @@ Rate limit: 60/min · Auth: none
 
 ---
 
-## 11. Error Catalog
+## 12. Error Catalog
 
 | Status | When | JSON body |
 |--------|------|-----------|
 | 400 | Malformed JSON, validation, CSRF failure (AJAX) | `{"success": false, "error": "..."}` |
-| 401 | Missing session on protected endpoint | `"Authentication required"` (HTML users redirected to login) |
+| 401 | Missing session on protected endpoint | `"Authentication required"` (assistant: `"Please sign in to chat with Finny."`; HTML users redirected to login) |
 | 403 | Access denied | `"Access denied"` |
 | 404 | Unknown route / history entry | `"Not found"` |
 | 405 | Wrong verb | `"Method not allowed"` |
 | 413 | Body > 5 MB | `"Payload too large"` |
 | 429 | Rate limit (+`Retry-After`) | `"Rate limit exceeded. Please try again later."` |
 | 500 | Unhandled exception (DB rolled back) | `"Internal server error"` |
+| 502 | Assistant search upstream failed / no usable results | `"Finny could not reach DuckDuckGo right now…"` / `"DuckDuckGo returned no usable results…"` |
 
 Error pages exist as themed templates for 400, 401, 403, 404, 405, 413, 429, 500.
 
 ---
 
-## 12. Security Reference
+## 13. Security Reference
 
 | Control | Behavior |
 |---------|----------|
@@ -650,6 +723,7 @@ Error pages exist as themed templates for 400, 401, 403, 404, 405, 413, 429, 500
 | Input validation | `validate_calculator_input()` on all 27 types |
 | IDOR | History filtered by `user_id` |
 | Uploads | Magic-byte validation, 2 MB, server-generated names, SVG rejected |
+| Assistant search | Hard-coded upstream host (SSRF-safe); result URLs unwrapped and **https-only**; snippets length-capped; 10/min · 100/day; chat never stored server-side |
 | Headers (every response) | CSP, HSTS (prod), `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, CORP |
 | Logging | Security events to rotating `security.log` (10 MB × 10 backups); format `EVENT | ip=X | user_id=Y | details` |
 | Errors | No stack traces; generic 500 |
@@ -668,12 +742,13 @@ frame-ancestors 'none'; base-uri 'self'; form-action 'self'
 
 ---
 
-## 13. Changelog
+## 14. Changelog
 
 No URL versioning yet; `/api/v1/` prefix planned for the future public API platform.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.2 | Oct 13, 2026 | Added §10 Assistant Chat Endpoint (`POST /api/assistant/chat`, SSE-style streaming, DuckDuckGo-backed); rate-limit table, error catalog (+502), and security reference updated; sections 10–13 renumbered to 11–14 |
 | 2.1 | Oct 9, 2026 | Accuracy pass: 27 types (USD_INR backend-only), per-IP limits, `/calculate` CSRF-exempt, verified example values, real PDF filename, no standalone history endpoint |
 | 2.0 | Oct 8, 2026 | Full flow documentation |
 | 1.0 | Sep 2026 | Initial API |
@@ -684,6 +759,7 @@ No URL versioning yet; `/api/v1/` prefix planned for the future public API platf
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 2.2 | Oct 13, 2026 | patakrishna2006-a11y | Documented the Finny assistant chat endpoint from `app.py` `assistant_chat()` |
 | 2.1 | Oct 9, 2026 | patakrishna2006-a11y | Verified against `app.py` commit; all sample values computed by running `calculator.py` |
 
 ---
