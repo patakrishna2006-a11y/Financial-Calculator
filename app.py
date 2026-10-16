@@ -51,7 +51,7 @@ if database_url:
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///FinCalc Pro.db'
 
 # Session cookie security
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
