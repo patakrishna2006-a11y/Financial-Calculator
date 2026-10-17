@@ -39,9 +39,3 @@ htmlcov/
 
 # waitress
 start.py
-
-# DBeaver
-*.dbeaver/
-
-# Scripts
-Script.sql
