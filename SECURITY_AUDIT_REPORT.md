@@ -340,20 +340,23 @@ db.session.commit()
 
 ## Rate Limiting
 
+**Addendum (October 22, 2026):** Rate limits were rescaled to Google-standard quotas for 10,000-user capacity. The values below reflect the **current configuration**. `/calculate` uses `300/min, 5,000/day`; `/api/assistant/chat` uses `60/min, 2,000/day`. ProxyFix middleware was also added so per-client-IP limiting stays correct behind the Render reverse proxy.
+
 | Endpoint | Limit | Status |
 |----------|-------|--------|
-| /register | 5/min, 20/hour | PASS |
-| /login | 10/min, 50/hour | PASS |
-| /calculate | 30/min, 100/hour | PASS |
-| /resend-verification | 1/5min, 5/hour | PASS |
-| /forgot-password | 5/hour | PASS |
-| /change-password | 5/min, 10/hour | PASS |
-| /remove-profile-picture | 5/min, 20/hour | PASS |
-| /update-profile-picture | 5/min, 20/hour | PASS |
-| /request-account-deletion | 3/hour, 10/day | PASS |
-| /api/crypto/prices | 60/min | PASS |
-| /api/usd-inr/rate | 60/min | PASS |
-| Default | 200/day, 50/hour | PASS |
+| /register | 30/min, 200/hour | PASS |
+| /login | 30/min, 200/hour | PASS |
+| /calculate | 300/min, 5,000/day | PASS |
+| /resend-verification | 3/min, 20/hour | PASS |
+| /forgot-password | 20/hour | PASS |
+| /change-password | 10/min, 50/hour | PASS |
+| /remove-profile-picture | 30/min, 100/hour | PASS |
+| /update-profile-picture | 30/min, 100/hour | PASS |
+| /request-account-deletion | 10/hour, 50/day | PASS |
+| /api/crypto/prices | 300/min | PASS |
+| /api/usd-inr/rate | 300/min | PASS |
+| /api/assistant/chat | 60/min, 2,000/day | PASS |
+| Default | 10,000/day, 600/min | PASS |
 
 **Note:** Production deployment requires Redis backend for multi-worker support.
 

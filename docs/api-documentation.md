@@ -2,8 +2,8 @@
 
 ## FinCalc Pro patakrishna2006-a11y Smart Financial Calculators for India
 
-**Version:** 2.2
-**Date:** October 13, 2026
+**Version:** 2.3
+**Date:** October 22, 2026
 **Status:** Active
 **Base URL:** `https://<your-deployment>` (dev: `http://localhost:5000`)
 **Source of truth:** `app.py`, `calculator.py`, `templates/index.html`
@@ -94,19 +94,19 @@ All limits are enforced **per IP address** (`get_remote_address`). Production us
 
 | Endpoint | Limit |
 |----------|-------|
-| Global default | 200/day, 50/hour |
-| `POST /calculate` | 30/min, 100/hour |
-| `GET/POST /register` | 5/min, 20/hour |
-| `POST /resend-verification` | 1 per 5 min, 5/hour |
-| `GET/POST /login` | 10/min, 50/hour |
-| `GET/POST /forgot-password` | 5/hour |
-| `POST /change-password` | 5/min, 10/hour |
-| `POST /update-profile-picture` | 5/min, 20/hour |
-| `POST /remove-profile-picture` | 5/min, 20/hour |
-| `POST /request-account-deletion` | 3/hour, 10/day |
-| `POST /api/assistant/chat` | 10/min, 100/day |
-| `GET /api/crypto/prices` | 60/min |
-| `GET /api/usd-inr/rate` | 60/min |
+| Global default | 10,000/day, 600/min |
+| `POST /calculate` | 300/min, 5,000/day |
+| `GET/POST /register` | 30/min, 200/hour |
+| `POST /resend-verification` | 3/min, 20/hour |
+| `GET/POST /login` | 30/min, 200/hour |
+| `GET/POST /forgot-password` | 20/hour |
+| `POST /change-password` | 10/min, 50/hour |
+| `POST /update-profile-picture` | 30/min, 100/hour |
+| `POST /remove-profile-picture` | 30/min, 100/hour |
+| `POST /request-account-deletion` | 10/hour, 50/day |
+| `POST /api/assistant/chat` | 60/min, 2,000/day |
+| `GET /api/crypto/prices` | 300/min |
+| `GET /api/usd-inr/rate` | 300/min |
 
 **429 (JSON clients):**
 
@@ -174,7 +174,7 @@ Token details: `secrets.token_urlsafe(32)`, stored as PBKDF2 hash, 1-hour expiry
 
 ```
 POST /resend-verification    (form field: email)
-Rate limit: 1 per 5 min, 5/hour
+Rate limit: 3/min, 20/hour
 ```
 
 - Found unverified account → new token, email re-sent, flash `"Verification email resent! Please check your inbox (valid for 1 hour)."`
@@ -219,7 +219,7 @@ GET/POST /reset-password/<token>    → HTML / 302
 ```
 POST /calculate
 Auth: session required
-Rate limit: 30/min, 100/hour (per IP)
+Rate limit: 300/min, 5,000/day (per IP)
 Content-Type: application/json
 CSRF: exempt (@csrf.exempt) patakrishna2006-a11y protected by session auth
 ```
@@ -465,7 +465,7 @@ All are AJAX JSON endpoints (send `Content-Type: application/json`, except the m
 
 ```
 POST /change-password
-Rate limit: 5/min, 10/hour
+Rate limit: 10/min, 50/hour
 ```
 
 **Request:**
@@ -493,7 +493,7 @@ Rate limit: 5/min, 10/hour
 ```
 POST /update-profile-picture
 Content-Type: multipart/form-data   (field: picture)
-Rate limit: 5/min, 20/hour
+Rate limit: 30/min, 100/hour
 ```
 
 **Validation chain:**
@@ -518,7 +518,7 @@ Filenames are server-generated (`user_{id}_{token_hex(8)}.{fmt}`); the previous 
 
 ```
 POST /remove-profile-picture
-Rate limit: 5/min, 20/hour
+Rate limit: 30/min, 100/hour
 ```
 
 Idempotent patakrishna2006-a11y **200:**
@@ -532,7 +532,7 @@ Idempotent patakrishna2006-a11y **200:**
 
 ```
 POST /request-account-deletion
-Rate limit: 3/hour, 10/day
+Rate limit: 10/hour, 50/day
 ```
 
 **Request:** `{"current_password": "..."}`
@@ -568,7 +568,7 @@ Streams DuckDuckGo search results to authenticated dashboard users — the Finny
 ```
 POST /api/assistant/chat
 Auth: session required · CSRF token required (X-CSRFToken)
-Rate limit: 10/min, 100/day
+Rate limit: 60/min, 2,000/day
 Content-Type: application/json
 ```
 
@@ -635,7 +635,7 @@ The client may abort the fetch mid-stream (Finny's Stop button uses `AbortContro
 
 ```
 GET /api/crypto/prices
-Rate limit: 60/min · Auth: none
+Rate limit: 300/min · Auth: none
 ```
 
 **200:**
@@ -669,7 +669,7 @@ Rate limit: 60/min · Auth: none
 
 ```
 GET /api/usd-inr/rate
-Rate limit: 60/min · Auth: none
+Rate limit: 300/min · Auth: none
 ```
 
 **200:**
@@ -723,7 +723,7 @@ Error pages exist as themed templates for 400, 401, 403, 404, 405, 413, 429, 500
 | Input validation | `validate_calculator_input()` on all 27 types |
 | IDOR | History filtered by `user_id` |
 | Uploads | Magic-byte validation, 2 MB, server-generated names, SVG rejected |
-| Assistant search | Hard-coded upstream host (SSRF-safe); result URLs unwrapped and **https-only**; snippets length-capped; 10/min · 100/day; chat never stored server-side |
+| Assistant search | Hard-coded upstream host (SSRF-safe); result URLs unwrapped and **https-only**; snippets length-capped; 60/min · 2,000/day; chat never stored server-side |
 | Headers (every response) | CSP, HSTS (prod), `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy, COOP, CORP |
 | Logging | Security events to rotating `security.log` (10 MB × 10 backups); format `EVENT | ip=X | user_id=Y | details` |
 | Errors | No stack traces; generic 500 |
@@ -748,6 +748,7 @@ No URL versioning yet; `/api/v1/` prefix planned for the future public API platf
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.3 | Oct 22, 2026 | Rate-limit values rescaled: global default 600/min · 10,000/day; per-route limits raised across all endpoints (§3 table and per-endpoint references updated) |
 | 2.2 | Oct 13, 2026 | Added §10 Assistant Chat Endpoint (`POST /api/assistant/chat`, SSE-style streaming, DuckDuckGo-backed); rate-limit table, error catalog (+502), and security reference updated; sections 10–13 renumbered to 11–14 |
 | 2.1 | Oct 9, 2026 | Accuracy pass: 27 types (USD_INR backend-only), per-IP limits, `/calculate` CSRF-exempt, verified example values, real PDF filename, no standalone history endpoint |
 | 2.0 | Oct 8, 2026 | Full flow documentation |

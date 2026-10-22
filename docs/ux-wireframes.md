@@ -252,7 +252,7 @@ flowchart TD
 │  │ Check your email                                            │ │
 │  │ Verification link sent, expires in 1 hour                    │ │
 │  │                                                             │ │
-│  │ [Email display]         [Resend → (1 per 5 min)]            │ │
+│  │ [Email display]         [Resend → (3/min)]             │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```

@@ -1,5 +1,6 @@
 from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, flash, session, g, stream_with_context
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -38,6 +39,12 @@ from calculator import (
 )
 
 app = Flask(__name__)
+
+# Trust the hosting platform's reverse proxy (Render) so request.remote_addr,
+# is_secure and the host header reflect the real client. Without this, the
+# rate limiter would count every visitor under the proxy's IP and hit the
+# site-wide limit almost immediately.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 # --- Security Configuration ---
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
@@ -86,7 +93,7 @@ else:
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=["10000 per day", "600 per minute"],
     storage_uri=storage_uri,
 )
 
@@ -474,7 +481,7 @@ def get_cached_usd_inr_rate():
 
 
 @app.route('/api/usd-inr/rate')
-@limiter.limit("60 per minute")
+@limiter.limit("300 per minute")
 def usd_inr_rate():
     """Return the latest available USD/INR rate from CurrencyAPI."""
     rate = get_cached_usd_inr_rate()
@@ -494,7 +501,7 @@ def usd_inr_rate():
 
 
 @app.route('/api/crypto/prices')
-@limiter.limit("60 per minute")
+@limiter.limit("300 per minute")
 def crypto_prices():
     """API endpoint for cached crypto prices."""
     prices, coins = get_cached_crypto_prices()
@@ -515,7 +522,7 @@ def crypto_prices():
 
 
 @app.route('/api/assistant/chat', methods=['POST'])
-@limiter.limit("10 per minute; 100 per day")
+@limiter.limit("60 per minute; 2000 per day")
 def assistant_chat():
     """Stream DuckDuckGo search results to authenticated dashboard users."""
     if 'user_id' not in session:
@@ -1094,7 +1101,7 @@ def home():
     return render_template('landing.html')
 
 @app.route('/register', methods=['GET', 'POST'])
-@limiter.limit("5 per minute; 20 per hour")
+@limiter.limit("30 per minute; 200 per hour")
 def register():
     check_email = request.args.get('check_email', '0') == '1'
     
@@ -1267,7 +1274,7 @@ def verify_email(token):
 
 
 @app.route('/resend-verification', methods=['POST'])
-@limiter.limit("1 per 5 minutes; 5 per hour", error_message="Too many requests. Please wait before resending.")
+@limiter.limit("3 per minute; 20 per hour", error_message="Too many requests. Please wait before resending.")
 def resend_verification():
     """Resend verification email for unverified users."""
     email = request.form.get('email', '').strip()
@@ -1301,7 +1308,7 @@ def resend_verification():
 
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
-@limiter.limit("5 per hour")
+@limiter.limit("20 per hour")
 def forgot_password():
     """Request a password reset link without revealing account existence."""
     if request.method == 'GET':
@@ -1403,7 +1410,7 @@ def ratelimit_handler(e):
 
 
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("10 per minute; 50 per hour")
+@limiter.limit("30 per minute; 200 per hour")
 def login():
     if request.method == 'GET':
         return render_template('login.html')
@@ -1507,7 +1514,7 @@ def delete_history_entry(entry_id):
 
 
 @app.route('/update-profile-picture', methods=['POST'])
-@limiter.limit("5 per minute; 20 per hour")
+@limiter.limit("30 per minute; 100 per hour")
 def update_profile_picture():
     """Update the logged-in user's profile picture (AJAX, no page refresh)."""
     if 'user_id' not in session:
@@ -1561,7 +1568,7 @@ def update_profile_picture():
 
 
 @app.route('/change-password', methods=['POST'])
-@limiter.limit("5 per minute; 10 per hour")
+@limiter.limit("10 per minute; 50 per hour")
 def change_password():
     """Change the password of the logged-in user without email verification.
 
@@ -1615,7 +1622,7 @@ def change_password():
 
 
 @app.route('/remove-profile-picture', methods=['POST'])
-@limiter.limit("5 per minute; 20 per hour")
+@limiter.limit("30 per minute; 100 per hour")
 def remove_profile_picture():
     """Remove the logged-in user's profile picture (direct action, no refresh).
 
@@ -1655,7 +1662,7 @@ def find_user_by_deletion_token(token):
 
 
 @app.route('/request-account-deletion', methods=['POST'])
-@limiter.limit("3 per hour; 10 per day")
+@limiter.limit("10 per hour; 50 per day")
 def request_account_deletion():
     """Step 1 of account deletion: verify current password, then email a confirmation link."""
     if 'user_id' not in session:
@@ -1749,7 +1756,7 @@ def logout():
 
 @app.route("/calculate", methods=["POST"])
 @csrf.exempt  # API endpoint - CSRF handled via custom header
-@limiter.limit("30 per minute; 100 per hour")
+@limiter.limit("300 per minute; 5000 per day")
 def calculate():
     # Verify authentication
     if 'user_id' not in session:

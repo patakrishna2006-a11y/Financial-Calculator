@@ -107,7 +107,7 @@ Priority runs **top → bottom** within each step; the top row across the map is
 | Step | Story cards |
 |------|-------------|
 | Register | ✅ `US-AUT-01` Register (username + email + password, 9+/letter/number/symbol) · ✅ `US-AUT-02` Confirm match |
-| Verify email | ✅ `US-AUT-03` 1-hour single-use hashed-token link · ✅ `US-AUT-04` Check-email page · ✅ `US-AUT-05` Resend (1/5min) |
+| Verify email | ✅ `US-AUT-03` 1-hour single-use hashed-token link · ✅ `US-AUT-04` Check-email page · ✅ `US-AUT-05` Resend (3/min) |
 | Gate | ✅ `US-AUT-03a` Unverified users blocked at login with clear guidance |
 
 ### 4.3 ACCESS

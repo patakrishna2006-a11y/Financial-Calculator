@@ -153,7 +153,7 @@ All colors, radii, shadows, motion values, copy, and sample numbers in these moc
         │        Check your email                   │
         │  A verification link was sent — it         │
         │  expires in 1 hour.                       │
-        │ [your@email.com]     [Resend →]           │ ← 1 per 5 min
+        │ [your@email.com]     [Resend →]           │ ← 3/min
         │ Too many? "Too many requests. Please      │   (rate-limit flash)
         │ wait 5 minutes before resending."         │
         └──────────────────────────────────────────┘

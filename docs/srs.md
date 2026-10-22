@@ -32,7 +32,7 @@ This Software Requirements Specification (SRS) defines the functional and non-fu
 
 ### 1.2 Scope
 
-FinCalc Pro provides **25+ financial calculators** tailored for Indian users, covering:
+FinCalc Pro provides **26 financial calculators (27 backend types)** tailored for Indian users, covering:
 - Investment planning (SIP, Lumpsum, PPF, EPF, NPS, NSC, FD, RD)
 - Retirement & goal planning
 - Loan & EMI calculations (Home, Car, Gold, Education)
@@ -88,7 +88,7 @@ FinCalc Pro is a standalone web application built with **Flask (Python)** backen
 │                        FinCalc Pro                          │
 ├─────────────────┬─────────────────┬─────────────────────────┤
 │   Landing Page  │  Auth System    │  Calculator Engine      │
-│   (Public)      │  (Register/     │  (25+ Calculators)      │
+│   (Public)      │  (Register/     │  (26 Calculators)       │
 │                 │   Login/Email   │                         │
 ├─────────────────┼─────────────────┼─────────────────────────┤
 │  Dashboard SPA  │  User Profile   │  History & Export       │
@@ -334,7 +334,7 @@ All calculators share a common interface: **POST /calculate** with JSON `{type, 
 | ID | Requirement | Target |
 |----|-------------|--------|
 | **NFR-MAINT-01** | Code Quality | Linting clean (pyflakes, pylint, flake8) |
-| **NFR-MAINT-02** | Test Coverage | Security: 100% critical paths; Functional: 25/25 calculators |
+| **NFR-MAINT-02** | Test Coverage | Security: 100% critical paths; Functional: 26/26 calculators |
 | **NFR-MAINT-03** | Documentation | All docs updated Oct 2026 |
 | **NFR-MAINT-04** | Technical Debt | Documented in QA_CODEBASE_CLEANUP_REPORT.md |
 
@@ -530,25 +530,25 @@ sequenceDiagram
 
 | Method | Endpoint | Auth | Rate Limit | Description |
 |--------|----------|------|------------|-------------|
-| GET | `/` | No | 200/day | Landing page |
-| GET/POST | `/register` | No | 5/min, 20/hr | Registration + email verify |
+| GET | `/` | No | 600/min, 10,000/day (default) | Landing page |
+| GET/POST | `/register` | No | 30/min, 200/hr | Registration + email verify |
 | GET | `/verify-email/<token>` | No | — | Email verification |
-| POST | `/resend-verification` | No | 1/5min, 5/hr | Resend verification |
-| GET/POST | `/login` | No | 10/min, 50/hr | Login with session |
+| POST | `/resend-verification` | No | 3/min, 20/hr | Resend verification |
+| GET/POST | `/login` | No | 30/min, 200/hr | Login with session |
 | GET | `/logout` | Yes | — | Session destruction |
-| GET/POST | `/forgot-password` | No | 5/hr | Password reset request |
+| GET/POST | `/forgot-password` | No | 20/hr | Password reset request |
 | GET/POST | `/reset-password/<token>` | No | — | Password reset |
 | GET | `/dashboard` | Yes | — | Main SPA |
-| POST | `/calculate` | Yes | 30/min, 100/hr | Main calculator API |
+| POST | `/calculate` | Yes | 300/min, 5,000/day | Main calculator API |
 | GET | `/history` | Yes | — | History list (JSON) |
 | DELETE | `/history/<id>` | Yes | — | Delete history entry |
-| POST | `/change-password` | Yes | 5/min, 10/hr | In-session password change |
-| POST | `/update-profile-picture` | Yes | 5/min, 20/hr | Avatar upload |
-| POST | `/remove-profile-picture` | Yes | 5/min, 20/hr | Avatar removal |
-| POST | `/request-account-deletion` | Yes | 3/hr, 10/day | Step 1: password gate |
+| POST | `/change-password` | Yes | 10/min, 50/hr | In-session password change |
+| POST | `/update-profile-picture` | Yes | 30/min, 100/hr | Avatar upload |
+| POST | `/remove-profile-picture` | Yes | 30/min, 100/hr | Avatar removal |
+| POST | `/request-account-deletion` | Yes | 10/hr, 50/day | Step 1: password gate |
 | GET/POST | `/confirm-account-deletion/<token>` | No | — | Step 2: final confirm |
-| GET | `/api/crypto/prices` | No | 60/min | Live crypto prices |
-| GET | `/api/usd-inr/rate` | No | 60/min | Live USD/INR rate |
+| GET | `/api/crypto/prices` | No | 300/min | Live crypto prices |
+| GET | `/api/usd-inr/rate` | No | 300/min | Live USD/INR rate |
 
 ### 7.3 External Interfaces
 

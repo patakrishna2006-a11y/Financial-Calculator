@@ -7,7 +7,7 @@
 [![Code Quality](https://img.shields.io/badge/Code%20Quality-PASS-brightgreen.svg)](QA_CODEBASE_CLEANUP_REPORT.md)
 [![Responsive](https://img.shields.io/badge/Responsive-PASS-brightgreen.svg)](RESPONSIVE_TEST_REPORT.md)
 
-A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. It includes 25 financial calculators tailored for Indian financial planning, from SIP and EMI to retirement, tax, and investment planning.
+A modern, full-stack financial calculator web application built with **Flask** (Python) and **Vanilla JavaScript**. It includes 26 financial calculators tailored for Indian financial planning, from SIP and EMI to retirement, tax, and investment planning.
 
 **Status:** 🟢 **PRODUCTION READY** — All security, responsive, and code quality tests passing.
 
@@ -21,10 +21,11 @@ FinCalc Pro has undergone comprehensive security hardening with **zero critical/
 |------------------|----------------|--------|
 | **Debug Mode** | Defaults to false; explicit `FLASK_DEBUG=false` in production | ✅ PASS |
 | **CSRF Protection** | Flask-WTF on all forms + `X-CSRFToken` header for API; 12hr token timeout | ✅ PASS |
-| **Rate Limiting** | Register: 5/min, Login: 10/min, Calculate: 30/min (Redis-ready) | ✅ PASS |
+| **Rate Limiting** | Global: 10,000/day · 600/min; Calculate: 300/min, 5,000/day; auth routes 30/min, 200/hr (Redis-backed, memory fallback) | ✅ PASS |
+| **Proxy Trust** | Werkzeug `ProxyFix` (x_for/x_proto/x_host) — real client IPs behind the Render reverse proxy | ✅ PASS |
 | **Session Security** | HttpOnly, SameSite=Lax, Secure (HTTPS), 24h timeout, fixation prevention | ✅ PASS |
 | **Security Headers** | CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, CORP | ✅ PASS |
-| **Input Validation** | Server-side validation on all 25 calculator endpoints | ✅ PASS |
+| **Input Validation** | Server-side validation on all 26 calculator endpoints | ✅ PASS |
 | **Authorization/IDOR** | User isolation, ownership verification, session fixation prevention | ✅ PASS |
 | **Error Handling** | Custom templates verified for 400, 401, 403, 404, 405, 413, 429, 500 | ✅ PASS |
 | **Security Logging** | Auth events, CSRF failures, rate limits, calculation errors (10MB/10 backups) | ✅ PASS |
@@ -274,9 +275,9 @@ CURRENCY_API_KEY=<your-currency-api-key>
 3. Connect your repository
 4. Configure:
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:app`
+   - **Start Command(Linux)**: `gunicorn app:app`
+   - **Start Command(Windows)**: `waitress-serve --host=0.0.0 --port=Your Port number app:app`    
    - **Environment**: Python 3
-5. Click **Deploy**
 
 ### Railway
 
@@ -321,11 +322,31 @@ docker run -p 5000:5000 fincalc-pro
 - **Production**: Set `DATABASE_URL` to a supported SQLAlchemy database URI and install its matching driver
 
 ### Security
-- Change `SECRET_KEY` in production (use `secrets.token_hex(32)`)
+- Change `FLASK_SECRET_KEY` in production (use `secrets.token_hex(32)`)
 - Enable HTTPS in production (Render/Railway/Heroku provide this automatically)
 - `FLASK_DEBUG` defaults to false; set explicitly in production
 - Provide `REDIS_URL` for multi-worker rate limiting in production
 - Set `CURRENCY_API_KEY` for live USD/INR exchange rates
+
+### Rate Limiting (scaled for 10,000 users)
+
+Applied per client IP (real IP via `ProxyFix`), Redis-backed in production. Any route without an explicit limit uses the global default.
+
+| Route | Limit |
+|-------|-------|
+| `/calculate` (POST) | 300/min; 5,000/day |
+| `/api/usd-inr/rate` | 300/min |
+| `/api/crypto/prices` | 300/min |
+| `/api/assistant/chat` | 60/min; 2,000/day |
+| `/register` | 30/min; 200/hour |
+| `/login` | 30/min; 200/hour |
+| `/update-profile-picture` | 30/min; 100/hour |
+| `/remove-profile-picture` | 30/min; 100/hour |
+| `/change-password` | 10/min; 50/hour |
+| `/forgot-password` | 20/hour |
+| `/resend-verification` | 3/min; 20/hour |
+| `/request-account-deletion` | 10/hour; 50/day |
+| **Global default** (all other routes) | **600/min; 10,000/day** |
 
 ### Customization
 - **Calculators**: Modify `calculator.py` to add/change formulas
@@ -340,12 +361,15 @@ docker run -p 5000:5000 fincalc-pro
 |---------|---------|---------|
 | `flask` | ≥3.0.0 | Web framework |
 | `gunicorn` | ≥21.2.0 | WSGI production server |
+| `waitress` | ≥2.0.0 | WSGI server (Windows local alternative) |
 | `flask_sqlalchemy` | ≥3.0.0 | ORM for database |
-| `werkzeug` | ≥3.0.0 | Security utilities (password hashing) |
+| `werkzeug` | ≥3.0.0 | Security utilities (password hashing, ProxyFix) |
 | `flask_wtf` | ≥1.2.0 | CSRF protection |
 | `flask_limiter` | ≥3.8.0 | Rate limiting |
 | `flask-mail` | ≥0.10.0 | Verification and password-reset email delivery |
 | `python-dotenv` | ≥1.0.0 | Environment variable loading |
+| `requests` | ≥2.31.0 | External API calls (crypto/USD-INR rates) |
+| `redis` | ≥5.0.0 | Shared rate-limit storage in production (`REDIS_URL`) |
 
 ---
 
@@ -453,4 +477,4 @@ See [QA_CODEBASE_CLEANUP_REPORT.md](QA_CODEBASE_CLEANUP_REPORT.md) for complete 
 
 ---
 
-**Last Updated:** October 8, 2026 — All security, responsive, and code quality tests passing. Production ready.
+**Last Updated:** October 22, 2026 — Rate limiting rescaled to Google-standard quotas (10,000-user capacity), ProxyFix added, Render deployment live. All security, responsive, and code quality tests passing. Production ready.

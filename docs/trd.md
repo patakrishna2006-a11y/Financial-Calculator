@@ -271,13 +271,13 @@ with app.app_context():
 
 | Method | Endpoint | Rate Limit | Description |
 |--------|----------|-------------|-------------|
-| `GET` | `/` | 200/day, 50/hr (default) | Landing page |
-| `GET/POST` | `/register` | 5/min, 20/hr | Registration |
+| `GET` | `/` | 600/min, 10,000/day (default) | Landing page |
+| `GET/POST` | `/register` | 30/min, 200/hr | Registration |
 | `GET` | `/verify-email/<token>` | default | Email verification |
-| `POST` | `/resend-verification` | 1/5min, 5/hr | Resend verification |
-| `GET/POST` | `/login` | 10/min, 50/hr | Login (3 fields) |
+| `POST` | `/resend-verification` | 3/min, 20/hr | Resend verification |
+| `GET/POST` | `/login` | 30/min, 200/hr | Login (3 fields) |
 | `GET` | `/logout` | default | Session destruction |
-| `GET/POST` | `/forgot-password` | 5/hr | Reset request (generic response) |
+| `GET/POST` | `/forgot-password` | 20/hr | Reset request (generic response) |
 | `GET/POST` | `/reset-password/<token>` | default | Token-gated reset |
 
 #### Calculator & History (3)
@@ -285,7 +285,7 @@ with app.app_context():
 | Method | Endpoint | Auth | Rate Limit | Description |
 |--------|----------|------|-------------|-------------|
 | `GET` | `/dashboard` | Yes | default | Main SPA (embeds last-10 history) |
-| `POST` | `/calculate` | Yes | 30/min, 100/hr | Calculator API |
+| `POST` | `/calculate` | Yes | 300/min, 5,000/day | Calculator API |
 | `DELETE` | `/history/<id>` | Yes | default | Delete history entry |
 
 > **Note:** There is **no standalone `GET /history` JSON endpoint**. History is server-rendered into `/dashboard` as `history_json`.
@@ -294,18 +294,18 @@ with app.app_context():
 
 | Method | Endpoint | Auth | Rate Limit | Description |
 |--------|----------|------|-------------|-------------|
-| `POST` | `/change-password` | Yes | 5/min, 10/hr | Change password (JSON) |
-| `POST` | `/update-profile-picture` | Yes | 5/min, 20/hr | Avatar upload (multipart) |
-| `POST` | `/remove-profile-picture` | Yes | 5/min, 20/hr | Avatar removal |
-| `POST` | `/request-account-deletion` | Yes | 3/hr, 10/day | Deletion step 1 (password gate) |
+| `POST` | `/change-password` | Yes | 10/min, 50/hr | Change password (JSON) |
+| `POST` | `/update-profile-picture` | Yes | 30/min, 100/hr | Avatar upload (multipart) |
+| `POST` | `/remove-profile-picture` | Yes | 30/min, 100/hr | Avatar removal |
+| `POST` | `/request-account-deletion` | Yes | 10/hr, 50/day | Deletion step 1 (password gate) |
 | `GET/POST` | `/confirm-account-deletion/<token>` | No | default | Deletion step 2 (email link) |
 
 #### Public Market Data (2)
 
 | Method | Endpoint | Rate Limit | Description |
 |--------|----------|-------------|-------------|
-| `GET` | `/api/crypto/prices` | 60/min | Live crypto prices (30s cache) |
-| `GET` | `/api/usd-inr/rate` | 60/min | Live USD/INR rate (60s cache) |
+| `GET` | `/api/crypto/prices` | 300/min | Live crypto prices (30s cache) |
+| `GET` | `/api/usd-inr/rate` | 300/min | Live USD/INR rate (60s cache) |
 
 ### 5.3 Calculator API Contract (Verified)
 
