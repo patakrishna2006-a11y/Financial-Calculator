@@ -215,7 +215,7 @@ Full request/response reference: see `docs/api-documentation.md` §10. Summary:
 |--------|-------|
 | Method / path | `POST /api/assistant/chat` |
 | Auth | Session required (401 otherwise) |
-| Rate limit | 10 per minute, 100 per day (per IP) |
+| Rate limit | 60 per minute, 2,000 per day (per IP) |
 | Request body | `{ "messages": [ { "role": "user" \| "assistant", "content": "…" } ] }` |
 | Constraints | 1–20 messages; each 1–4,000 chars; ≤12,000 total chars; last message must be `user` |
 | Search | last user message (first 500 chars) → `html.duckduckgo.com/html`, timeouts (5, 12) |
@@ -235,7 +235,7 @@ The client handles `event: error` inside the stream, `AbortError` (user Stop), a
 | XSS — backend | Backend never reflects raw HTML into JSON errors; snippets pass through `re.sub` normalization and length caps before streaming | `app.py` 615–640 |
 | CSRF | `X-CSRFToken` from `<meta name="csrf-token">` on every POST; Flask-WTF global CSRFProtect | `finny.js` 433–441, `app.py` 75 |
 | Auth | Session required; anonymous users get 401 and never reach the search | `app.py` 521–522 |
-| Rate limiting | 10/min · 100/day per IP on the endpoint (Flask-Limiter, Redis in prod) | `app.py` 518 |
+| Rate limiting | 60/min · 2,000/day per IP on the endpoint (Flask-Limiter, Redis in prod) | `app.py` 518 |
 | Input clamps | Message count, per-message and total character limits, role whitelist, last-must-be-user | `app.py` 531–547 |
 | External links | Only `https:` URLs are rendered; `rel="noopener noreferrer"`; `target="_blank"` | `finny.js` 387–393 |
 | SSRF surface | Backend fetches only the hard-coded DuckDuckGo host — user input is query-only, never a URL | `app.py` 549–559 |
