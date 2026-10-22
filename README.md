@@ -257,14 +257,9 @@ CURRENCY_API_KEY=<your-currency-api-key>
 3. Connect your repository
 4. Configure:
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:app`
+   - **Start Command(Linux)**: `gunicorn app:app`
+   - **Start Command(Windows)**: `waitress-serve --host=0.0.0 --port=Your Port number app:app`    
    - **Environment**: Python 3
-5. Add environment variables (Environment tab): `FLASK_SECRET_KEY`, `FLASK_ENV=production`, `BASE_URL=https://<your-service>.onrender.com`, `MAIL_*`, `CURRENCY_API_KEY`
-6. Attach a Render **PostgreSQL** database and set `DATABASE_URL` (internal URL) — SQLite does not persist on Render
-7. Attach a Render **Redis** instance and set `REDIS_URL` for shared rate limiting across workers
-8. Click **Deploy**
-
-**Live:** https://fincalc-pro.onrender.com
 
 ### Railway
 
@@ -357,7 +352,6 @@ Applied per client IP (real IP via `ProxyFix`), Redis-backed in production. Any 
 | `python-dotenv` | ≥1.0.0 | Environment variable loading |
 | `requests` | ≥2.31.0 | External API calls (crypto/USD-INR rates) |
 | `redis` | ≥5.0.0 | Shared rate-limit storage in production (`REDIS_URL`) |
-| `psycopg2-binary` | ≥2.9.9 | PostgreSQL driver for `DATABASE_URL` on Render |
 
 ---
 
